@@ -1,4 +1,4 @@
-# parkparkpark
+# Sample Flutter App
 
 A production-ready Flutter starter template with enterprise-grade features and best practices.
 
