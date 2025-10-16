@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sample_app/features/login/bloc/login_bloc.dart';
-import 'package:sample_app/router/app_page.dart';
+import 'package:depozio/features/login/bloc/login_bloc.dart';
+import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
 
 class SettingsPage extends StatelessWidget {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sample_app/core/localization/app_localizations.dart';
-import 'package:sample_app/features/login/bloc/login_bloc.dart';
-import 'package:sample_app/core/environment.dart';
-import 'package:sample_app/router/app_router.dart';
-import 'package:sample_app/core/theme/theme.dart';
+import 'package:depozio/core/localization/app_localizations.dart';
+import 'package:depozio/features/login/bloc/login_bloc.dart';
+import 'package:depozio/core/environment.dart';
+import 'package:depozio/router/app_router.dart';
+import 'package:depozio/core/theme/theme.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {

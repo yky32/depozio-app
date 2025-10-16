@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sample_app/router/app_page.dart';
-import 'package:sample_app/router/app_router.dart';
-import 'package:sample_app/core/network/logger.dart';
-import 'package:sample_app/core/network/storage.dart';
+import 'package:depozio/router/app_page.dart';
+import 'package:depozio/router/app_router.dart';
+import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/core/network/storage.dart';
 
 class ApiInterceptor extends InterceptorsWrapper {
   final StorageService _storageService = StorageService();

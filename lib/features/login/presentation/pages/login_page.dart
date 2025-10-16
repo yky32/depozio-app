@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:sample_app/features/login/bloc/login_bloc.dart';
-import 'package:sample_app/router/app_page.dart';
-import 'package:sample_app/core/extensions/localizations.dart';
+import 'package:depozio/features/login/bloc/login_bloc.dart';
+import 'package:depozio/router/app_page.dart';
+import 'package:depozio/core/extensions/localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
 

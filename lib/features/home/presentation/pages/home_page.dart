@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/core/theme/app_colors.dart';
+import 'package:depozio/core/theme/app_colors.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -110,7 +110,7 @@ class HomePage extends StatelessWidget {
             icon: Icons.local_parking_rounded,
             onTap: () {
               // Navigate to parking search
-              print('Find Parking tapped');
+              // TODO: Navigate to parking search
             },
           ),
           Container(
@@ -122,7 +122,7 @@ class HomePage extends StatelessWidget {
             icon: Icons.navigation_rounded,
             onTap: () {
               // Navigate to navigation
-              print('Navigation tapped');
+              // TODO: Navigate to navigation
             },
           ),
           Container(
@@ -134,7 +134,7 @@ class HomePage extends StatelessWidget {
             icon: Icons.history_rounded,
             onTap: () {
               // Navigate to history
-              print('History tapped');
+              // TODO: Navigate to history
             },
           ),
           Container(
@@ -146,7 +146,7 @@ class HomePage extends StatelessWidget {
             icon: Icons.favorite_rounded,
             onTap: () {
               // Navigate to favorites
-              print('Favorites tapped');
+              // TODO: Navigate to favorites
             },
           ),
           Container(
@@ -158,7 +158,7 @@ class HomePage extends StatelessWidget {
             icon: Icons.more_horiz_rounded,
             onTap: () {
               // Show more options
-              print('More options tapped');
+              // TODO: Show more options
             },
           ),
         ],

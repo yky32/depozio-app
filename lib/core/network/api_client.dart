@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:sample_app/core/dto/common_response.dart';
-import 'package:sample_app/core/dto/login_response.dart';
-import 'package:sample_app/core/network/api_interceptor.dart';
+import 'package:depozio/core/dto/common_response.dart';
+import 'package:depozio/core/dto/login_response.dart';
+import 'package:depozio/core/network/api_interceptor.dart';
 
 class ApiClient {
   late final Dio _dio;

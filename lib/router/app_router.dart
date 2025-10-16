@@ -1,12 +1,12 @@
-import 'package:sample_app/features/landing/presentation/pages/landing_page.dart';
-import 'package:sample_app/router/app_page.dart';
-import 'package:sample_app/features/home/presentation/pages/home_page.dart';
-import 'package:sample_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:sample_app/features/login/presentation/pages/login_page.dart';
-import 'package:sample_app/features/property_search/presentation/pages/property_search_page.dart';
-import 'package:sample_app/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
-import 'package:sample_app/features/map_view/presentation/pages/map_view_page.dart';
-import 'package:sample_app/widgets/scaffold_with_nav_bar.dart';
+import 'package:depozio/features/landing/presentation/pages/landing_page.dart';
+import 'package:depozio/router/app_page.dart';
+import 'package:depozio/features/home/presentation/pages/home_page.dart';
+import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
+import 'package:depozio/features/login/presentation/pages/login_page.dart';
+import 'package:depozio/features/property_search/presentation/pages/property_search_page.dart';
+import 'package:depozio/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
+import 'package:depozio/features/map_view/presentation/pages/map_view_page.dart';
+import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {

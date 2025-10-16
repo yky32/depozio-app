@@ -97,56 +97,6 @@ class FloatingNavBar extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required int index,
-    required String label,
-  }) {
-    final bool isSelected = selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () => onItemTapped(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFFFC107).withValues(alpha: 0.2)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFFFC107) : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.black : Colors.grey[600],
-                size: 22,
-              ),
-            ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? Colors.black : Colors.grey[600],
-              ),
-              child: Text(label),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 // Alternative simpler floating nav bar without labels
