@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter',
+        title: 'Depozio App',
         theme: CustomTheme.lightThemeData(),
         darkTheme: CustomTheme.darkThemeData(),
         themeMode: ThemeMode.dark,

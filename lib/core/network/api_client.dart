@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:depozio/core/dto/common_response.dart';
+import 'package:depozio/core/dto/base_response.dart';
 import 'package:depozio/core/dto/login_response.dart';
 import 'package:depozio/core/network/api_interceptor.dart';
 
@@ -29,7 +29,7 @@ class ApiClient {
         headers: {'Authorization': dotenv.env['API_BASE_TOKEN']!},
       ),
     );
-    final CommonResponse commonResponse = CommonResponse.fromMap(response.data);
+    final BaseResponse commonResponse = BaseResponse.fromMap(response.data);
     if (commonResponse.httpStatus == "OK") {
       return LoginResponse.fromMap(response.data['data']);
     } else {

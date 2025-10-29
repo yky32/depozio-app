@@ -1,18 +1,18 @@
 import 'package:equatable/equatable.dart';
 
-class CommonResponse extends Equatable {
+class BaseResponse extends Equatable {
   final String code;
   final String message;
   final String httpStatus;
 
-  const CommonResponse({
+  const BaseResponse({
     required this.code,
     required this.message,
     required this.httpStatus,
   });
 
-  factory CommonResponse.fromMap(Map<String, dynamic> data) {
-    return CommonResponse(
+  factory BaseResponse.fromMap(Map<String, dynamic> data) {
+    return BaseResponse(
       code: data['code'] as String,
       message: data['message'] as String,
       httpStatus: data['httpStatus'] as String,
