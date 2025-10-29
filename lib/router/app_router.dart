@@ -5,7 +5,7 @@ import 'package:depozio/features/settings/presentation/pages/settings_page.dart'
 import 'package:depozio/features/login/presentation/pages/login_page.dart';
 import 'package:depozio/features/property_search/presentation/pages/property_search_page.dart';
 import 'package:depozio/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
-import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
+import 'package:depozio/widgets/nav_bar/scaffold_with_nav_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {

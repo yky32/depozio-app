@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:depozio/widgets/floating_nav_bar_members.dart';
+import 'package:depozio/widgets/nav_bar/floating_nav_bar_members.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
