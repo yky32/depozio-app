@@ -14,7 +14,6 @@ class ScaffoldWithNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true, // Extend body behind bottom navigation
-      backgroundColor: Colors.white, // Set to match page background
       body: Stack(
         children: [
           // Main content - let it extend fully

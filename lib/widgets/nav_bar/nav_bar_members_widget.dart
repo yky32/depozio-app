@@ -17,7 +17,7 @@ class NavBarMembersWidget extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 20), // No top margin
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white70,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
