@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:depozio/core/theme/app_colors.dart';
 
 class HomeDashboardPage extends StatelessWidget {
   const HomeDashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+    return Container(
+      color: AppColors.background,
+      child: Column(
         children: [
           // Purple header
           Container(
@@ -218,28 +219,6 @@ class HomeDashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildBottomNavItem(Icons.home, 'Home', true),
-            _buildBottomNavItem(Icons.search, 'Search', false),
-            _buildBottomNavItem(Icons.business, 'Agent', false),
-            _buildBottomNavItem(Icons.person, 'Account', false),
-          ],
-        ),
-      ),
     );
   }
 
@@ -440,25 +419,4 @@ class HomeDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? const Color(0xFF8B5CF6) : Colors.grey,
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF8B5CF6) : Colors.grey,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
 }

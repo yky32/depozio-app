@@ -3,15 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/features/login/bloc/login_bloc.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:depozio/core/theme/app_colors.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+    return Container(
+      color: AppColors.background,
+      child: Column(
         children: [
           // Purple gradient header
           _buildHeader(context),

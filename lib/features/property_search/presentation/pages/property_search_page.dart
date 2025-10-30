@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:depozio/core/theme/app_colors.dart';
 
 class PropertySearchPage extends StatelessWidget {
   const PropertySearchPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+    return Container(
+      color: AppColors.background,
+      child: Column(
         children: [
           // Purple header
           Container(
