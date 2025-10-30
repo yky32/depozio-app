@@ -23,7 +23,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           Positioned(
             left: 0,
             right: 0,
-            bottom: -15, // Move it lower by 15 pixels
+            bottom: -25,
             child: IgnorePointer(
               ignoring: false,
               child: Container(
