@@ -1,11 +1,11 @@
 import 'package:depozio/router/app_page.dart';
 import 'package:flutter/material.dart';
 
-class FloatingNavBarMembers extends StatelessWidget {
+class NavBarMembersWidget extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
 
-  const FloatingNavBarMembers({
+  const NavBarMembersWidget({
     super.key,
     required this.selectedIndex,
     required this.onItemTapped,

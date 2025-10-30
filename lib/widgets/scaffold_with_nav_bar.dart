@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:depozio/widgets/nav_bar/floating_nav_bar_members.dart';
+import 'package:depozio/widgets/nav_bar/nav_bar_members_widget.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -31,7 +31,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
                 color: Colors.transparent,
                 child: SafeArea(
                   top: false,
-                  child: FloatingNavBarMembers(
+                  child: NavBarMembersWidget(
                     selectedIndex: navigationShell.currentIndex,
                     onItemTapped: navigationShell.goBranch,
                   ),
