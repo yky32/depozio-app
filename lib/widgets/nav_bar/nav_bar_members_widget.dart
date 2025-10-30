@@ -34,10 +34,7 @@ class NavBarMembersWidget extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: AppPage.values
-            .where((page) =>
-                page.navBarMemberIndex !=
-                99) // Filter out non-nav pages, 99 = NA
+        children: _getSortedNavigationPages()
             .map((page) => Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -50,6 +47,16 @@ class NavBarMembersWidget extends StatelessWidget {
             .toList(),
       ),
     );
+  }
+
+  /// Get navigation pages sorted by navBarMemberIndex in ascending order
+  List<AppPage> _getSortedNavigationPages() {
+    return AppPage.values
+        .where(
+            (page) => page.navBarMemberIndex != 99) // Filter out non-nav pages
+        .toList()
+      ..sort((a, b) => a.navBarMemberIndex
+          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC;
   }
 
   Widget __buildNavBarMember({

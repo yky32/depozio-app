@@ -5,73 +5,79 @@ import 'package:depozio/features/property_search/presentation/pages/property_sea
 import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
   AppRouter._();
 
+  // Page widget mapping
+  static final Map<AppPage, Widget Function()> _appPages = {
+    AppPage.home: () => const HomePage(),
+    AppPage.propertySearch: () => const PropertySearchPage(),
+    AppPage.homeDashboard: () => const HomeDashboardPage(),
+    AppPage.settings: () => const SettingsPage(),
+  };
+
+  // Standalone page widgets (non-navigation pages)
+  static final Map<AppPage, Widget Function()> _standaloneAppPages = {
+    AppPage.login: () => const LoginPage(),
+  };
+
+  // Generate navigation branches dynamically
+  static List<StatefulShellBranch> get _navigationBranches {
+    final navigationPages = AppPage.values
+        .where(
+            (page) => page.navBarMemberIndex != 99) // Filter out non-nav pages
+        .toList()
+      ..sort((a, b) => a.navBarMemberIndex
+          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC
+
+    return navigationPages
+        .map((page) => StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: page.name,
+                  path: page.path,
+                  builder: (context, state) => _appPages[page]!(),
+                ),
+              ],
+            ))
+        .toList();
+  }
+
+  // Generate standalone routes dynamically
+  static List<GoRoute> get _standaloneRoutes {
+    final standalonePages = AppPage.values
+        .where((page) => page.navBarMemberIndex == 99) // Filter non-nav pages
+        .toList()
+      ..sort((a, b) => a.navBarMemberIndex
+          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC
+
+    return standalonePages
+        .map((page) => GoRoute(
+              name: page.name,
+              path: page.path,
+              builder: (context, state) => _standaloneAppPages[page]!(),
+            ))
+        .toList();
+  }
+
   static final router = GoRouter(
     initialLocation: '/home',
     routes: [
-      // *** Apps Routes
-      // *** Apps Routes
-      GoRoute(
-        name: AppPage.login.name,
-        path: AppPage.login.path,
-        builder: (context, state) => const LoginPage(),
-      ),
-      // *** Apps Routes END
-      // *** Apps Routes END
+      // Standalone routes (non-navigation pages)
+      ..._standaloneRoutes,
 
-      // *** Navigation Bar
-      // *** Navigation Bar
+      // Navigation shell route
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ScaffoldWithNavBar(
             navigationShell: navigationShell,
           );
         },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                name: AppPage.home.name,
-                path: AppPage.home.path,
-                builder: (context, state) => const HomePage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                name: AppPage.propertySearch.name,
-                path: AppPage.propertySearch.path,
-                builder: (context, state) => const PropertySearchPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                name: AppPage.homeDashboard.name,
-                path: AppPage.homeDashboard.path,
-                builder: (context, state) => const HomeDashboardPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                name: AppPage.settings.name,
-                path: AppPage.settings.path,
-                builder: (context, state) => const SettingsPage(),
-              ),
-            ],
-          ),
-        ],
+        branches: _navigationBranches,
       ),
-      // *** Navigation Bar END
-      // *** Navigation Bar END
     ],
   );
 }
