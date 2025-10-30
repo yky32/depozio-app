@@ -1,10 +1,9 @@
-import 'package:depozio/features/landing/presentation/pages/landing_page.dart';
-import 'package:depozio/router/app_page.dart';
 import 'package:depozio/features/home/presentation/pages/home_page.dart';
-import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
+import 'package:depozio/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
 import 'package:depozio/features/login/presentation/pages/login_page.dart';
 import 'package:depozio/features/property_search/presentation/pages/property_search_page.dart';
-import 'package:depozio/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
+import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
+import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,19 +16,12 @@ class AppRouter {
       // *** Apps Routes
       // *** Apps Routes
       GoRoute(
-        name: AppPage.landing.name,
-        path: AppPage.landing.path,
-        builder: (context, state) => const LandingPage(),
-      ),
-      GoRoute(
         name: AppPage.login.name,
         path: AppPage.login.path,
         builder: (context, state) => const LoginPage(),
       ),
       // *** Apps Routes END
       // *** Apps Routes END
-
-
 
       // *** Navigation Bar
       // *** Navigation Bar
