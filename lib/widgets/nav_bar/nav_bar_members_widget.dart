@@ -67,7 +67,7 @@ class NavBarMembersWidget extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFFFC107) : Colors.grey[100],
+            color: isSelected ? const Color(0xFFFFC107) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
