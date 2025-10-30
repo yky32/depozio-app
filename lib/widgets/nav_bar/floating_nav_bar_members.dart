@@ -34,37 +34,20 @@ class FloatingNavBarMembers extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-            child: _buildNavItem(
-              icon: AppPage.home.icon,
-              index: AppPage.home.navItemIndex,
-            ),
-          ),
-          Expanded(
-            child: _buildNavItem(
-              icon: AppPage.propertySearch.icon,
-              index: AppPage.propertySearch.navItemIndex,
-            ),
-          ),
-          Expanded(
-            child: _buildNavItem(
-              icon: AppPage.homeDashboard.icon,
-              index: AppPage.homeDashboard.navItemIndex,
-            ),
-          ),
-          Expanded(
-            child: _buildNavItem(
-              icon: AppPage.settings.icon,
-              index: AppPage.settings.navItemIndex,
-            ),
-          ),
-        ],
+        children: AppPage.values
+            .where((page) => page.navBarMemberIndex != 99) // Filter out non-nav pages, 99 = NA
+            .map((page) => Expanded(
+                  child: __buildNavBarMember(
+                    icon: page.icon,
+                    index: page.navBarMemberIndex,
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
 
-  Widget _buildNavItem({
+  Widget __buildNavBarMember({
     required IconData icon,
     required int index,
   }) {

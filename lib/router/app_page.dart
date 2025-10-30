@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 99 = NA
+/// 99 = NA, not for nav bar member.
 enum AppPage {
   landing("Landing", "/", Icons.home, 99),
   login("Login", "/login", Icons.login, 99),
@@ -9,10 +9,10 @@ enum AppPage {
   homeDashboard("Dashboard", "/home-dashboard", Icons.dashboard, 2),
   settings("Settings", "/settings", Icons.settings, 3);
 
-  const AppPage(this.name, this.path, this.icon, this.navItemIndex);
+  const AppPage(this.name, this.path, this.icon, this.navBarMemberIndex);
 
   final String name;
   final String path;
   final IconData icon;
-  final int navItemIndex;
+  final int navBarMemberIndex;
 }
