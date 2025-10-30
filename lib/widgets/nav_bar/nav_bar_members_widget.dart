@@ -35,11 +35,16 @@ class NavBarMembersWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: AppPage.values
-            .where((page) => page.navBarMemberIndex != 99) // Filter out non-nav pages, 99 = NA
+            .where((page) =>
+                page.navBarMemberIndex !=
+                99) // Filter out non-nav pages, 99 = NA
             .map((page) => Expanded(
-                  child: __buildNavBarMember(
-                    icon: page.icon,
-                    index: page.navBarMemberIndex,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: __buildNavBarMember(
+                      icon: page.icon,
+                      index: page.navBarMemberIndex,
+                    ),
                   ),
                 ))
             .toList(),
