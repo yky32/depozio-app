@@ -5,6 +5,7 @@ import 'package:depozio/features/property_search/presentation/pages/property_sea
 import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
+import 'package:depozio/widgets/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -64,8 +65,14 @@ class AppRouter {
   }
 
   static final router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/splash',
     routes: [
+      // Splash screen route
+      GoRoute(
+        name: 'splash',
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       // Standalone routes (non-navigation pages)
       ..._standaloneRoutes,
 
