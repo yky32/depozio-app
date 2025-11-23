@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:depozio/widgets/buttons/back_button.dart' as custom;
+import 'package:depozio/router/app_page.dart';
+import 'package:go_router/go_router.dart';
 
 /// Temporary test page to verify Satoshi font is applied
 /// You can navigate to this page to see all font weights
@@ -8,9 +11,12 @@ class FontTestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
+        leading: custom.BackButton(
+          onPressed: () => context.go(AppPage.setting.path),
+        ),
         title: const Text('Font Test - Satoshi'),
       ),
       body: SingleChildScrollView(
@@ -99,4 +105,3 @@ class FontTestPage extends StatelessWidget {
     );
   }
 }
-

@@ -6,7 +6,7 @@ import 'package:depozio/features/setting/presentation/pages/setting_page.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
 import 'package:depozio/widgets/splash_screen.dart';
-import 'package:depozio/widgets/font_test_page.dart';
+import 'package:depozio/widgets/test/font_test_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
