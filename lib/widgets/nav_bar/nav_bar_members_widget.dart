@@ -1,4 +1,5 @@
 import 'package:depozio/router/app_page.dart';
+import 'package:depozio/widgets/buttons/nav_bar_action_button.dart';
 import 'package:flutter/material.dart';
 
 class NavBarMembersWidget extends StatelessWidget {
@@ -34,17 +35,34 @@ class NavBarMembersWidget extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _getSortedNavigationPages()
-            .map((page) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: __buildNavBarMember(
-                      icon: page.icon,
-                      index: page.navBarMemberIndex,
-                    ),
+        children: [
+          // Left side navigation items (first 2)
+          ..._getSortedNavigationPages().take(2).map((page) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: __buildNavBarMember(
+                    icon: page.icon,
+                    index: page.navBarMemberIndex,
                   ),
-                ))
-            .toList(),
+                ),
+              )),
+          // Center action button
+          NavBarActionButton(
+            onPressed: () {
+              // TODO: Add action for center button
+            },
+          ),
+          // Right side navigation items (last 2)
+          ..._getSortedNavigationPages().skip(2).map((page) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: __buildNavBarMember(
+                    icon: page.icon,
+                    index: page.navBarMemberIndex,
+                  ),
+                ),
+              )),
+        ],
       ),
     );
   }
