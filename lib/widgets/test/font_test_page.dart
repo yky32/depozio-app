@@ -20,13 +20,15 @@ class FontTestPage extends StatelessWidget {
         title: const Text('Font Test - Satoshi'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Satoshi Font Verification',
-              style: theme.textTheme.displayMedium,
+              style: theme.textTheme.displayMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 32),
             _buildFontWeightTest('Light (300)', FontWeight.w300),

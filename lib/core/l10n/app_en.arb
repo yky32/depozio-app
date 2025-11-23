@@ -3,5 +3,8 @@
   "action_confirm": "Confirm",
   "login_page_email": "Email",
   "login_page_password": "Password",
-  "login_page_submit": "Login"
+  "login_page_submit": "Login",
+  "home_page_title": "Home",
+  "home_page_deposits": "Deposits",
+  "home_page_expenses": "Expenses"
 }

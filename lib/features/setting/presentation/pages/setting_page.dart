@@ -11,19 +11,23 @@ class SettingPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Settings',
-              style: theme.textTheme.displayMedium,
-            ),
-            const SizedBox(height: 32),
-            // Testing Section
-            _buildTestingSection(context, theme, colorScheme),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Settings',
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Testing Section
+              _buildTestingSection(context, theme, colorScheme),
+            ],
+          ),
         ),
       ),
     );

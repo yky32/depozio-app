@@ -1,0 +1,11 @@
+{
+  "action_cancel": "取消",
+  "action_confirm": "確認",
+  "login_page_email": "電子郵件",
+  "login_page_password": "密碼",
+  "login_page_submit": "登入",
+  "home_page_title": "首頁",
+  "home_page_deposits": "存款",
+  "home_page_expenses": "支出"
+}
+

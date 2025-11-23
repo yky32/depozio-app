@@ -22,4 +22,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login_page_submit => 'Login';
+
+  @override
+  String get home_page_title => 'Home';
+
+  @override
+  String get home_page_deposits => 'Deposits';
+
+  @override
+  String get home_page_expenses => 'Expenses';
 }
