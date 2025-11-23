@@ -1,9 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({
+    super.key,
+    this.lottiePath = 'assets/lottie/splash.json',
+  });
+
+  final String lottiePath;
 
   @override
   Widget build(BuildContext context) {
@@ -37,28 +43,41 @@ class SplashScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // App Logo/Icon - You can replace this with your actual logo
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.primary.withOpacity(0.3),
-                                blurRadius: 20,
-                                spreadRadius: 5,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.store,
-                            size: 60,
-                            color: Colors.white,
+                        // Lottie Animation
+                        SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: Lottie.asset(
+                            lottiePath,
+                            fit: BoxFit.contain,
+                            repeat: true,
+                            errorBuilder: (context, error, stackTrace) {
+                              // Fallback if Lottie file is not found
+                              return Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          colorScheme.primary.withOpacity(0.3),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.store,
+                                  size: 60,
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 16),
                         // App Name
                         Text(
                           'Depozio',
