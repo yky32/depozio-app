@@ -9,7 +9,8 @@ enum AppPage {
   home("Home", "/home", Icons.home, 0),
   deposit("Deposit", "/deposit", Icons.account_balance_wallet, 1),
   analytics("Analytics", "/analytics", Icons.bar_chart, 2),
-  setting("Setting", "/setting", Icons.settings, 3);
+  setting("Setting", "/setting", Icons.settings, 3),
+  fontTest("Font Test", "/font-test", Icons.text_fields, 4);
 
   const AppPage(this.name, this.path, this.icon, this.navBarMemberIndex);
 

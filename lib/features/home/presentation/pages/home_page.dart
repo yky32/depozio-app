@@ -5,11 +5,23 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final theme = Theme.of(context);
+    
+    return Scaffold(
       body: Center(
-        child: Text(
-          'Home',
-          style: TextStyle(fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Home',
+              style: theme.textTheme.displayMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Satoshi font is applied',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
         ),
       ),
     );

@@ -5,32 +5,40 @@ final _textTheme = const TextTheme(
   displayLarge: TextStyle(
     fontSize: 36.0,
     fontWeight: FontWeight.w600,
+    fontFamily: 'Satoshi',
   ),
   displayMedium: TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 32.0,
+    fontFamily: 'Satoshi',
   ),
   titleLarge: TextStyle(
     fontSize: 28.0,
+    fontFamily: 'Satoshi',
   ),
   titleMedium: TextStyle(
     fontSize: 24.0,
     fontWeight: FontWeight.w600,
+    fontFamily: 'Satoshi',
   ),
   titleSmall: TextStyle(
     fontSize: 18.0,
+    fontFamily: 'Satoshi',
   ),
   bodyLarge: TextStyle(
     fontSize: 16.0,
     fontWeight: FontWeight.w500,
+    fontFamily: 'Satoshi',
   ),
   bodyMedium: TextStyle(
     fontSize: 14.0,
     fontWeight: FontWeight.w400,
+    fontFamily: 'Satoshi',
   ),
   bodySmall: TextStyle(
     fontSize: 12.0,
     fontWeight: FontWeight.w400,
+    fontFamily: 'Satoshi',
   ),
 ).apply(
   bodyColor: const Color(0xFF1D1D1D),
