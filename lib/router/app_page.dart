@@ -7,9 +7,9 @@ enum AppPage {
   error("Error", "/error", Icons.error, 99),
 
   home("Home", "/home", Icons.home, 0),
-  propertySearch("Property Search", "/property-search", Icons.search, 1),
-  homeDashboard("Dashboard", "/home-dashboard", Icons.dashboard, 2),
-  settings("Settings", "/settings", Icons.settings, 3);
+  deposit("Deposit", "/deposit", Icons.account_balance_wallet, 1),
+  analytics("Analytics", "/analytics", Icons.bar_chart, 2),
+  setting("Setting", "/setting", Icons.settings, 3);
 
   const AppPage(this.name, this.path, this.icon, this.navBarMemberIndex);
 

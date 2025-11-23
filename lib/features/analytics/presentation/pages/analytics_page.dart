@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class AnalyticsPage extends StatelessWidget {
+  const AnalyticsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
         child: Text(
-          'Settings',
+          'Analytics',
           style: TextStyle(fontSize: 24),
         ),
       ),

@@ -1,8 +1,8 @@
 import 'package:depozio/features/home/presentation/pages/home_page.dart';
-import 'package:depozio/features/home_dashboard/presentation/pages/home_dashboard_page.dart';
+import 'package:depozio/features/deposit/presentation/pages/deposit_page.dart';
+import 'package:depozio/features/analytics/presentation/pages/analytics_page.dart';
 import 'package:depozio/features/login/presentation/pages/login_page.dart';
-import 'package:depozio/features/property_search/presentation/pages/property_search_page.dart';
-import 'package:depozio/features/settings/presentation/pages/settings_page.dart';
+import 'package:depozio/features/setting/presentation/pages/setting_page.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/scaffold_with_nav_bar.dart';
 import 'package:depozio/widgets/splash_screen.dart';
@@ -15,9 +15,9 @@ class AppRouter {
   // Page widget mapping
   static final Map<AppPage, Widget Function()> _appPages = {
     AppPage.home: () => const HomePage(),
-    AppPage.propertySearch: () => const PropertySearchPage(),
-    AppPage.homeDashboard: () => const HomeDashboardPage(),
-    AppPage.settings: () => const SettingsPage(),
+    AppPage.deposit: () => const DepositPage(),
+    AppPage.analytics: () => const AnalyticsPage(),
+    AppPage.setting: () => const SettingPage(),
   };
 
   // Standalone page widgets (non-navigation pages)

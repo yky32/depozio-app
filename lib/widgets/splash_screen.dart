@@ -146,21 +146,6 @@ class SplashScreen extends StatelessWidget {
                             color: colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        // Loading indicator
-                        Padding(
-                          padding: const EdgeInsets.only(top: 32),
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
