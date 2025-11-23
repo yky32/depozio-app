@@ -1,5 +1,6 @@
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/buttons/nav_bar_action_button.dart';
+import 'package:depozio/widgets/bottom_sheets/action_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class NavBarMembersWidget extends StatelessWidget {
@@ -49,7 +50,14 @@ class NavBarMembersWidget extends StatelessWidget {
           // Center action button
           NavBarActionButton(
             onPressed: () {
-              // TODO: Add action for center button
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                isDismissible: true,
+                enableDrag: true,
+                builder: (context) => const ActionBottomSheet(),
+              );
             },
           ),
           // Right side navigation items (last 2)
