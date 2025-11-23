@@ -56,7 +56,9 @@ class NavBarMembersWidget extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 isDismissible: true,
                 enableDrag: true,
-                builder: (context) => const ActionBottomSheet(),
+                builder: (context) => const ActionBottomSheet(
+                  maxHeightPercentage: 0.9,
+                ),
               );
             },
           ),

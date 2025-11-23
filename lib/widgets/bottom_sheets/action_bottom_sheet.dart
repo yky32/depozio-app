@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 
 /// Bottom sheet that appears when the nav bar action button is clicked
 class ActionBottomSheet extends StatelessWidget {
-  const ActionBottomSheet({super.key});
+  const ActionBottomSheet({
+    super.key,
+    this.maxHeightPercentage = 0.9,
+  });
+
+  /// Maximum height as a percentage of screen height (0.0 to 1.0)
+  /// Default is 0.9 (90%)
+  final double maxHeightPercentage;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    final maxHeight = screenHeight * 0.9;
+    final maxHeight = screenHeight * maxHeightPercentage;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
