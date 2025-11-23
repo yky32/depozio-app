@@ -66,7 +66,7 @@ class _WaveText extends StatelessWidget {
 class SplashScreen extends StatelessWidget {
   const SplashScreen({
     super.key,
-    this.lottiePath = 'assets/lottie/splash.json',
+    this.lottiePath = 'assets/lottie/splash-logo.json',
   });
 
   final String lottiePath;
