@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: 1.2,
                 children: [
-                  _buildStatCard(
+                  _buildStatisticCard(
                     context: context,
                     theme: theme,
                     colorScheme: colorScheme,
@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
                     value: '0',
                     icon: Icons.account_balance_wallet,
                   ),
-                  _buildStatCard(
+                  _buildStatisticCard(
                     context: context,
                     theme: theme,
                     colorScheme: colorScheme,
@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildStatisticCard({
     required BuildContext context,
     required ThemeData theme,
     required ColorScheme colorScheme,
