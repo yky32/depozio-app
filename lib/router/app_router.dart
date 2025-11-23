@@ -19,12 +19,12 @@ class AppRouter {
     AppPage.deposit: () => const DepositPage(),
     AppPage.analytics: () => const AnalyticsPage(),
     AppPage.setting: () => const SettingPage(),
-    AppPage.fontTest: () => const FontTestPage(),
   };
 
   // Standalone page widgets (non-navigation pages)
   static final Map<AppPage, Widget Function()> _standaloneAppPages = {
     AppPage.login: () => const LoginPage(),
+    AppPage.fontTest: () => const FontTestPage(),
   };
 
   // Generate navigation branches dynamically

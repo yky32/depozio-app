@@ -86,73 +86,77 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
-        child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 1500),
-          curve: Curves.easeIn,
-          builder: (context, fadeValue, child) {
-            return TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0.5, end: 1.0),
-              duration: const Duration(milliseconds: 1200),
-              curve: Curves.easeOutBack,
-              builder: (context, scaleValue, child) {
-                return Opacity(
-                  opacity: fadeValue,
-                  child: Transform.scale(
-                    scale: scaleValue,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Lottie Animation
-                        SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: Lottie.asset(
-                            lottiePath,
-                            fit: BoxFit.contain,
-                            repeat: true,
-                            errorBuilder: (context, error, stackTrace) {
-                              // Fallback if Lottie file is not found
-                              return Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          colorScheme.primary.withOpacity(0.3),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  Icons.store,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
-                              );
-                            },
+        child: Transform.translate(
+          offset: const Offset(0, -40), // Move up by 40 pixels
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeIn,
+            builder: (context, fadeValue, child) {
+              return TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.5, end: 1.0),
+                duration: const Duration(milliseconds: 1200),
+                curve: Curves.easeOutBack,
+                builder: (context, scaleValue, child) {
+                  return Opacity(
+                    opacity: fadeValue,
+                    child: Transform.scale(
+                      scale: scaleValue,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Lottie Animation
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: Lottie.asset(
+                              lottiePath,
+                              fit: BoxFit.contain,
+                              repeat: true,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback if Lottie file is not found
+                                return Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: colorScheme.primary
+                                            .withOpacity(0.3),
+                                        blurRadius: 20,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.store,
+                                    size: 60,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        // App Name with wave animation (left to right jump)
-                        _WaveText(
-                          text: 'Depozio',
-                          style: theme.textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
+                          const SizedBox(height: 16),
+                          // App Name with wave animation (left to right jump)
+                          _WaveText(
+                            text: 'Depozio',
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
-          },
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
