@@ -146,6 +146,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expenses'**
   String get home_page_expenses;
+
+  /// No description provided for @home_page_total_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Savings'**
+  String get home_page_total_savings;
+
+  /// No description provided for @home_page_savings_goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Goal'**
+  String get home_page_savings_goal;
+
+  /// No description provided for @home_page_monthly_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Savings'**
+  String get home_page_monthly_savings;
+
+  /// No description provided for @home_page_recent_activity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get home_page_recent_activity;
+
+  /// No description provided for @home_page_no_activity.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent activity'**
+  String get home_page_no_activity;
 }
 
 class _AppLocalizationsDelegate

@@ -31,4 +31,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_page_expenses => 'Expenses';
+
+  @override
+  String get home_page_total_savings => 'Total Savings';
+
+  @override
+  String get home_page_savings_goal => 'Savings Goal';
+
+  @override
+  String get home_page_monthly_savings => 'Monthly Savings';
+
+  @override
+  String get home_page_recent_activity => 'Recent Activity';
+
+  @override
+  String get home_page_no_activity => 'No recent activity';
 }

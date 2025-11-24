@@ -6,5 +6,10 @@
   "login_page_submit": "Login",
   "home_page_title": "Home",
   "home_page_deposits": "Deposits",
-  "home_page_expenses": "Expenses"
+  "home_page_expenses": "Expenses",
+  "home_page_total_savings": "Total Savings",
+  "home_page_savings_goal": "Savings Goal",
+  "home_page_monthly_savings": "Monthly Savings",
+  "home_page_recent_activity": "Recent Activity",
+  "home_page_no_activity": "No recent activity"
 }

@@ -31,6 +31,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get home_page_expenses => '支出';
+
+  @override
+  String get home_page_total_savings => '總儲蓄';
+
+  @override
+  String get home_page_savings_goal => '儲蓄目標';
+
+  @override
+  String get home_page_monthly_savings => '每月儲蓄';
+
+  @override
+  String get home_page_recent_activity => '最近活動';
+
+  @override
+  String get home_page_no_activity => '無最近活動';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -60,4 +75,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get home_page_expenses => '支出';
+
+  @override
+  String get home_page_total_savings => '總儲蓄';
+
+  @override
+  String get home_page_savings_goal => '儲蓄目標';
+
+  @override
+  String get home_page_monthly_savings => '每月儲蓄';
+
+  @override
+  String get home_page_recent_activity => '最近活動';
+
+  @override
+  String get home_page_no_activity => '無最近活動';
 }
