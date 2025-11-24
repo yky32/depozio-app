@@ -11,6 +11,8 @@
   "home_page_savings_goal": "儲蓄目標",
   "home_page_monthly_savings": "每月儲蓄",
   "home_page_recent_activity": "最近活動",
-  "home_page_no_activity": "無最近活動"
+  "home_page_no_activity": "無最近活動",
+  "deposit_page_title": "存款",
+  "deposit_page_add_category": "新增類別"
 }
 

@@ -46,4 +46,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_page_no_activity => 'No recent activity';
+
+  @override
+  String get deposit_page_title => 'Deposit';
+
+  @override
+  String get deposit_page_add_category => 'Add Category';
 }

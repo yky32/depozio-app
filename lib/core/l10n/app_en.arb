@@ -11,5 +11,7 @@
   "home_page_savings_goal": "Savings Goal",
   "home_page_monthly_savings": "Monthly Savings",
   "home_page_recent_activity": "Recent Activity",
-  "home_page_no_activity": "No recent activity"
+  "home_page_no_activity": "No recent activity",
+  "deposit_page_title": "Deposit",
+  "deposit_page_add_category": "Add Category"
 }

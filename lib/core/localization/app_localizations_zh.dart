@@ -46,6 +46,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get home_page_no_activity => '無最近活動';
+
+  @override
+  String get deposit_page_title => '存款';
+
+  @override
+  String get deposit_page_add_category => '新增類別';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -90,4 +96,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get home_page_no_activity => '無最近活動';
+
+  @override
+  String get deposit_page_title => '存款';
+
+  @override
+  String get deposit_page_add_category => '新增類別';
 }

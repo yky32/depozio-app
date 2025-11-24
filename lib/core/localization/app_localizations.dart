@@ -176,6 +176,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No recent activity'**
   String get home_page_no_activity;
+
+  /// No description provided for @deposit_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get deposit_page_title;
+
+  /// No description provided for @deposit_page_add_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get deposit_page_add_category;
 }
 
 class _AppLocalizationsDelegate
