@@ -14,12 +14,6 @@
   "home_page_no_activity": "無最近活動",
   "deposit_page_title": "存款",
   "deposit_page_add_category": "新增類別",
-  "add_category_bottom_sheet_title": "新增類別",
-  "add_category_name": "名稱",
-  "add_category_name_hint": "輸入類別名稱",
-  "add_category_icon": "圖標",
-  "add_category_type": "類型",
-  "add_category_type_deposits": "存款",
-  "add_category_type_expenses": "支出"
+  "add_category_bottom_sheet_title": "新增類別"
 }
 

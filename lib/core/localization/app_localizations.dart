@@ -194,42 +194,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Category'**
   String get add_category_bottom_sheet_title;
-
-  /// No description provided for @add_category_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get add_category_name;
-
-  /// No description provided for @add_category_name_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter category name'**
-  String get add_category_name_hint;
-
-  /// No description provided for @add_category_icon.
-  ///
-  /// In en, this message translates to:
-  /// **'Icon'**
-  String get add_category_icon;
-
-  /// No description provided for @add_category_type.
-  ///
-  /// In en, this message translates to:
-  /// **'Type'**
-  String get add_category_type;
-
-  /// No description provided for @add_category_type_deposits.
-  ///
-  /// In en, this message translates to:
-  /// **'Deposits'**
-  String get add_category_type_deposits;
-
-  /// No description provided for @add_category_type_expenses.
-  ///
-  /// In en, this message translates to:
-  /// **'Expenses'**
-  String get add_category_type_expenses;
 }
 
 class _AppLocalizationsDelegate

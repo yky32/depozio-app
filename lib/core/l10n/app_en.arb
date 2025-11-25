@@ -14,11 +14,5 @@
   "home_page_no_activity": "No recent activity",
   "deposit_page_title": "Deposit",
   "deposit_page_add_category": "Add Category",
-  "add_category_bottom_sheet_title": "Add Category",
-  "add_category_name": "Name",
-  "add_category_name_hint": "Enter category name",
-  "add_category_icon": "Icon",
-  "add_category_type": "Type",
-  "add_category_type_deposits": "Deposits",
-  "add_category_type_expenses": "Expenses"
+  "add_category_bottom_sheet_title": "Add Category"
 }

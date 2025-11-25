@@ -55,22 +55,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get add_category_bottom_sheet_title => 'Add Category';
-
-  @override
-  String get add_category_name => 'Name';
-
-  @override
-  String get add_category_name_hint => 'Enter category name';
-
-  @override
-  String get add_category_icon => 'Icon';
-
-  @override
-  String get add_category_type => 'Type';
-
-  @override
-  String get add_category_type_deposits => 'Deposits';
-
-  @override
-  String get add_category_type_expenses => 'Expenses';
 }
