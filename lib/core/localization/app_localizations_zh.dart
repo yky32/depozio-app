@@ -55,6 +55,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get add_category_bottom_sheet_title => '新增類別';
+
+  @override
+  String get add_category_name => '名稱';
+
+  @override
+  String get add_category_name_hint => '輸入類別名稱';
+
+  @override
+  String get add_category_icon => '圖標';
+
+  @override
+  String get add_category_type => '類型';
+
+  @override
+  String get add_category_type_deposits => '存款';
+
+  @override
+  String get add_category_type_expenses => '支出';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -108,4 +126,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get add_category_bottom_sheet_title => '新增類別';
+
+  @override
+  String get add_category_name => '名稱';
+
+  @override
+  String get add_category_name_hint => '輸入類別名稱';
+
+  @override
+  String get add_category_icon => '圖標';
+
+  @override
+  String get add_category_type => '類型';
+
+  @override
+  String get add_category_type_deposits => '存款';
+
+  @override
+  String get add_category_type_expenses => '支出';
 }
