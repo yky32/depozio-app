@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
+import 'package:depozio/widgets/bottom_sheets/add_category_bottom_sheet.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -32,7 +33,17 @@ class DepositPage extends StatelessWidget {
                       color: colorScheme.primary,
                     ),
                     onPressed: () {
-                      // TODO: Add category action
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        isDismissible: true,
+                        enableDrag: true,
+                        useRootNavigator: true,
+                        builder: (context) => const AddCategoryBottomSheet(
+                          maxHeightPercentage: 0.9,
+                        ),
+                      );
                     },
                     tooltip: l10n.deposit_page_add_category,
                   ),

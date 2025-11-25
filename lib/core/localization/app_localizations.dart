@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Category'**
   String get deposit_page_add_category;
+
+  /// No description provided for @add_category_bottom_sheet_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get add_category_bottom_sheet_title;
 }
 
 class _AppLocalizationsDelegate

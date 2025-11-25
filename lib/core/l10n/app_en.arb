@@ -13,5 +13,6 @@
   "home_page_recent_activity": "Recent Activity",
   "home_page_no_activity": "No recent activity",
   "deposit_page_title": "Deposit",
-  "deposit_page_add_category": "Add Category"
+  "deposit_page_add_category": "Add Category",
+  "add_category_bottom_sheet_title": "Add Category"
 }

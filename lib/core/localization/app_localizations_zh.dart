@@ -52,6 +52,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deposit_page_add_category => '新增類別';
+
+  @override
+  String get add_category_bottom_sheet_title => '新增類別';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -102,4 +105,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get deposit_page_add_category => '新增類別';
+
+  @override
+  String get add_category_bottom_sheet_title => '新增類別';
 }

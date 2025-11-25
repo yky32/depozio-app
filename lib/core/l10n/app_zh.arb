@@ -13,6 +13,7 @@
   "home_page_recent_activity": "最近活動",
   "home_page_no_activity": "無最近活動",
   "deposit_page_title": "存款",
-  "deposit_page_add_category": "新增類別"
+  "deposit_page_add_category": "新增類別",
+  "add_category_bottom_sheet_title": "新增類別"
 }
 

@@ -52,4 +52,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deposit_page_add_category => 'Add Category';
+
+  @override
+  String get add_category_bottom_sheet_title => 'Add Category';
 }
