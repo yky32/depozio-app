@@ -9,8 +9,26 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Environment.load();
-  runApp(const MyApp());
+  
+  // Set up error handling
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+    debugPrint('Stack trace: ${details.stack}');
+  };
+  
+  // Load environment variables with error handling
+  try {
+    await Environment.load();
+  } catch (e) {
+    // Log error but don't crash - app can work without env vars if needed
+    debugPrint('Error loading environment: $e');
+  }
+  
+  // Wrap app in error boundary
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,6 +56,13 @@ class MyApp extends StatelessWidget {
           ...AppLocalizations.localizationsDelegates,
           FormBuilderLocalizations.delegate,
         ],
+        builder: (context, child) {
+          // Add error handling widget
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.of(context).textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.0)),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

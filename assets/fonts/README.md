@@ -25,10 +25,10 @@ After downloading, your `assets/fonts/` directory should look like:
 assets/
   └── fonts/
       ├── README.md
-      ├── Satoshi-Light.otf
-      ├── Satoshi-Regular.otf
-      ├── Satoshi-Medium.otf
-      ├── Satoshi-Bold.otf
-      └── Satoshi-Black.otf
+  ├── Satoshi-Light.otf
+  ├── Satoshi-Regular.otf
+  ├── Satoshi-Medium.otf
+  ├── Satoshi-Bold.otf
+  └── Satoshi-Black.otf
 ```
 
