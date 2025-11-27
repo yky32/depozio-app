@@ -26,55 +26,27 @@ platform :ios do
       )
     end
 
-    # Build using Flutter's build ipa command with proper export options
+    # Use Fastlane's build_app with App Store Connect API key for automatic signing
+    # This is more reliable in CI/CD environments
     team_id = ENV["TEAM_ID"] || "3G34999H3A"
     
-    # Create export_options.plist in ios directory
-    export_options_path = File.expand_path('../export_options.plist', __dir__)
-    
-    # Create export_options.plist with App Store signing
-    File.write(export_options_path, <<~PLIST
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>method</key>
-        <string>app-store</string>
-        <key>signingStyle</key>
-        <string>automatic</string>
-        <key>teamID</key>
-        <string>#{team_id}</string>
-        <key>uploadBitcode</key>
-        <false/>
-        <key>uploadSymbols</key>
-        <true/>
-        <key>compileBitcode</key>
-        <false/>
-      </dict>
-      </plist>
-    PLIST
+    # Build the app using Fastlane (works better with API keys in CI/CD)
+    build_app(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        signingStyle: "automatic",
+        teamID: team_id
+      },
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      clean: true,
+      silent: false,
+      include_bitcode: false,
+      xcargs: "-allowProvisioningUpdates" # Allow Xcode to create provisioning profiles
     )
-    
-    # Build IPA using Flutter (it will use the export_options.plist)
-    project_root = File.expand_path('../..', __dir__)
-    sh("cd #{project_root} && flutter build ipa --release --export-options-plist=ios/export_options.plist")
-    
-    # Find and copy the generated IPA
-    ipa_path = Dir.glob("#{project_root}/build/ios/ipa/*.ipa").first
-    
-    if ipa_path.nil? || !File.exist?(ipa_path)
-      # Try alternative location
-      ipa_path = Dir.glob("#{project_root}/build/ios/*.ipa").first
-    end
-    
-    if ipa_path.nil? || !File.exist?(ipa_path)
-      UI.user_error!("Could not find IPA file. Build may have failed. Check Flutter build logs above.")
-    end
-    
-    # Copy to build directory
-    FileUtils.mkdir_p("./build")
-    FileUtils.cp(ipa_path, "./build/Depozio.ipa")
-    UI.success("IPA created successfully at ./build/Depozio.ipa")
 
     # Upload to TestFlight
     upload_to_testflight(
