@@ -50,17 +50,39 @@ platform :ios do
     UI.message("Provisioning profile Name: #{profile_name}")
     UI.message("Provisioning profile path: #{profile_path}")
     
+    # Verify the profile is installed in the correct location
+    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+    profile_filename = "#{profile_uuid}.mobileprovision"
+    expected_profile_path = File.join(profiles_dir, profile_filename)
+    
+    unless File.exist?(expected_profile_path)
+      UI.important("Provisioning profile not found at expected location: #{expected_profile_path}")
+      UI.important("Copying profile to correct location...")
+      FileUtils.mkdir_p(profiles_dir)
+      FileUtils.cp(profile_path, expected_profile_path)
+    end
+    
+    UI.message("Provisioning profile verified at: #{expected_profile_path}")
+    
     # Update Xcode project to use manual signing with the specific provisioning profile
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       team_id: "3G34999H3A",
       code_sign_identity: "Apple Distribution",
-      bundle_identifier: "com.depozio",
-      profile_uuid: profile_uuid
+      bundle_identifier: "com.depozio"
+    )
+    
+    # Update the provisioning profile in the project
+    update_project_provisioning(
+      xcodeproj: "Runner.xcodeproj",
+      profile: expected_profile_path,
+      target_filter: "Runner",
+      code_signing_identity: "Apple Distribution"
     )
     
     UI.message("Updated Xcode project to use provisioning profile: #{profile_uuid}")
+    UI.message("Profile path: #{expected_profile_path}")
     
     # Store profile UUID in a file for use in build step
     profile_uuid_dir = "../build/ios"
