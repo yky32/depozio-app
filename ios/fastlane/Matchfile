@@ -1,11 +1,21 @@
 # Match configuration
 # This file is used by Fastlane Match to manage certificates and provisioning profiles
 
-git_url(ENV["MATCH_GIT_BASIC_AUTHORIZATION"] ? nil : ENV["MATCH_GIT_URL"] || "")
+# Git repository URL for storing certificates and profiles
+# Set MATCH_GIT_URL in GitHub Secrets to enable Match
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/yky32/fastlane-certificates.git")
+
+# Storage mode - git is recommended
 storage_mode("git")
-type("appstore") # App Store distribution
+
+# App Store distribution
+type("appstore")
+
+# Your app's bundle identifier
 app_identifier("com.depozio")
-username(ENV["APPLE_ID"] || "") # Optional, not needed with API keys
+
+# Team ID
+team_id(ENV["TEAM_ID"] || "3G34999H3A")
 
 # App Store Connect API Key (preferred for CI/CD)
 # Set via environment variables:
