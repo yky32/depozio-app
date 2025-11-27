@@ -133,55 +133,31 @@ platform :ios do
       # We've already authenticated with app_store_connect_api_key, so we don't need the path
       ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
       
-      # Always try to get existing certificates first (readonly mode)
-      # This will download existing certificates if they exist, without creating new ones
-      certificates_exist = false
+      # Use cert action - it will automatically reuse existing certificates from portal
+      # and install them into the keychain. Only creates new ones if none exist.
       begin
-        UI.message("Checking for existing distribution certificates...")
-        get_certificates(
-          team_id: "3G34999H3A",
-          readonly: true
+        UI.message("Getting distribution certificate (will reuse existing if available)...")
+        cert(
+          team_id: "3G34999H3A"
         )
-        certificates_exist = true
-        UI.success("✓ Existing certificates found and downloaded")
+        UI.success("✓ Certificate ready (reused existing or created new)")
       rescue => e
         error_message = e.message.to_s.downcase
-        # Check if error is specifically about no certificates existing
-        # vs other errors (network, auth, etc.)
-        if error_message.include?("no certificates") || 
-           error_message.include?("could not find") ||
-           error_message.include?("not found")
-          UI.important("No existing distribution certificates found in Apple Developer Portal")
-          UI.important("Error: #{e.message}")
-          certificates_exist = false
+        if error_message.include?("maximum number") || 
+           error_message.include?("reached the maximum") ||
+           error_message.include?("certificate limit")
+          UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
+                        "https://developer.apple.com/account/resources/certificates/list\n\n" +
+                        "Steps to fix:\n" +
+                        "1. Go to the link above\n" +
+                        "2. Filter by 'Production' to see Distribution certificates\n" +
+                        "3. Revoke expired or unused certificates\n" +
+                        "4. Wait a few minutes for changes to propagate\n" +
+                        "5. Retry the workflow\n\n" +
+                        "The cert action will automatically reuse existing certificates if they exist in the portal.")
         else
-          # Other error (auth, network, etc.) - don't try to create new certificate
-          UI.user_error!("Failed to check for existing certificates: #{e.message}")
-        end
-      end
-      
-      # Only create a new certificate if we're certain none exist
-      # This prevents hitting the certificate limit
-      if certificates_exist
-        UI.message("Using existing certificate - skipping creation")
-      else
-        UI.important("⚠️ WARNING: About to create a new distribution certificate")
-        UI.important("⚠️ Make sure you've removed old/unused certificates from Apple Developer Portal first")
-        UI.important("⚠️ Creating new certificate may fail if you've reached the limit")
-        
-        begin
-          cert(
-            team_id: "3G34999H3A"
-          )
-          UI.success("✓ New certificate created successfully")
-        rescue => e
-          if e.message.include?("maximum number") || e.message.include?("reached the maximum")
-            UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
-                          "https://developer.apple.com/account/resources/certificates/list\n\n" +
-                          "Then retry the workflow.")
-          else
-            raise
-          end
+          # Re-raise other errors
+          raise
         end
       end
       
@@ -205,57 +181,32 @@ platform :ios do
       # Set password for fastlane
       ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
-      # Always try to get existing certificates first (readonly mode)
-      # This will download existing certificates if they exist, without creating new ones
-      certificates_exist = false
+      # Use cert action - it will automatically reuse existing certificates from portal
+      # and install them into the keychain. Only creates new ones if none exist.
       begin
-        UI.message("Checking for existing distribution certificates...")
-        get_certificates(
+        UI.message("Getting distribution certificate (will reuse existing if available)...")
+        cert(
           username: ENV["FASTLANE_USER"],
-          team_id: "3G34999H3A",
-          readonly: true
+          team_id: "3G34999H3A"
         )
-        certificates_exist = true
-        UI.success("✓ Existing certificates found and downloaded")
+        UI.success("✓ Certificate ready (reused existing or created new)")
       rescue => e
         error_message = e.message.to_s.downcase
-        # Check if error is specifically about no certificates existing
-        # vs other errors (network, auth, etc.)
-        if error_message.include?("no certificates") || 
-           error_message.include?("could not find") ||
-           error_message.include?("not found")
-          UI.important("No existing distribution certificates found in Apple Developer Portal")
-          UI.important("Error: #{e.message}")
-          certificates_exist = false
+        if error_message.include?("maximum number") || 
+           error_message.include?("reached the maximum") ||
+           error_message.include?("certificate limit")
+          UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
+                        "https://developer.apple.com/account/resources/certificates/list\n\n" +
+                        "Steps to fix:\n" +
+                        "1. Go to the link above\n" +
+                        "2. Filter by 'Production' to see Distribution certificates\n" +
+                        "3. Revoke expired or unused certificates\n" +
+                        "4. Wait a few minutes for changes to propagate\n" +
+                        "5. Retry the workflow\n\n" +
+                        "The cert action will automatically reuse existing certificates if they exist in the portal.")
         else
-          # Other error (auth, network, etc.) - don't try to create new certificate
-          UI.user_error!("Failed to check for existing certificates: #{e.message}")
-        end
-      end
-      
-      # Only create a new certificate if we're certain none exist
-      # This prevents hitting the certificate limit
-      if certificates_exist
-        UI.message("Using existing certificate - skipping creation")
-      else
-        UI.important("⚠️ WARNING: About to create a new distribution certificate")
-        UI.important("⚠️ Make sure you've removed old/unused certificates from Apple Developer Portal first")
-        UI.important("⚠️ Creating new certificate may fail if you've reached the limit")
-        
-        begin
-          cert(
-            username: ENV["FASTLANE_USER"],
-            team_id: "3G34999H3A"
-          )
-          UI.success("✓ New certificate created successfully")
-        rescue => e
-          if e.message.include?("maximum number") || e.message.include?("reached the maximum")
-            UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
-                          "https://developer.apple.com/account/resources/certificates/list\n\n" +
-                          "Then retry the workflow.")
-          else
-            raise
-          end
+          # Re-raise other errors
+          raise
         end
       end
       
