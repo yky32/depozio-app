@@ -94,6 +94,7 @@ jobs:
       - name: Setup Code Signing
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
         run: |
           # Setup keychain - use login keychain for cert/sigh
@@ -108,7 +109,7 @@ jobs:
           
           # Use fastlane to get certificates and provisioning profiles
           # cert and sigh will install them in the default locations
-          if [ -n "$FASTLANE_USER" ]; then
+          if [ -n "$FASTLANE_USER" ] && [ -n "$FASTLANE_PASSWORD" ]; then
             PROFILE_PATH=$(bundle exec fastlane setup_certificates 2>&1 | grep -i "profile.*path" | tail -1 || echo "")
             echo "Profile setup output: $PROFILE_PATH"
             
@@ -121,7 +122,7 @@ jobs:
               echo "Warning: No provisioning profiles directory found"
             fi
           else
-            echo "Error: FASTLANE_USER is required for code signing."
+            echo "Error: FASTLANE_USER and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD are required for code signing."
             exit 1
           fi
           cd ..
@@ -137,6 +138,7 @@ jobs:
       - name: Build iOS app with fastlane
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
