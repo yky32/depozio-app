@@ -80,8 +80,11 @@ platform :ios do
       )
       
       # Now cert and sigh will use the authenticated session
+      # Use readonly: true to download existing certificates instead of creating new ones
+      # This prevents hitting the maximum certificate limit
       cert(
-        team_id: "3G34999H3A"
+        team_id: "3G34999H3A",
+        readonly: true
       )
       
       sigh(
@@ -104,9 +107,12 @@ platform :ios do
       # Set password for fastlane
       ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
+      # Use readonly: true to download existing certificates instead of creating new ones
+      # This prevents hitting the maximum certificate limit
       cert(
         username: ENV["FASTLANE_USER"],
-        team_id: "3G34999H3A"
+        team_id: "3G34999H3A",
+        readonly: true
       )
       
       sigh(
