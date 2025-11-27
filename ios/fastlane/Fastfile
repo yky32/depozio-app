@@ -285,21 +285,24 @@ platform :ios do
     profile_uuid = lane_context[Fastlane::Actions::SharedValues::SIGH_UUID]
     
     # Build the app using gym (build_app)
-    # Use xcodebuild arguments to specify provisioning profile for archive phase
+    # Use xcargs to pass xcodebuild arguments for archive phase
     # For manual signing, we can use either PROVISIONING_PROFILE (UUID) or PROVISIONING_PROFILE_SPECIFIER (name)
-    xcodebuild_args = [
+    xcargs_array = [
       "CODE_SIGN_STYLE=Manual",
       "CODE_SIGN_IDENTITY=iPhone Distribution"
     ]
     
     # Use UUID if available (more reliable), otherwise use profile name
     if profile_uuid
-      xcodebuild_args << "PROVISIONING_PROFILE=#{profile_uuid}"
+      xcargs_array << "PROVISIONING_PROFILE=#{profile_uuid}"
       UI.message("Using provisioning profile UUID: #{profile_uuid}")
     else
-      xcodebuild_args << "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
+      xcargs_array << "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
       UI.message("Using provisioning profile name: #{profile_name}")
     end
+    
+    # Convert array to string for xcargs (space-separated)
+    xcargs_string = xcargs_array.join(" ")
     
     # export_options handles code signing during export phase
     build_app(
@@ -311,7 +314,7 @@ platform :ios do
       include_bitcode: false,
       include_symbols: true,
       codesigning_identity: "iPhone Distribution",
-      xcodebuild_args: xcodebuild_args,
+      xcargs: xcargs_string,
       export_options: {
         provisioningProfiles: {
           "com.depozio" => profile_name || "com.depozio AppStore"
