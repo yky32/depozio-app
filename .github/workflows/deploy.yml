@@ -114,8 +114,6 @@ jobs:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FLUTTER_BUILD_NAME: ${{ steps.version.outputs.version }}
           FLUTTER_BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
-          # Enable automatic provisioning for CI/CD
-          XCODE_XCCONFIG_FILE: ${{ github.workspace }}/ios/Flutter/Release.xcconfig
         working-directory: ios
         run: |
           bundle exec fastlane beta
