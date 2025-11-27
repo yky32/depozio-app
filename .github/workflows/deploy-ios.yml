@@ -115,18 +115,31 @@ jobs:
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
         run: |
           # Setup keychain - use login keychain for cert/sigh
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db || true
           security set-keychain-settings -t 3600 -u ~/Library/Keychains/login.keychain-db || true
           
-          # Unset API key path for cert/sigh - they should use username/password
-          # The API key is only used for upload_to_app_store later
-          unset APP_STORE_CONNECT_API_KEY_PATH || true
+          # Expand ~ to full path for API key
+          if [ -n "$APP_STORE_CONNECT_API_KEY_PATH" ]; then
+            export APP_STORE_CONNECT_API_KEY_PATH="${APP_STORE_CONNECT_API_KEY_PATH/#\~/$HOME}"
+            echo "Using App Store Connect API key: $APP_STORE_CONNECT_API_KEY_PATH"
+            if [ ! -f "$APP_STORE_CONNECT_API_KEY_PATH" ]; then
+              echo "Warning: API key file not found at $APP_STORE_CONNECT_API_KEY_PATH"
+              echo "Falling back to Apple ID authentication"
+              unset APP_STORE_CONNECT_API_KEY_PATH
+            fi
+          else
+            echo "App Store Connect API key not provided, using Apple ID authentication"
+          fi
           
           cd ios
           
           # Use fastlane to get certificates and provisioning profiles
+          # Fastfile will prioritize API key if available, otherwise use username/password
           bundle exec fastlane certificates
           cd ..
 

@@ -26,17 +26,28 @@ platform :ios do
 
   desc "Download certificates and provisioning profiles"
   lane :certificates do
+    # Expand ~ to full path and check if API key file exists
+    api_key_path = nil
+    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key_path = File.expand_path(ENV["APP_STORE_CONNECT_API_KEY_PATH"])
+      unless File.exist?(api_key_path)
+        UI.important("API key file not found at: #{api_key_path}")
+        UI.important("Falling back to Apple ID authentication")
+        api_key_path = nil
+      end
+    end
+    
     # Use App Store Connect API key if available, otherwise use username/password
-    if ENV["APP_STORE_CONNECT_API_KEY_PATH"] && File.exist?(File.expand_path(ENV["APP_STORE_CONNECT_API_KEY_PATH"]))
-      UI.message("Using App Store Connect API key")
+    if api_key_path
+      UI.message("Using App Store Connect API key: #{api_key_path}")
       
       cert(
-        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+        api_key_path: api_key_path,
         team_id: "3G34999H3A"
       )
       
       sigh(
-        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+        api_key_path: api_key_path,
         app_identifier: "com.depozio",
         team_id: "3G34999H3A",
         force: true
@@ -44,10 +55,17 @@ platform :ios do
     else
       UI.message("Using Apple ID authentication")
       
-      # Set password for fastlane
-      if ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
-        ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+      # Verify credentials are available
+      unless ENV["FASTLANE_USER"]
+        UI.user_error!("FASTLANE_USER must be set when API key is not available")
       end
+      
+      unless ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+        UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts")
+      end
+      
+      # Set password for fastlane
+      ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
       cert(
         username: ENV["FASTLANE_USER"],
