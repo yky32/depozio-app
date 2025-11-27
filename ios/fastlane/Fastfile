@@ -143,9 +143,32 @@ platform :ios do
         UI.success("✓ Certificate ready (reused existing or created new)")
       rescue => e
         error_message = e.message.to_s.downcase
-        if error_message.include?("maximum number") || 
-           error_message.include?("reached the maximum") ||
-           error_message.include?("certificate limit")
+        error_output = e.message
+        
+        # Check if certificates exist in portal but private keys are missing locally
+        if error_output.include?("can't be found on your local computer") ||
+           error_output.include?("There are no local code signing identities found")
+          UI.important("⚠️ Certificates exist in Apple Developer Portal but private keys are missing locally")
+          UI.important("⚠️ This usually means certificates were created on a different machine")
+          UI.important("")
+          UI.important("Options:")
+          UI.important("1. Export certificate with private key from the original machine and add to workflow")
+          UI.important("2. Revoke old certificates and create new ones (if under limit)")
+          UI.important("")
+          UI.important("Since you've hit the certificate limit, you need to:")
+          UI.user_error!("Certificate limit reached! Certificates exist in portal but can't be used locally.\n\n" +
+                        "Steps to fix:\n" +
+                        "1. Go to: https://developer.apple.com/account/resources/certificates/list\n" +
+                        "2. Filter by 'Production' to see Distribution certificates\n" +
+                        "3. Revoke expired or unused certificates (you have: TDMN54S859, U6AY8DY6XC)\n" +
+                        "4. Wait a few minutes for changes to propagate\n" +
+                        "5. Retry the workflow - it will create a new certificate with the private key\n\n" +
+                        "Note: The existing certificates can't be used because their private keys\n" +
+                        "are not available on this machine. After revoking old ones, a new certificate\n" +
+                        "will be created with the private key stored locally.")
+        elsif error_message.include?("maximum number") || 
+             error_message.include?("reached the maximum") ||
+             error_message.include?("certificate limit")
           UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
                         "https://developer.apple.com/account/resources/certificates/list\n\n" +
                         "Steps to fix:\n" +
@@ -192,9 +215,32 @@ platform :ios do
         UI.success("✓ Certificate ready (reused existing or created new)")
       rescue => e
         error_message = e.message.to_s.downcase
-        if error_message.include?("maximum number") || 
-           error_message.include?("reached the maximum") ||
-           error_message.include?("certificate limit")
+        error_output = e.message
+        
+        # Check if certificates exist in portal but private keys are missing locally
+        if error_output.include?("can't be found on your local computer") ||
+           error_output.include?("There are no local code signing identities found")
+          UI.important("⚠️ Certificates exist in Apple Developer Portal but private keys are missing locally")
+          UI.important("⚠️ This usually means certificates were created on a different machine")
+          UI.important("")
+          UI.important("Options:")
+          UI.important("1. Export certificate with private key from the original machine and add to workflow")
+          UI.important("2. Revoke old certificates and create new ones (if under limit)")
+          UI.important("")
+          UI.important("Since you've hit the certificate limit, you need to:")
+          UI.user_error!("Certificate limit reached! Certificates exist in portal but can't be used locally.\n\n" +
+                        "Steps to fix:\n" +
+                        "1. Go to: https://developer.apple.com/account/resources/certificates/list\n" +
+                        "2. Filter by 'Production' to see Distribution certificates\n" +
+                        "3. Revoke expired or unused certificates\n" +
+                        "4. Wait a few minutes for changes to propagate\n" +
+                        "5. Retry the workflow - it will create a new certificate with the private key\n\n" +
+                        "Note: The existing certificates can't be used because their private keys\n" +
+                        "are not available on this machine. After revoking old ones, a new certificate\n" +
+                        "will be created with the private key stored locally.")
+        elsif error_message.include?("maximum number") || 
+             error_message.include?("reached the maximum") ||
+             error_message.include?("certificate limit")
           UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
                         "https://developer.apple.com/account/resources/certificates/list\n\n" +
                         "Steps to fix:\n" +
