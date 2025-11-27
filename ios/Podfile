@@ -45,6 +45,9 @@ post_install do |installer|
       if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 14.0
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
       end
+      # Disable code signing for Pods (they don't need to be signed)
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
     end
   end
 end
