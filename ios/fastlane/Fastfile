@@ -53,42 +53,24 @@ platform :ios do
     PLIST
     )
     
-    # Archive with development signing (Xcode can do this automatically), then export with App Store signing
-    UI.message("Archiving app with automatic signing...")
-    
-    # Create archive directory
-    archive_dir = "#{Dir.home}/Library/Developer/Xcode/Archives/#{Time.now.strftime('%Y-%m-%d')}"
-    FileUtils.mkdir_p(archive_dir)
-    archive_name = "Depozio #{Time.now.strftime('%Y-%m-%d %H.%M.%S')}"
-    archive_path = "#{archive_dir}/#{archive_name}.xcarchive"
-    
-    # Archive - Xcode will use development signing automatically, but export will re-sign with App Store
-    sh("xcodebuild archive -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath '#{archive_path}' -allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id} 2>&1 | xcbeautify")
-    
-    unless File.exist?(archive_path)
-      UI.user_error!("Archive failed. Check build logs above.")
-    end
-    
-    UI.message("Archive created at: #{archive_path}")
-    
-    # Export with App Store signing (this will re-sign the app with App Store distribution)
-    UI.message("Exporting IPA with App Store signing...")
-    export_path = "./build"
-    FileUtils.mkdir_p(export_path)
-    
-    sh("xcodebuild -exportArchive -archivePath '#{archive_path}' -exportOptionsPlist '#{export_options_path}' -exportPath '#{export_path}' -allowProvisioningUpdates 2>&1")
-    
-    # Find and rename the exported IPA
-    ipa_path = Dir.glob("#{export_path}/*.ipa").first
-    
-    if ipa_path.nil? || !File.exist?(ipa_path)
-      UI.user_error!("Could not find exported IPA file. Export may have failed. Check logs above.")
-    end
-    
-    final_ipa_path = "#{export_path}/Depozio.ipa"
-    FileUtils.mv(ipa_path, final_ipa_path) if ipa_path != final_ipa_path
-    
-    UI.success("IPA created successfully at #{final_ipa_path}")
+    # Use Fastlane's build_app which handles archive + export in one step
+    UI.message("Building and exporting IPA with App Store signing...")
+    build_app(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        signingStyle: "automatic",
+        teamID: team_id
+      },
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      clean: true,
+      silent: false,
+      include_bitcode: false,
+      xcargs: "-allowProvisioningUpdates" # Allow Xcode to create provisioning profiles
+    )
 
     # Upload to TestFlight
     upload_to_testflight(
