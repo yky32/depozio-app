@@ -27,8 +27,6 @@ platform :ios do
     end
 
     # Build the app using Fastlane (Flutter build number is set via environment variables)
-    team_id = ENV["TEAM_ID"] || "3G34999H3A"
-    
     build_app(
       scheme: "Runner",
       workspace: "Runner.xcworkspace",
@@ -36,15 +34,13 @@ platform :ios do
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
-        teamID: team_id,
-        provisioningProfiles: {} # Empty hash lets Xcode automatically manage profiles
+        teamID: ENV["TEAM_ID"] || "3G34999H3A"
       },
       output_directory: "./build",
       output_name: "Depozio.ipa",
       clean: true,
       silent: false, # Set to false to see more build details
-      include_bitcode: false,
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_IDENTITY=\"Apple Distribution\" DEVELOPMENT_TEAM=#{team_id}" # Allow Xcode to automatically manage provisioning profiles
+      include_bitcode: false
     )
 
     # Upload to TestFlight
