@@ -2,7 +2,7 @@
 # These are set via environment variables in GitHub Actions
 
 app_identifier("com.depozio")
-apple_id(ENV["APPLE_ID"] || "your-apple-id@example.com")
+apple_id(ENV["APPLE_ID"] || "wayneyu.dev@gmail.com")
 team_id(ENV["TEAM_ID"] || "3G34999H3A")
 
 # App Store Connect API Key (recommended for CI/CD)
