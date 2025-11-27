@@ -1,8 +1,12 @@
-# Appfile for Fastlane
-# This file contains configuration for your app
+# Appfile for fastlane
+# Documentation: https://docs.fastlane.tools/advanced/#appfile
 
-# Your Apple Developer Team ID
-app_identifier("com.depozio")
-apple_id("wayneyu.dev@gmail.com")
+app_identifier("com.depozio") # The bundle identifier of your app
+apple_id(ENV["wayneyu.dev@gmail.com"]) # Your Apple email address
+
+# Uncomment the following line if you want to specify a team
 team_id("3G34999H3A")
+
+# Uncomment the following line if you want to specify a team name
+# team_name("YOUR_TEAM_NAME")
 
