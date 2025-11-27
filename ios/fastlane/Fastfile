@@ -93,18 +93,20 @@ platform :ios do
           readonly: true
         )
         certificates_exist = true
-        UI.success("✓ Existing certificates found - will reuse them")
+        UI.success("✓ Existing certificates found - reused them")
       rescue => e
         UI.important("No existing certificates found - will create new one")
         certificates_exist = false
       end
       
-      # Now cert and sigh will use the authenticated session
-      # Use readonly: true if certificates exist, otherwise create new one
-      cert(
-        team_id: "3G34999H3A",
-        readonly: certificates_exist
-      )
+      # If certificates don't exist, create a new one using cert
+      # If they exist, get_certificates already downloaded them, so we skip cert
+      unless certificates_exist
+        UI.message("Creating new distribution certificate...")
+        cert(
+          team_id: "3G34999H3A"
+        )
+      end
       
       sigh(
         app_identifier: "com.depozio",
@@ -127,6 +129,7 @@ platform :ios do
       ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
       # Check if certificates exist first (with username/password auth)
+      certificates_exist = false
       begin
         UI.message("Checking for existing distribution certificates...")
         get_certificates(
@@ -135,17 +138,21 @@ platform :ios do
           readonly: true
         )
         certificates_exist = true
-        UI.success("✓ Existing certificates found - will reuse them")
+        UI.success("✓ Existing certificates found - reused them")
       rescue => e
         certificates_exist = false
         UI.important("No existing certificates found - will create new one")
       end
       
-      cert(
-        username: ENV["FASTLANE_USER"],
-        team_id: "3G34999H3A",
-        readonly: certificates_exist
-      )
+      # If certificates don't exist, create a new one using cert
+      # If they exist, get_certificates already downloaded them, so we skip cert
+      unless certificates_exist
+        UI.message("Creating new distribution certificate...")
+        cert(
+          username: ENV["FASTLANE_USER"],
+          team_id: "3G34999H3A"
+        )
+      end
       
       sigh(
         username: ENV["FASTLANE_USER"],
