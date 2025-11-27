@@ -89,16 +89,30 @@ jobs:
             mkdir -p ~/private_keys
             KEY_FILE="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
             
-            # Write the key content using printf to preserve newlines
-            printf '%s\n' "$APP_STORE_CONNECT_API_KEY_CONTENT" > "$KEY_FILE"
+            # Write the key content - the content should already have proper newlines
+            # Use echo -e to interpret escape sequences, but the content should be literal
+            echo "$APP_STORE_CONNECT_API_KEY_CONTENT" > "$KEY_FILE"
             chmod 600 "$KEY_FILE"
             
             # Verify the file was written correctly
             if [ -f "$KEY_FILE" ]; then
+              FILE_SIZE=$(wc -c < "$KEY_FILE" | tr -d ' ')
+              FIRST_LINE=$(head -n1 "$KEY_FILE")
+              LAST_LINE=$(tail -n1 "$KEY_FILE")
+              
               echo "✓ API key file created: $KEY_FILE"
-              echo "✓ File size: $(wc -c < "$KEY_FILE") bytes"
-              echo "✓ First line: $(head -n1 "$KEY_FILE")"
-              echo "✓ Last line: $(tail -n1 "$KEY_FILE")"
+              echo "✓ File size: $FILE_SIZE bytes"
+              echo "✓ First line: $FIRST_LINE"
+              echo "✓ Last line: $LAST_LINE"
+              
+              # Verify it starts with BEGIN PRIVATE KEY
+              if echo "$FIRST_LINE" | grep -q "BEGIN PRIVATE KEY"; then
+                echo "✓ File format verified: Starts with BEGIN PRIVATE KEY"
+              else
+                echo "⚠ Warning: File doesn't start with '-----BEGIN PRIVATE KEY-----'"
+                echo "⚠ First line is: $FIRST_LINE"
+                echo "⚠ This might cause issues. Please verify the secret content."
+              fi
             else
               echo "✗ Failed to create API key file"
               exit 1

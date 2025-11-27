@@ -63,30 +63,21 @@ platform :ios do
         UI.user_error!("Invalid API key file format. First line should be '-----BEGIN PRIVATE KEY-----', got: #{first_line}")
       end
       
-      # Use API key with issuer_id and key_id if available
-      cert_options = {
-        api_key_path: api_key_path,
+      # Set Fastlane's standard API key environment variables
+      ENV["APP_STORE_CONNECT_API_KEY_PATH"] = api_key_path
+      ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] = api_key_id if api_key_id
+      ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] = api_key_issuer_id if api_key_issuer_id
+      
+      # Use API key - Fastlane will automatically detect it from environment
+      cert(
         team_id: "3G34999H3A"
-      }
+      )
       
-      if api_key_issuer_id
-        cert_options[:api_key_issuer_id] = api_key_issuer_id
-      end
-      
-      cert(cert_options)
-      
-      sigh_options = {
-        api_key_path: api_key_path,
+      sigh(
         app_identifier: "com.depozio",
         team_id: "3G34999H3A",
         force: true
-      }
-      
-      if api_key_issuer_id
-        sigh_options[:api_key_issuer_id] = api_key_issuer_id
-      end
-      
-      sigh(sigh_options)
+      )
     else
       UI.message("Using Apple ID authentication")
       
