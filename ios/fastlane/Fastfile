@@ -50,20 +50,54 @@ platform :ios do
     UI.message("Provisioning profile Name: #{profile_name}")
     UI.message("Provisioning profile path: #{profile_path}")
     
-    # Update Xcode project to use manual signing
-    # The provisioning profile will be automatically selected by Xcode based on bundle ID
+    # Update Xcode project to use manual signing with the specific provisioning profile
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       team_id: "3G34999H3A",
       code_sign_identity: "Apple Distribution",
-      bundle_identifier: "com.depozio"
+      bundle_identifier: "com.depozio",
+      profile_uuid: profile_uuid
     )
     
-    # Store profile UUID in environment for potential use
-    ENV["PROVISIONING_PROFILE_UUID"] = profile_uuid
+    UI.message("Updated Xcode project to use provisioning profile: #{profile_uuid}")
     
+    # Store profile UUID in a file for use in build step
+    File.write("../build/ios/profile_uuid.txt", profile_uuid)
+    
+    UI.success("Provisioning profile setup complete: #{profile_uuid}")
     profile_path
+  end
+
+  desc "Create export options with provisioning profile"
+  lane :create_export_options do
+    # Read profile UUID from file
+    profile_uuid_file = "../build/ios/profile_uuid.txt"
+    unless File.exist?(profile_uuid_file)
+      UI.user_error!("Provisioning profile UUID file not found. Run setup_certificates first.")
+    end
+    
+    profile_uuid = File.read(profile_uuid_file).strip
+    
+    # Create export options plist with the provisioning profile
+    export_options = {
+      method: "app-store",
+      teamID: "3G34999H3A",
+      signingStyle: "manual",
+      provisioningProfiles: {
+        "com.depozio" => profile_uuid
+      }
+    }
+    
+    # Write export options to file
+    require 'plist'
+    export_options_path = "../build/ios/ExportOptions.plist"
+    File.write(export_options_path, export_options.to_plist)
+    
+    UI.message("Export options created at: #{export_options_path}")
+    UI.message("Using provisioning profile: #{profile_uuid}")
+    
+    export_options_path
   end
 
   desc "Deploy to App Store"
