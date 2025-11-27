@@ -6,8 +6,8 @@ To test if your credentials work, run this locally:
 cd ios
 
 # Set your credentials (replace with your actual values)
-export FASTLANE_USER="your-apple-id@email.com"
-export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="your-app-specific-password"
+export FASTLANE_USER="wayneyu.dev@gmail.com"
+export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="wlet-xvzn-yxrl-evxq"
 
 # Test cert action
 bundle exec fastlane run cert username:$FASTLANE_USER team_id:3G34999H3A
