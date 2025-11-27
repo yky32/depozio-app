@@ -80,14 +80,6 @@ jobs:
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
           echo "Setting version: $VERSION+$BUILD_NUMBER"
 
-      - name: Build iOS app
-        run: |
-          flutter build ipa \
-            --release \
-            --build-name=${{ env.VERSION }} \
-            --build-number=${{ env.BUILD_NUMBER }} \
-            --export-method=app-store
-
       - name: Setup App Store Connect API Key
         run: |
           if [ -n "${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" ] && [ -n "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" ]; then
@@ -98,6 +90,45 @@ jobs:
           else
             echo "App Store Connect API key not provided, will use Apple ID authentication"
           fi
+
+      - name: Setup Code Signing
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+        run: |
+          # Create keychain for code signing
+          security create-keychain -p "" build.keychain || true
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          
+          cd ios
+          
+          # Use fastlane to get certificates and provisioning profiles
+          # cert and sigh automatically install them in the keychain
+          if [ -n "$FASTLANE_USER" ]; then
+            export APP_STORE_CONNECT_API_KEY_PATH="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8" 2>/dev/null || true
+            bundle exec fastlane setup_certificates || echo "Certificate setup failed, will try automatic signing"
+          else
+            echo "Warning: FASTLANE_USER not provided. Code signing will attempt to use automatic signing."
+          fi
+          cd ..
+
+      - name: Build iOS app
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          flutter build ipa \
+            --release \
+            --build-name=${{ env.VERSION }} \
+            --build-number=${{ env.BUILD_NUMBER }} \
+            --export-method=app-store
 
       - name: Deploy to App Store
         env:
