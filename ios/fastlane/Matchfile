@@ -1,0 +1,15 @@
+# Match configuration
+# This file is used by Fastlane Match to manage certificates and provisioning profiles
+
+git_url(ENV["MATCH_GIT_BASIC_AUTHORIZATION"] ? nil : ENV["MATCH_GIT_URL"] || "")
+storage_mode("git")
+type("appstore") # App Store distribution
+app_identifier("com.depozio")
+username(ENV["APPLE_ID"] || "") # Optional, not needed with API keys
+
+# App Store Connect API Key (preferred for CI/CD)
+# Set via environment variables:
+# - APP_STORE_CONNECT_API_KEY_ID
+# - APP_STORE_CONNECT_ISSUER_ID  
+# - APP_STORE_CONNECT_API_KEY_PATH
+
