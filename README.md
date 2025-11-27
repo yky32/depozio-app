@@ -1,7 +1,7 @@
 # Depozio Flutter App
 
 A production-ready Flutter starter template with enterprise-grade features and best practices.
-v1
+v2
 
 ## 🚀 Core Features
 
