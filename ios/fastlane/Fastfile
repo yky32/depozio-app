@@ -3,7 +3,7 @@
 
 default_platform(:ios)
 
-# Trigger GitHub Actions workflow
+# Trigger GitHub Actions workflow - test build
 
 platform :ios do
   desc "List existing distribution certificates"
