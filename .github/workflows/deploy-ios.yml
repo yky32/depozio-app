@@ -110,7 +110,7 @@ jobs:
           if [ -n "$FASTLANE_USER" ]; then
             bundle exec fastlane setup_certificates || echo "Certificate setup failed"
           else
-            echo "Error: FASTLANE_USER is required for code signing"
+            echo "Error: FASTLANE_USER is required for code signing."
             exit 1
           fi
           cd ..
