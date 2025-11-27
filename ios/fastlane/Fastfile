@@ -281,14 +281,27 @@ platform :ios do
     UI.message("Using provisioning profile: #{profile_path}")
     UI.message("Profile name: #{profile_name}")
     
-    # Install the provisioning profile to the system
-    # This ensures Xcode can find it during the build
-    install_provisioning_profile(
-      path: profile_path
-    )
+    # Get the provisioning profile UUID from sigh
+    profile_uuid = lane_context[Fastlane::Actions::SharedValues::SIGH_UUID]
     
     # Build the app using gym (build_app)
-    # The export_options will handle code signing during export
+    # Use xcodebuild arguments to specify provisioning profile for archive phase
+    # For manual signing, we can use either PROVISIONING_PROFILE (UUID) or PROVISIONING_PROFILE_SPECIFIER (name)
+    xcodebuild_args = [
+      "CODE_SIGN_STYLE=Manual",
+      "CODE_SIGN_IDENTITY=iPhone Distribution"
+    ]
+    
+    # Use UUID if available (more reliable), otherwise use profile name
+    if profile_uuid
+      xcodebuild_args << "PROVISIONING_PROFILE=#{profile_uuid}"
+      UI.message("Using provisioning profile UUID: #{profile_uuid}")
+    else
+      xcodebuild_args << "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
+      UI.message("Using provisioning profile name: #{profile_name}")
+    end
+    
+    # export_options handles code signing during export phase
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -297,6 +310,8 @@ platform :ios do
       clean: true,
       include_bitcode: false,
       include_symbols: true,
+      codesigning_identity: "iPhone Distribution",
+      xcodebuild_args: xcodebuild_args,
       export_options: {
         provisioningProfiles: {
           "com.depozio" => profile_name || "com.depozio AppStore"
