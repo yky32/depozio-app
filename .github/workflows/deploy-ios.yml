@@ -109,7 +109,17 @@ jobs:
           # Use fastlane to get certificates and provisioning profiles
           # cert and sigh will install them in the default locations
           if [ -n "$FASTLANE_USER" ]; then
-            bundle exec fastlane setup_certificates || echo "Certificate setup failed"
+            PROFILE_PATH=$(bundle exec fastlane setup_certificates 2>&1 | grep -i "profile.*path" | tail -1 || echo "")
+            echo "Profile setup output: $PROFILE_PATH"
+            
+            # Verify provisioning profiles are installed
+            echo "Checking provisioning profiles..."
+            if [ -d ~/Library/MobileDevice/Provisioning\ Profiles/ ]; then
+              ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ | head -5
+              echo "Provisioning profiles directory exists"
+            else
+              echo "Warning: No provisioning profiles directory found"
+            fi
           else
             echo "Error: FASTLANE_USER is required for code signing."
             exit 1

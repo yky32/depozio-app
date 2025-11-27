@@ -36,17 +36,32 @@ platform :ios do
       username: ENV["FASTLANE_USER"],
       app_identifier: "com.depozio",
       team_id: "3G34999H3A",
-      force: true
+      force: true,
+      readonly: false
     )
     
-    # Update Xcode project to use automatic signing with team ID
-    # The provisioning profile will be automatically selected
+    # Extract provisioning profile UUID from the profile for reference
+    require 'plist'
+    profile_data = Plist.parse_xml(profile_path)
+    profile_uuid = profile_data["UUID"]
+    profile_name = profile_data["Name"]
+    
+    UI.message("Provisioning profile UUID: #{profile_uuid}")
+    UI.message("Provisioning profile Name: #{profile_name}")
+    UI.message("Provisioning profile path: #{profile_path}")
+    
+    # Update Xcode project to use manual signing
+    # The provisioning profile will be automatically selected by Xcode based on bundle ID
     update_code_signing_settings(
-      use_automatic_signing: true,
+      use_automatic_signing: false,
       path: "Runner.xcodeproj",
       team_id: "3G34999H3A",
+      code_sign_identity: "Apple Distribution",
       bundle_identifier: "com.depozio"
     )
+    
+    # Store profile UUID in environment for potential use
+    ENV["PROVISIONING_PROFILE_UUID"] = profile_uuid
     
     profile_path
   end
