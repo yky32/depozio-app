@@ -93,9 +93,6 @@ jobs:
 
       - name: Setup Code Signing
         env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
         run: |
@@ -103,10 +100,9 @@ jobs:
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db || true
           security set-keychain-settings -t 3600 -u ~/Library/Keychains/login.keychain-db || true
           
-          # Set API key path if available (preferred method)
-          if [ -n "$APP_STORE_CONNECT_API_KEY_ID" ] && [ -n "$APP_STORE_CONNECT_API_KEY_CONTENT" ]; then
-            export APP_STORE_CONNECT_API_KEY_PATH="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-          fi
+          # Unset API key path for cert/sigh - they should use username/password
+          # The API key is only used for upload_to_app_store later
+          unset APP_STORE_CONNECT_API_KEY_PATH || true
           
           cd ios
           
@@ -126,8 +122,7 @@ jobs:
           
           # Use fastlane to get certificates and provisioning profiles
           # cert and sigh will install them in the default locations
-          # Prefer API key if available, otherwise use username/password
-          if [ -n "$APP_STORE_CONNECT_API_KEY_ID" ] || ([ -n "$FASTLANE_USER" ] && [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]); then
+          if [ -n "$FASTLANE_USER" ] && [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]; then
             PROFILE_PATH=$(bundle exec fastlane setup_certificates 2>&1 | grep -i "profile.*path" | tail -1 || echo "")
             echo "Profile setup output: $PROFILE_PATH"
             
@@ -140,8 +135,7 @@ jobs:
               echo "Warning: No provisioning profiles directory found"
             fi
           else
-            echo "Error: Either App Store Connect API key or FASTLANE_USER + FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD are required for code signing."
-            echo "APP_STORE_CONNECT_API_KEY_ID: ${APP_STORE_CONNECT_API_KEY_ID:+SET}"
+            echo "Error: FASTLANE_USER and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD are required for code signing."
             echo "FASTLANE_USER: ${FASTLANE_USER:+SET}"
             echo "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:+SET}"
             exit 1

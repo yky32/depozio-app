@@ -18,66 +18,54 @@ default_platform(:ios)
 platform :ios do
   desc "Setup code signing certificates and provisioning profiles"
   lane :setup_certificates do
-    # Check if App Store Connect API key is available (preferred method)
-    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
-    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
-    api_key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    # Ensure we use username/password authentication for cert/sigh
+    # Unset API key environment variables to avoid conflicts
+    ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
+    ENV.delete("APP_STORE_CONNECT_API_KEY")
     
-    # Fallback to username/password if API key not available
+    # Verify credentials are available
     username = ENV["FASTLANE_USER"]
     app_specific_password = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
     
     # Debug: Check what we received (without showing sensitive data)
-    UI.message("Checking authentication method...")
+    UI.message("Checking environment variables...")
+    UI.message("FASTLANE_USER is #{username ? 'SET' : 'NOT SET'}")
+    UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is #{app_specific_password ? 'SET' : 'NOT SET'}")
     
-    # Try App Store Connect API key first (more reliable for CI/CD)
-    if api_key_id && api_key_issuer_id && api_key_path && File.exist?(File.expand_path(api_key_path))
-      UI.message("Using App Store Connect API key authentication")
-      
-      # Get App Store distribution certificate using API key
-      cert(
-        api_key_path: api_key_path,
-        team_id: "3G34999H3A"
-      )
-      
-      # Get App Store provisioning profile using API key
-      profile_path = sigh(
-        api_key_path: api_key_path,
-        app_identifier: "com.depozio",
-        team_id: "3G34999H3A",
-        force: true,
-        readonly: false
-      )
-    elsif username && app_specific_password
-      UI.message("Using Apple ID authentication (username/password)")
-      UI.message("FASTLANE_USER is SET")
-      UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is SET")
-      
-      # Set both FASTLANE_PASSWORD and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
-      # Some fastlane actions look for FASTLANE_PASSWORD
-      ENV["FASTLANE_PASSWORD"] = app_specific_password
-      ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = app_specific_password
-      
-      UI.message("Using username: #{username}")
-      UI.message("App-specific password provided: Yes")
-      
-      # Get App Store distribution certificate
-      cert(
-        username: username,
-        team_id: "3G34999H3A"
-      )
-      
-      # Get App Store provisioning profile
-      profile_path = sigh(
-        username: username,
-        app_identifier: "com.depozio",
-        team_id: "3G34999H3A",
-        force: true,
-        readonly: false
-      )
-    else
-      UI.user_error!("Either App Store Connect API key (APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_API_KEY_PATH) or Apple ID credentials (FASTLANE_USER, FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD) must be set.")
+    unless username
+      UI.user_error!("FASTLANE_USER must be set. Check your GitHub secrets.")
     end
+    
+    unless app_specific_password
+      UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts. Check your GitHub secrets.")
+    end
+    
+    # Set both FASTLANE_PASSWORD and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+    # Some fastlane actions look for FASTLANE_PASSWORD
+    ENV["FASTLANE_PASSWORD"] = app_specific_password
+    ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = app_specific_password
+    
+    UI.message("Using username: #{username}")
+    UI.message("App-specific password provided: Yes")
+    UI.message("Environment variables set for authentication")
+    
+    # Get App Store distribution certificate
+    # cert automatically installs it in the default keychain
+    # It will use FASTLANE_PASSWORD or FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD from ENV
+    cert(
+      username: username,
+      team_id: "3G34999H3A"
+    )
+    
+    # Get App Store provisioning profile
+    # sigh automatically installs it in ~/Library/MobileDevice/Provisioning Profiles
+    profile_path = sigh(
+      username: username,
+      app_identifier: "com.depozio",
+      team_id: "3G34999H3A",
+      force: true,
+      readonly: false
+    )
     
     # Extract provisioning profile UUID from the profile for reference
     require 'plist'
