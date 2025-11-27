@@ -24,6 +24,7 @@ platform :ios do
     UI.message("================================")
   end
 
+
   desc "Download certificates and provisioning profiles"
   lane :certificates do
     # Check for App Store Connect API key
@@ -79,9 +80,26 @@ platform :ios do
         is_key_content_base64: false
       )
       
+      # Check if certificates exist first by trying to get them in readonly mode
+      certificates_exist = false
+      begin
+        UI.message("Checking for existing distribution certificates...")
+        get_certificates(
+          team_id: "3G34999H3A",
+          readonly: true
+        )
+        certificates_exist = true
+        UI.success("✓ Existing certificates found - will reuse them")
+      rescue => e
+        UI.important("No existing certificates found - will create new one")
+        certificates_exist = false
+      end
+      
       # Now cert and sigh will use the authenticated session
+      # Use readonly: true if certificates exist, otherwise create new one
       cert(
-        team_id: "3G34999H3A"
+        team_id: "3G34999H3A",
+        readonly: certificates_exist
       )
       
       sigh(
@@ -104,9 +122,25 @@ platform :ios do
       # Set password for fastlane
       ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
+      # Check if certificates exist first (with username/password auth)
+      begin
+        UI.message("Checking for existing distribution certificates...")
+        get_certificates(
+          username: ENV["FASTLANE_USER"],
+          team_id: "3G34999H3A",
+          readonly: true
+        )
+        certificates_exist = true
+        UI.success("✓ Existing certificates found - will reuse them")
+      rescue => e
+        certificates_exist = false
+        UI.important("No existing certificates found - will create new one")
+      end
+      
       cert(
         username: ENV["FASTLANE_USER"],
-        team_id: "3G34999H3A"
+        team_id: "3G34999H3A",
+        readonly: certificates_exist
       )
       
       sigh(
