@@ -81,12 +81,15 @@ jobs:
           echo "Setting version: $VERSION+$BUILD_NUMBER"
 
       - name: Setup App Store Connect API Key
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
-          if [ -n "${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" ] && [ -n "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" ]; then
+          if [ -n "$APP_STORE_CONNECT_API_KEY_ID" ] && [ -n "$APP_STORE_CONNECT_API_KEY_CONTENT" ]; then
             mkdir -p ~/private_keys
-            echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-            chmod 600 ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-            echo "App Store Connect API key configured"
+            echo "$APP_STORE_CONNECT_API_KEY_CONTENT" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+            chmod 600 ~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+            echo "App Store Connect API key configured at ~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
           else
             echo "App Store Connect API key not provided, will use Apple ID authentication"
           fi
