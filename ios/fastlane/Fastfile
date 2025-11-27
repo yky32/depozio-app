@@ -24,9 +24,9 @@ platform :ios do
     else
       UI.message("Using Apple ID authentication")
       
-      # Ensure password is set
-      unless ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
-        ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] if ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+      # Set password for fastlane
+      if ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+        ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       end
       
       cert(
