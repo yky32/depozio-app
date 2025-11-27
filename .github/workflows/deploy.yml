@@ -92,6 +92,8 @@ jobs:
           APP_STORE_CONNECT_API_KEY_PATH: ~/private_keys/AuthKey.p8
           TEAM_ID: ${{ secrets.TEAM_ID || '3G34999H3A' }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          FLUTTER_BUILD_NAME: ${{ steps.version.outputs.version }}
+          FLUTTER_BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
         working-directory: ios
         run: |
           bundle exec fastlane beta
