@@ -26,30 +26,10 @@ platform :ios do
       )
     end
 
-    # Build archive with Flutter (no signing), then export with Fastlane (App Store signing)
+    # Build using Flutter's build ipa command with proper export options
     team_id = ENV["TEAM_ID"] || "3G34999H3A"
-    project_root = File.expand_path('../..', __dir__)
     
-    # Step 1: Build archive using Flutter without code signing
-    UI.message("Building archive with Flutter (no signing)...")
-    sh("cd #{project_root} && flutter build ios --release --no-codesign")
-    
-    # Step 2: Find the archive
-    archive_path = Dir.glob("#{project_root}/build/ios/archive/Runner.xcarchive").first
-    
-    if archive_path.nil? || !File.exist?(archive_path)
-      # Try alternative location
-      archive_path = Dir.glob("#{project_root}/build/ios/*.xcarchive").first
-    end
-    
-    if archive_path.nil? || !File.exist?(archive_path)
-      UI.user_error!("Could not find archive file. Build may have failed. Check Flutter build logs above.")
-    end
-    
-    UI.message("Found archive at: #{archive_path}")
-    
-    # Step 3: Export IPA with App Store signing using Fastlane
-    UI.message("Exporting IPA with App Store signing...")
+    # Create export_options.plist in ios directory
     export_options_path = File.expand_path('../export_options.plist', __dir__)
     
     # Create export_options.plist with App Store signing
@@ -75,24 +55,26 @@ platform :ios do
     PLIST
     )
     
-    # Export the IPA using xcodebuild with proper signing
-    export_path = "./build"
-    FileUtils.mkdir_p(export_path)
+    # Build IPA using Flutter (it will use the export_options.plist)
+    project_root = File.expand_path('../..', __dir__)
+    sh("cd #{project_root} && flutter build ipa --release --export-options-plist=ios/export_options.plist")
     
-    sh("xcodebuild -exportArchive -archivePath '#{archive_path}' -exportOptionsPlist '#{export_options_path}' -exportPath '#{export_path}' -allowProvisioningUpdates")
-    
-    # Find the exported IPA
-    ipa_path = Dir.glob("#{export_path}/*.ipa").first
+    # Find and copy the generated IPA
+    ipa_path = Dir.glob("#{project_root}/build/ios/ipa/*.ipa").first
     
     if ipa_path.nil? || !File.exist?(ipa_path)
-      UI.user_error!("Could not find exported IPA file. Export may have failed.")
+      # Try alternative location
+      ipa_path = Dir.glob("#{project_root}/build/ios/*.ipa").first
     end
     
-    # Rename to expected name
-    final_ipa_path = "#{export_path}/Depozio.ipa"
-    FileUtils.mv(ipa_path, final_ipa_path) if ipa_path != final_ipa_path
+    if ipa_path.nil? || !File.exist?(ipa_path)
+      UI.user_error!("Could not find IPA file. Build may have failed. Check Flutter build logs above.")
+    end
     
-    UI.success("IPA created successfully at #{final_ipa_path}")
+    # Copy to build directory
+    FileUtils.mkdir_p("./build")
+    FileUtils.cp(ipa_path, "./build/Depozio.ipa")
+    UI.success("IPA created successfully at ./build/Depozio.ipa")
 
     # Upload to TestFlight
     upload_to_testflight(
