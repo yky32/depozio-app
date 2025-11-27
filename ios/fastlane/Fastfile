@@ -1,0 +1,95 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Set up App Store Connect API authentication
+    if ENV["APP_STORE_CONNECT_API_KEY_ID"] && ENV["APP_STORE_CONNECT_ISSUER_ID"] && ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key = app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+        duration: 1200, # 20 minutes
+        in_house: false
+      )
+    end
+
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # Build the app
+    build_app(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        signingStyle: "automatic",
+        teamID: ENV["TEAM_ID"] || "3G34999H3A"
+      },
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      clean: true,
+      silent: true,
+      include_bitcode: false,
+      codesigning_identity: "Apple Distribution"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      distribute_external: false,
+      notify_external_testers: false,
+      groups: ENV["TESTFLIGHT_GROUPS"]&.split(",") || ["Internal Testers"], # Change this to your TestFlight group name
+      api_key: api_key
+    )
+
+    # Optional: Add release notes
+    # changelog = ENV["CHANGELOG"] || "Bug fixes and improvements"
+    # upload_to_testflight(
+    #   changelog: changelog
+    # )
+  end
+
+  desc "Build app only (without uploading)"
+  lane :build do
+    build_app(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        signingStyle: "automatic"
+      },
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      clean: true
+    )
+  end
+
+  desc "Upload existing build to TestFlight"
+  lane :upload do
+    upload_to_testflight(
+      ipa: "./build/Depozio.ipa",
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      distribute_external: false
+    )
+  end
+end
+
