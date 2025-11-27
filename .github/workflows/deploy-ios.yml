@@ -152,14 +152,15 @@ jobs:
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db || true
           security set-keychain-settings -t 3600 -u ~/Library/Keychains/login.keychain-db || true
           
-          # Set API key path if key ID is available
+          # Don't set APP_STORE_CONNECT_API_KEY_PATH as env var - it causes Fastlane to try parsing as JSON
+          # Fastfile will find the file directly using the key ID
           if [ -n "$APP_STORE_CONNECT_API_KEY_ID" ]; then
-            export APP_STORE_CONNECT_API_KEY_PATH="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-            if [ -f "$APP_STORE_CONNECT_API_KEY_PATH" ]; then
-              echo "✓ Using App Store Connect API key: $APP_STORE_CONNECT_API_KEY_PATH"
+            KEY_FILE="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+            if [ -f "$KEY_FILE" ]; then
+              echo "✓ API key file found: $KEY_FILE"
+              echo "✓ Fastfile will use it directly via api_key_path parameter"
             else
               echo "⚠ API key file not found, will fall back to Apple ID authentication"
-              unset APP_STORE_CONNECT_API_KEY_PATH
             fi
           else
             echo "App Store Connect API key not provided, using Apple ID authentication"

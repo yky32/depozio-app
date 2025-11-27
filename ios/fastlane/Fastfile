@@ -33,8 +33,8 @@ platform :ios do
     
     if api_key_id
       # Try to find the API key file
+      # Don't use ENV["APP_STORE_CONNECT_API_KEY_PATH"] as it might confuse Fastlane's auto-detection
       possible_paths = [
-        ENV["APP_STORE_CONNECT_API_KEY_PATH"],
         "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
         "~/private_keys/AuthKey_#{api_key_id}.p8"
       ].compact
@@ -63,17 +63,15 @@ platform :ios do
         UI.user_error!("Invalid API key file format. First line should be '-----BEGIN PRIVATE KEY-----', got: #{first_line}")
       end
       
-      # Set Fastlane's standard API key environment variables
-      ENV["APP_STORE_CONNECT_API_KEY_PATH"] = api_key_path
-      ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] = api_key_id if api_key_id
-      ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] = api_key_issuer_id if api_key_issuer_id
-      
-      # Use API key - Fastlane will automatically detect it from environment
+      # Use explicit api_key_path parameter - don't rely on environment variable auto-detection
+      # which might try to parse the file as JSON
       cert(
+        api_key_path: api_key_path,
         team_id: "3G34999H3A"
       )
       
       sigh(
+        api_key_path: api_key_path,
         app_identifier: "com.depozio",
         team_id: "3G34999H3A",
         force: true
