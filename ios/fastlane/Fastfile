@@ -6,6 +6,53 @@ default_platform(:ios)
 # Trigger GitHub Actions workflow
 
 platform :ios do
+  desc "List existing distribution certificates"
+  lane :list_certificates do
+    # Authenticate first if using API key
+    api_key_path = nil
+    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
+    
+    if api_key_id
+      possible_paths = [
+        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
+        "~/private_keys/AuthKey_#{api_key_id}.p8"
+      ].compact
+      
+      possible_paths.each do |path|
+        expanded_path = File.expand_path(path)
+        if File.exist?(expanded_path)
+          api_key_path = expanded_path
+          break
+        end
+      end
+      
+      if api_key_path && File.exist?(api_key_path)
+        key_content = File.read(api_key_path)
+        app_store_connect_api_key(
+          key_id: api_key_id,
+          issuer_id: api_key_issuer_id,
+          key_content: key_content,
+          is_key_content_base64: false
+        )
+      end
+    end
+    
+    UI.message("=== Listing Distribution Certificates ===")
+    begin
+      get_certificates(
+        team_id: "3G34999H3A",
+        readonly: true
+      )
+      UI.success("✓ Certificates found and listed")
+    rescue => e
+      UI.important("No certificates found or error: #{e.message}")
+      UI.important("")
+      UI.important("To view certificates in Apple Developer Portal:")
+      UI.important("https://developer.apple.com/account/resources/certificates/list")
+    end
+  end
+
   desc "Debug: Check environment variables (for troubleshooting)"
   lane :check_env do
     UI.message("=== Environment Variables Check ===")
@@ -86,7 +133,8 @@ platform :ios do
       # We've already authenticated with app_store_connect_api_key, so we don't need the path
       ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
       
-      # Check if certificates exist first by trying to get them in readonly mode
+      # Always try to get existing certificates first (readonly mode)
+      # This will download existing certificates if they exist, without creating new ones
       certificates_exist = false
       begin
         UI.message("Checking for existing distribution certificates...")
@@ -95,19 +143,46 @@ platform :ios do
           readonly: true
         )
         certificates_exist = true
-        UI.success("✓ Existing certificates found - reused them")
+        UI.success("✓ Existing certificates found and downloaded")
       rescue => e
-        UI.important("No existing certificates found - will create new one")
-        certificates_exist = false
+        error_message = e.message.to_s.downcase
+        # Check if error is specifically about no certificates existing
+        # vs other errors (network, auth, etc.)
+        if error_message.include?("no certificates") || 
+           error_message.include?("could not find") ||
+           error_message.include?("not found")
+          UI.important("No existing distribution certificates found in Apple Developer Portal")
+          UI.important("Error: #{e.message}")
+          certificates_exist = false
+        else
+          # Other error (auth, network, etc.) - don't try to create new certificate
+          UI.user_error!("Failed to check for existing certificates: #{e.message}")
+        end
       end
       
-      # If certificates don't exist, create a new one using cert
-      # If they exist, get_certificates already downloaded them, so we skip cert
-      unless certificates_exist
-        UI.message("Creating new distribution certificate...")
-        cert(
-          team_id: "3G34999H3A"
-        )
+      # Only create a new certificate if we're certain none exist
+      # This prevents hitting the certificate limit
+      if certificates_exist
+        UI.message("Using existing certificate - skipping creation")
+      else
+        UI.important("⚠️ WARNING: About to create a new distribution certificate")
+        UI.important("⚠️ Make sure you've removed old/unused certificates from Apple Developer Portal first")
+        UI.important("⚠️ Creating new certificate may fail if you've reached the limit")
+        
+        begin
+          cert(
+            team_id: "3G34999H3A"
+          )
+          UI.success("✓ New certificate created successfully")
+        rescue => e
+          if e.message.include?("maximum number") || e.message.include?("reached the maximum")
+            UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
+                          "https://developer.apple.com/account/resources/certificates/list\n\n" +
+                          "Then retry the workflow.")
+          else
+            raise
+          end
+        end
       end
       
       sigh(
@@ -130,7 +205,8 @@ platform :ios do
       # Set password for fastlane
       ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
       
-      # Check if certificates exist first (with username/password auth)
+      # Always try to get existing certificates first (readonly mode)
+      # This will download existing certificates if they exist, without creating new ones
       certificates_exist = false
       begin
         UI.message("Checking for existing distribution certificates...")
@@ -140,20 +216,47 @@ platform :ios do
           readonly: true
         )
         certificates_exist = true
-        UI.success("✓ Existing certificates found - reused them")
+        UI.success("✓ Existing certificates found and downloaded")
       rescue => e
-        certificates_exist = false
-        UI.important("No existing certificates found - will create new one")
+        error_message = e.message.to_s.downcase
+        # Check if error is specifically about no certificates existing
+        # vs other errors (network, auth, etc.)
+        if error_message.include?("no certificates") || 
+           error_message.include?("could not find") ||
+           error_message.include?("not found")
+          UI.important("No existing distribution certificates found in Apple Developer Portal")
+          UI.important("Error: #{e.message}")
+          certificates_exist = false
+        else
+          # Other error (auth, network, etc.) - don't try to create new certificate
+          UI.user_error!("Failed to check for existing certificates: #{e.message}")
+        end
       end
       
-      # If certificates don't exist, create a new one using cert
-      # If they exist, get_certificates already downloaded them, so we skip cert
-      unless certificates_exist
-        UI.message("Creating new distribution certificate...")
-        cert(
-          username: ENV["FASTLANE_USER"],
-          team_id: "3G34999H3A"
-        )
+      # Only create a new certificate if we're certain none exist
+      # This prevents hitting the certificate limit
+      if certificates_exist
+        UI.message("Using existing certificate - skipping creation")
+      else
+        UI.important("⚠️ WARNING: About to create a new distribution certificate")
+        UI.important("⚠️ Make sure you've removed old/unused certificates from Apple Developer Portal first")
+        UI.important("⚠️ Creating new certificate may fail if you've reached the limit")
+        
+        begin
+          cert(
+            username: ENV["FASTLANE_USER"],
+            team_id: "3G34999H3A"
+          )
+          UI.success("✓ New certificate created successfully")
+        rescue => e
+          if e.message.include?("maximum number") || e.message.include?("reached the maximum")
+            UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
+                          "https://developer.apple.com/account/resources/certificates/list\n\n" +
+                          "Then retry the workflow.")
+          else
+            raise
+          end
+        end
       end
       
       sigh(
