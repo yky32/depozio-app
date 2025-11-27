@@ -106,6 +106,20 @@ jobs:
           
           cd ios
           
+          # Debug: Verify environment variables are set (without showing values)
+          echo "Checking environment variables..."
+          if [ -n "$FASTLANE_USER" ]; then
+            echo "✓ FASTLANE_USER is set"
+          else
+            echo "✗ FASTLANE_USER is NOT set"
+          fi
+          
+          if [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]; then
+            echo "✓ FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is set"
+          else
+            echo "✗ FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is NOT set"
+          fi
+          
           # Use fastlane to get certificates and provisioning profiles
           # cert and sigh will install them in the default locations
           if [ -n "$FASTLANE_USER" ] && [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]; then
