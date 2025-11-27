@@ -46,6 +46,7 @@ app.*.map.json
 
 # Fastlane
 ios/fastlane/.env
+ios/fastlane/env.default
 ios/fastlane/report.xml
 ios/fastlane/Preview.html
 ios/fastlane/screenshots/**/*.png
