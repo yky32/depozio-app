@@ -31,22 +31,42 @@ platform :ios do
     team_id = ENV["TEAM_ID"] || "3G34999H3A"
     
     # Update export_options.plist with the correct team ID
-    export_options_path = File.expand_path('../export_options.plist', __dir__)
-    if File.exist?(export_options_path)
-      # Read and update team ID in plist
+    export_options_path = File.expand_path('../../export_options.plist', __dir__)
+    
+    # Create export_options.plist if it doesn't exist
+    unless File.exist?(export_options_path)
+      FileUtils.mkdir_p(File.dirname(export_options_path))
+      File.write(export_options_path, <<~PLIST
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+          <key>method</key>
+          <string>app-store</string>
+          <key>signingStyle</key>
+          <string>automatic</string>
+          <key>teamID</key>
+          <string>#{team_id}</string>
+        </dict>
+        </plist>
+      PLIST
+      )
+    else
+      # Read and update team ID in existing plist
       content = File.read(export_options_path)
       content.gsub!(/<string>3G34999H3A<\/string>/, "<string>#{team_id}</string>")
       File.write(export_options_path, content)
     end
     
     # Build IPA using Flutter (this handles code signing automatically)
-    sh("cd .. && flutter build ipa --release --export-options-plist=#{export_options_path}")
+    # Use absolute path for export_options
+    sh("cd ../.. && flutter build ipa --release --export-options-plist=#{export_options_path}")
     
-    # Find the generated IPA
-    ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
+    # Find the generated IPA (Flutter puts it in build/ios/ipa/)
+    ipa_path = Dir.glob("../../build/ios/ipa/*.ipa").first
     
     if ipa_path.nil? || !File.exist?(ipa_path)
-      UI.user_error!("Could not find IPA file. Searched in: ../build/ios/ipa/")
+      UI.user_error!("Could not find IPA file. Searched in: ../../build/ios/ipa/. Build may have failed.")
     end
     
     # Copy to build directory for consistency
