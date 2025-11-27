@@ -28,36 +28,25 @@ platform :ios do
 
     team_id = ENV["TEAM_ID"] || "3G34999H3A"
     
-    # Use Match to sync certificates and provisioning profiles (recommended for CI/CD)
-    match_success = false
-    if ENV["MATCH_GIT_URL"]
+    # Try to use Match if configured (optional)
+    # Match requires MATCH_GIT_URL or MATCH_GIT_BASIC_AUTHORIZATION to be set
+    if ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_BASIC_AUTHORIZATION"]
       UI.message("Syncing certificates and provisioning profiles with Match...")
       begin
         match(
           type: "appstore",
           app_identifier: "com.depozio",
-          readonly: true, # In CI/CD, only read existing certificates/profiles
+          readonly: true,
           api_key: api_key
         )
-        match_success = true
-        UI.success("✓ Match sync successful - certificates and profiles ready")
+        UI.success("Match sync successful")
       rescue => e
-        UI.important("⚠ Match sync failed: #{e.message}")
-        UI.important("Run 'fastlane match appstore' locally first to initialize Match")
-        UI.important("See MATCH_SETUP.md for detailed instructions")
+        UI.important("Match sync failed: #{e.message}")
+        UI.important("Continuing with automatic signing...")
       end
     else
-      UI.important("⚠ Match not configured")
-      UI.important("For reliable CI/CD builds, set up Match:")
-      UI.important("1. Create a private git repo for certificates")
-      UI.important("2. Run 'fastlane match appstore' locally")
-      UI.important("3. Add MATCH_GIT_URL to GitHub Secrets")
-      UI.important("See MATCH_SETUP.md for details")
-    end
-    
-    # If Match failed, try to continue with automatic signing (may not work in CI/CD)
-    unless match_success
-      UI.important("Attempting build with automatic signing (may fail in CI/CD)...")
+      UI.important("Match not configured. Using automatic signing (may require manual setup).")
+      UI.important("For reliable CI/CD, consider setting up Match: https://docs.fastlane.tools/actions/match/")
     end
     
     # Create export_options.plist with App Store signing
@@ -101,7 +90,7 @@ platform :ios do
       clean: true,
       silent: false,
       include_bitcode: false,
-      xcargs: match_success ? "CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id}" : "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id}" # Use Match certificates if available, otherwise try automatic
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id}" # Allow Xcode to create provisioning profiles automatically
     )
 
     # Upload to TestFlight
