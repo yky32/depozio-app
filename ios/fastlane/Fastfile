@@ -26,11 +26,33 @@ platform :ios do
       )
     end
 
-    # Use xcodebuild to archive and export with App Store signing
+    # Build archive with Flutter (no signing), then export with Fastlane (App Store signing)
     team_id = ENV["TEAM_ID"] || "3G34999H3A"
+    project_root = File.expand_path('../..', __dir__)
+    
+    # Step 1: Build archive using Flutter without code signing
+    UI.message("Building archive with Flutter (no signing)...")
+    sh("cd #{project_root} && flutter build ios --release --no-codesign")
+    
+    # Step 2: Find the archive
+    archive_path = Dir.glob("#{project_root}/build/ios/archive/Runner.xcarchive").first
+    
+    if archive_path.nil? || !File.exist?(archive_path)
+      # Try alternative location
+      archive_path = Dir.glob("#{project_root}/build/ios/*.xcarchive").first
+    end
+    
+    if archive_path.nil? || !File.exist?(archive_path)
+      UI.user_error!("Could not find archive file. Build may have failed. Check Flutter build logs above.")
+    end
+    
+    UI.message("Found archive at: #{archive_path}")
+    
+    # Step 3: Export IPA with App Store signing using Fastlane
+    UI.message("Exporting IPA with App Store signing...")
+    export_options_path = File.expand_path('../export_options.plist', __dir__)
     
     # Create export_options.plist with App Store signing
-    export_options_path = File.expand_path('../export_options.plist', __dir__)
     File.write(export_options_path, <<~PLIST
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -53,24 +75,24 @@ platform :ios do
     PLIST
     )
     
-    # Use Fastlane's build_app which handles archive + export in one step
-    UI.message("Building and exporting IPA with App Store signing...")
-    build_app(
-      scheme: "Runner",
-      workspace: "Runner.xcworkspace",
-      export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        signingStyle: "automatic",
-        teamID: team_id
-      },
-      output_directory: "./build",
-      output_name: "Depozio.ipa",
-      clean: true,
-      silent: false,
-      include_bitcode: false,
-      xcargs: "-allowProvisioningUpdates" # Allow Xcode to create provisioning profiles
-    )
+    # Export the IPA using xcodebuild with proper signing
+    export_path = "./build"
+    FileUtils.mkdir_p(export_path)
+    
+    sh("xcodebuild -exportArchive -archivePath '#{archive_path}' -exportOptionsPlist '#{export_options_path}' -exportPath '#{export_path}' -allowProvisioningUpdates")
+    
+    # Find the exported IPA
+    ipa_path = Dir.glob("#{export_path}/*.ipa").first
+    
+    if ipa_path.nil? || !File.exist?(ipa_path)
+      UI.user_error!("Could not find exported IPA file. Export may have failed.")
+    end
+    
+    # Rename to expected name
+    final_ipa_path = "#{export_path}/Depozio.ipa"
+    FileUtils.mv(ipa_path, final_ipa_path) if ipa_path != final_ipa_path
+    
+    UI.success("IPA created successfully at #{final_ipa_path}")
 
     # Upload to TestFlight
     upload_to_testflight(
