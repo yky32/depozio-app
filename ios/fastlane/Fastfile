@@ -24,7 +24,7 @@ platform :ios do
     ENV.delete("APP_STORE_CONNECT_API_KEY")
     
     # Verify credentials are available
-    username = ENV["FASTLANE_USER"]
+    username = wayneyu.dev@gmail.com
     app_specific_password = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
     
     unless username
