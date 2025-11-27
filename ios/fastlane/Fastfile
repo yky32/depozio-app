@@ -295,10 +295,13 @@ platform :ios do
     # Build the app using gym (build_app)
     # Use xcargs to pass xcodebuild arguments for archive phase
     # Use PROVISIONING_PROFILE_SPECIFIER with profile name (more reliable than UUID)
+    # Quote the profile name if it contains spaces
+    profile_specifier = profile_name.include?(" ") ? "\"#{profile_name}\"" : profile_name
+    
     xcargs_array = [
       "CODE_SIGN_STYLE=Manual",
-      "CODE_SIGN_IDENTITY=iPhone Distribution",
-      "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
+      "CODE_SIGN_IDENTITY=\"iPhone Distribution\"",
+      "PROVISIONING_PROFILE_SPECIFIER=#{profile_specifier}"
     ]
     
     UI.message("Using provisioning profile name: #{profile_name}")
@@ -307,6 +310,7 @@ platform :ios do
     end
     
     # Convert array to string for xcargs (space-separated)
+    # Note: xcargs expects a string, and xcodebuild will parse the arguments
     xcargs_string = xcargs_array.join(" ")
     
     # export_options handles code signing during export phase
