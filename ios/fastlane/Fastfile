@@ -1,93 +1,76 @@
-# Fastfile for iOS deployment
-# This file contains the lanes for building and deploying your app
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
 
 default_platform(:ios)
 
 platform :ios do
-  desc "Build and upload to TestFlight"
-  lane :beta do
-    # Increment build number
-    increment_build_number(
-      build_number: ENV["FLUTTER_BUILD_NUMBER"] || number_of_commits
-    )
-
-    # Sync certificates and provisioning profiles using Match
-    if ENV["MATCH_GIT_URL"]
-      match(
-        type: "appstore",
-        app_identifier: "com.depozio",
-        readonly: true,
-        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
+  desc "Deploy to App Store"
+  lane :deploy_app_store do
+    # Find the IPA file
+    ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
+    
+    if ipa_path.nil?
+      UI.user_error!("IPA file not found. Make sure Flutter build completed successfully.")
     end
-
-    # Build the app
-    build_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      configuration: "Release",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "Depozio.ipa",
-      silent: false,
-      suppress_xcode_output: false,
-      xcargs: "-allowProvisioningUpdates"
-    )
-
-    # Upload to TestFlight
-    upload_to_testflight(
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
-      skip_waiting_for_build_processing: false,
-      skip_submission: true,
-      distribute_external: false,
-      notify_external_testers: false
-    )
-
-    # Clean up
-    clean_build_artifacts
-  end
-
-  desc "Build and upload to App Store (for production release)"
-  lane :release do
-    # Increment build number
-    increment_build_number(
-      build_number: ENV["FLUTTER_BUILD_NUMBER"] || number_of_commits
-    )
-
-    # Sync certificates and provisioning profiles using Match
-    if ENV["MATCH_GIT_URL"]
-      match(
-        type: "appstore",
-        app_identifier: "com.depozio",
-        readonly: true,
-        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
-    end
-
-    # Build the app
-    build_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      configuration: "Release",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "Depozio.ipa",
-      silent: false,
-      suppress_xcode_output: false,
-      xcargs: "-allowProvisioningUpdates"
-    )
-
+    
+    UI.message("Found IPA at: #{ipa_path}")
+    
     # Upload to App Store Connect
+    # Uses App Store Connect API key if available, otherwise falls back to Apple ID
     upload_to_app_store(
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
-      skip_metadata: false,
+      ipa: ipa_path,
+      force: true,
+      skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false,
-      force: false
+      automatic_release: false
     )
-
-    # Clean up
-    clean_build_artifacts
+    
+    UI.success("Successfully uploaded to App Store Connect!")
+  end
+  
+  desc "Deploy to App Store and submit for review"
+  lane :deploy_and_submit do
+    # Ensure we're on the main branch or a release tag
+    ensure_git_branch(branch: 'main')
+    
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj"
+    )
+    
+    # Find the IPA file
+    ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
+    
+    if ipa_path.nil?
+      UI.user_error!("IPA file not found. Make sure Flutter build completed successfully.")
+    end
+    
+    UI.message("Found IPA at: #{ipa_path}")
+    
+    # Upload to App Store Connect and submit for review
+    upload_to_app_store(
+      ipa: ipa_path,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: false
+    )
+    
+    UI.success("Successfully uploaded and submitted for review!")
   end
 end
 
