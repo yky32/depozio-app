@@ -170,8 +170,25 @@ platform :ios do
     # Download certificates first
     certificates
     
+    # Get the provisioning profile info from sigh
+    profile_path = lane_context[Fastlane::Actions::SharedValues::SIGH_PROFILE_PATH]
+    profile_name = lane_context[Fastlane::Actions::SharedValues::SIGH_NAME]
+    
+    unless profile_path && File.exist?(profile_path)
+      UI.user_error!("Provisioning profile not found. Run 'fastlane certificates' first.")
+    end
+    
+    UI.message("Using provisioning profile: #{profile_path}")
+    UI.message("Profile name: #{profile_name}")
+    
+    # Install the provisioning profile to the system
+    # This ensures Xcode can find it during the build
+    install_provisioning_profile(
+      path: profile_path
+    )
+    
     # Build the app using gym (build_app)
-    # gym automatically handles code signing with the certificates we downloaded
+    # The export_options will handle code signing during export
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -179,7 +196,14 @@ platform :ios do
       output_directory: "../build/ios/ipa",
       clean: true,
       include_bitcode: false,
-      include_symbols: true
+      include_symbols: true,
+      export_options: {
+        provisioningProfiles: {
+          "com.depozio" => profile_name || "com.depozio AppStore"
+        },
+        signingStyle: "manual",
+        method: "app-store"
+      }
     )
   end
 
