@@ -28,11 +28,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -40,25 +35,21 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-      - name: Cache Ruby gems
-        uses: actions/cache@v4
+      - name: Generate localization files
+        run: flutter gen-l10n
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: |
+          pod install --repo-update
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
         with:
-          path: |
-            ios/vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('ios/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -71,17 +62,6 @@ jobs:
         working-directory: ios
         run: |
           bundle install
-
-      - name: Get Flutter dependencies
-        run: flutter pub get
-
-      - name: Generate localization files
-        run: flutter gen-l10n
-
-      - name: Install CocoaPods dependencies
-        working-directory: ios
-        run: |
-          pod install --repo-update
 
       - name: Decode App Store Connect API Key
         env:
