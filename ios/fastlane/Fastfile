@@ -35,12 +35,18 @@ platform :ios do
       UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts")
     end
     
+    # Set both FASTLANE_PASSWORD and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+    # Some fastlane actions look for FASTLANE_PASSWORD
+    ENV["FASTLANE_PASSWORD"] = app_specific_password
+    ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = app_specific_password
+    
     UI.message("Using username: #{username}")
     UI.message("App-specific password provided: Yes")
+    UI.message("Environment variables set for authentication")
     
     # Get App Store distribution certificate
     # cert automatically installs it in the default keychain
-    # Use app-specific password if available, otherwise regular password
+    # It will use FASTLANE_PASSWORD or FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD from ENV
     cert(
       username: username,
       team_id: "3G34999H3A"
