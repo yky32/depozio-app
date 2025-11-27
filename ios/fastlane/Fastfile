@@ -63,15 +63,29 @@ platform :ios do
         UI.user_error!("Invalid API key file format. First line should be '-----BEGIN PRIVATE KEY-----', got: #{first_line}")
       end
       
-      # Use explicit api_key_path parameter - don't rely on environment variable auto-detection
-      # which might try to parse the file as JSON
+      # Read the key content from file
+      key_content = File.read(api_key_path)
+      
+      # Use api_key hash format instead of api_key_path to avoid JSON parsing issues
+      # Fastlane expects key_content as a string, not a file path
+      unless api_key_issuer_id
+        UI.user_error!("APP_STORE_CONNECT_ISSUER_ID must be set when using API key")
+      end
+      
+      api_key_hash = {
+        key_id: api_key_id,
+        issuer_id: api_key_issuer_id,
+        key_content: key_content,
+        is_key_content_base64: false
+      }
+      
       cert(
-        api_key_path: api_key_path,
+        api_key: api_key_hash,
         team_id: "3G34999H3A"
       )
       
       sigh(
-        api_key_path: api_key_path,
+        api_key: api_key_hash,
         app_identifier: "com.depozio",
         team_id: "3G34999H3A",
         force: true
@@ -134,12 +148,45 @@ platform :ios do
     
     UI.message("Uploading: #{ipa_path}")
     
-    upload_to_app_store(
+    # Prepare API key if available (same format as certificates lane)
+    upload_options = {
       ipa: ipa_path,
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false
-    )
+    }
+    
+    # Use API key if available
+    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
+    
+    if api_key_id && api_key_issuer_id
+      possible_paths = [
+        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
+        "~/private_keys/AuthKey_#{api_key_id}.p8"
+      ].compact
+      
+      api_key_path = nil
+      possible_paths.each do |path|
+        expanded_path = File.expand_path(path)
+        if File.exist?(expanded_path)
+          api_key_path = expanded_path
+          break
+        end
+      end
+      
+      if api_key_path
+        key_content = File.read(api_key_path)
+        upload_options[:api_key] = {
+          key_id: api_key_id,
+          issuer_id: api_key_issuer_id,
+          key_content: key_content,
+          is_key_content_base64: false
+        }
+      end
+    end
+    
+    upload_to_app_store(upload_options)
     
     UI.success("Upload complete!")
   end
