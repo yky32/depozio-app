@@ -126,7 +126,15 @@ jobs:
           fi
           cd ..
 
-      - name: Build iOS app
+      - name: Build Flutter framework
+        env:
+          VERSION: ${{ env.VERSION }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+        run: |
+          # Build Flutter framework first (needed for Xcode build)
+          flutter build ios --release --no-codesign
+
+      - name: Build iOS app with fastlane
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
@@ -140,14 +148,11 @@ jobs:
           # Set version and build number in Xcode project
           bundle exec fastlane run increment_build_number build_number:$BUILD_NUMBER xcodeproj:Runner.xcodeproj || true
           bundle exec fastlane run increment_version_number version_number:$VERSION xcodeproj:Runner.xcodeproj || true
-          cd ..
           
-          # Build Flutter app - it should use the provisioning profile from setup_certificates
-          flutter build ipa \
-            --release \
-            --build-name=${{ env.VERSION }} \
-            --build-number=${{ env.BUILD_NUMBER }} \
-            --export-method=app-store
+          # Build using fastlane gym which handles code signing properly
+          # This will setup certificates, build, and export the IPA
+          bundle exec fastlane build_with_gym
+          cd ..
 
       - name: Deploy to App Store
         env:

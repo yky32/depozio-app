@@ -124,6 +124,46 @@ platform :ios do
     export_options_path
   end
 
+  desc "Build iOS app using fastlane gym"
+  lane :build_with_gym do
+    # Setup certificates first
+    profile_path = setup_certificates
+    
+    # Extract provisioning profile info
+    require 'plist'
+    profile_data = Plist.parse_xml(profile_path)
+    profile_uuid = profile_data["UUID"]
+    
+    # Get the profile path in the correct location
+    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+    profile_filename = "#{profile_uuid}.mobileprovision"
+    expected_profile_path = File.join(profiles_dir, profile_filename)
+    
+    # Build using gym which handles code signing properly
+    # gym will use the certificates and provisioning profiles we set up
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      output_directory: "../build/ios/ipa",
+      output_name: "Runner",
+      clean: true,
+      include_bitcode: false,
+      include_symbols: true,
+      codesigning_identity: "Apple Distribution",
+      export_options: {
+        method: "app-store",
+        teamID: "3G34999H3A",
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.depozio" => profile_uuid
+        }
+      }
+    )
+    
+    UI.success("Build completed successfully!")
+  end
+
   desc "Deploy to App Store"
   lane :deploy_app_store do
     # Find the IPA file
