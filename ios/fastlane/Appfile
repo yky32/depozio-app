@@ -9,5 +9,5 @@ team_id(ENV["TEAM_ID"] || "3G34999H3A")
 # Set via environment variables:
 # - APP_STORE_CONNECT_API_KEY_ID
 # - APP_STORE_CONNECT_ISSUER_ID
-# - APP_STORE_CONNECT_API_KEY_PATH
+# - APP_STORE_CONNECT_API_KEY (p8 file)
 
