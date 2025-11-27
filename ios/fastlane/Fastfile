@@ -24,15 +24,20 @@ platform :ios do
     ENV.delete("APP_STORE_CONNECT_API_KEY")
     
     # Verify credentials are available
-    username = wayneyu.dev@gmail.com
+    username = ENV["FASTLANE_USER"]
     app_specific_password = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
     
+    # Debug: Check what we received (without showing sensitive data)
+    UI.message("Checking environment variables...")
+    UI.message("FASTLANE_USER is #{username ? 'SET' : 'NOT SET'}")
+    UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is #{app_specific_password ? 'SET' : 'NOT SET'}")
+    
     unless username
-      UI.user_error!("FASTLANE_USER must be set")
+      UI.user_error!("FASTLANE_USER must be set. Check your GitHub secrets.")
     end
     
     unless app_specific_password
-      UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts")
+      UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts. Check your GitHub secrets.")
     end
     
     # Set both FASTLANE_PASSWORD and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
