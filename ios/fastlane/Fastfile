@@ -66,26 +66,25 @@ platform :ios do
       # Read the key content from file
       key_content = File.read(api_key_path)
       
-      # Use api_key hash format instead of api_key_path to avoid JSON parsing issues
-      # Fastlane expects key_content as a string, not a file path
       unless api_key_issuer_id
         UI.user_error!("APP_STORE_CONNECT_ISSUER_ID must be set when using API key")
       end
       
-      api_key_hash = {
+      # Use app_store_connect_api_key action to authenticate first
+      # This sets up the API key for subsequent actions
+      app_store_connect_api_key(
         key_id: api_key_id,
         issuer_id: api_key_issuer_id,
         key_content: key_content,
         is_key_content_base64: false
-      }
+      )
       
+      # Now cert and sigh will use the authenticated session
       cert(
-        api_key: api_key_hash,
         team_id: "3G34999H3A"
       )
       
       sigh(
-        api_key: api_key_hash,
         app_identifier: "com.depozio",
         team_id: "3G34999H3A",
         force: true
@@ -148,15 +147,7 @@ platform :ios do
     
     UI.message("Uploading: #{ipa_path}")
     
-    # Prepare API key if available (same format as certificates lane)
-    upload_options = {
-      ipa: ipa_path,
-      skip_metadata: true,
-      skip_screenshots: true,
-      submit_for_review: false
-    }
-    
-    # Use API key if available
+    # Use API key if available - authenticate first
     api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
     api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
     
@@ -177,16 +168,23 @@ platform :ios do
       
       if api_key_path
         key_content = File.read(api_key_path)
-        upload_options[:api_key] = {
+        # Authenticate with API key first
+        app_store_connect_api_key(
           key_id: api_key_id,
           issuer_id: api_key_issuer_id,
           key_content: key_content,
           is_key_content_base64: false
-        }
+        )
       end
     end
     
-    upload_to_app_store(upload_options)
+    # Upload will use the authenticated session
+    upload_to_app_store(
+      ipa: ipa_path,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false
+    )
     
     UI.success("Upload complete!")
   end
