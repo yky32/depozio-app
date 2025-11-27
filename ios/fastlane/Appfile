@@ -2,7 +2,7 @@
 # Documentation: https://docs.fastlane.tools/advanced/#appfile
 
 app_identifier("com.depozio") # The bundle identifier of your app
-apple_id(ENV["wayneyu.dev@gmail.com"]) # Your Apple email address
+apple_id(ENV["FASTLANE_USER"]) # Your Apple email address
 
 # Uncomment the following line if you want to specify a team
 team_id("3G34999H3A")
