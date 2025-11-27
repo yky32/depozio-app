@@ -91,6 +91,26 @@ jobs:
             echo "App Store Connect API key not provided, will use Apple ID authentication"
           fi
 
+      - name: Debug Environment Variables
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
+        run: |
+          cd ios
+          echo "=== Checking GitHub Secrets ==="
+          echo "FASTLANE_USER: ${FASTLANE_USER:+SET}"
+          echo "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:+SET}"
+          echo "APP_STORE_CONNECT_API_KEY_ID: ${APP_STORE_CONNECT_API_KEY_ID:+SET}"
+          echo "APP_STORE_CONNECT_ISSUER_ID: ${APP_STORE_CONNECT_ISSUER_ID:+SET}"
+          echo "APP_STORE_CONNECT_API_KEY_PATH: ${APP_STORE_CONNECT_API_KEY_PATH:+SET}"
+          echo ""
+          echo "=== Fastlane Environment Check ==="
+          bundle exec fastlane check_env
+          cd ..
+
       - name: Setup Code Signing
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
@@ -105,20 +125,6 @@ jobs:
           unset APP_STORE_CONNECT_API_KEY_PATH || true
           
           cd ios
-          
-          # Debug: Verify environment variables are set (without showing values)
-          echo "Checking environment variables..."
-          if [ -n "$FASTLANE_USER" ]; then
-            echo "✓ FASTLANE_USER is set"
-          else
-            echo "✗ FASTLANE_USER is NOT set"
-          fi
-          
-          if [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]; then
-            echo "✓ FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is set"
-          else
-            echo "✗ FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is NOT set"
-          fi
           
           # Use fastlane to get certificates and provisioning profiles
           bundle exec fastlane certificates

@@ -4,6 +4,26 @@
 default_platform(:ios)
 
 platform :ios do
+  desc "Debug: Check environment variables (for troubleshooting)"
+  lane :check_env do
+    UI.message("=== Environment Variables Check ===")
+    UI.message("FASTLANE_USER: #{ENV['FASTLANE_USER'] ? 'SET (' + ENV['FASTLANE_USER'] + ')' : 'NOT SET'}")
+    UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: #{ENV['FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD'] ? 'SET' : 'NOT SET'}")
+    UI.message("FASTLANE_PASSWORD: #{ENV['FASTLANE_PASSWORD'] ? 'SET' : 'NOT SET'}")
+    UI.message("APP_STORE_CONNECT_API_KEY_ID: #{ENV['APP_STORE_CONNECT_API_KEY_ID'] ? 'SET' : 'NOT SET'}")
+    UI.message("APP_STORE_CONNECT_ISSUER_ID: #{ENV['APP_STORE_CONNECT_ISSUER_ID'] ? 'SET' : 'NOT SET'}")
+    UI.message("APP_STORE_CONNECT_API_KEY_PATH: #{ENV['APP_STORE_CONNECT_API_KEY_PATH'] ? 'SET (' + ENV['APP_STORE_CONNECT_API_KEY_PATH'] + ')' : 'NOT SET'}")
+    
+    if ENV['APP_STORE_CONNECT_API_KEY_PATH']
+      key_exists = File.exist?(File.expand_path(ENV['APP_STORE_CONNECT_API_KEY_PATH']))
+      UI.message("API Key file exists: #{key_exists}")
+    end
+    
+    UI.message("Team ID: 3G34999H3A")
+    UI.message("App Identifier: com.depozio")
+    UI.message("================================")
+  end
+
   desc "Download certificates and provisioning profiles"
   lane :certificates do
     # Use App Store Connect API key if available, otherwise use username/password
@@ -48,13 +68,16 @@ platform :ios do
     # Download certificates first
     certificates
     
-    # Build the app
+    # Build the app using gym (build_app)
+    # gym automatically handles code signing with the certificates we downloaded
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
       output_directory: "../build/ios/ipa",
-      clean: true
+      clean: true,
+      include_bitcode: false,
+      include_symbols: true
     )
   end
 
