@@ -19,18 +19,31 @@ platform :ios do
   desc "Setup code signing certificates and provisioning profiles"
   lane :setup_certificates do
     # Get App Store distribution certificate
+    # cert automatically installs it in the default keychain
     cert(
       username: ENV["FASTLANE_USER"],
       team_id: "3G34999H3A"
     )
     
     # Get App Store provisioning profile
-    sigh(
+    # sigh automatically installs it in ~/Library/MobileDevice/Provisioning Profiles
+    profile_path = sigh(
       username: ENV["FASTLANE_USER"],
       app_identifier: "com.depozio",
       team_id: "3G34999H3A",
       force: true
     )
+    
+    # Update Xcode project to use automatic signing with team ID
+    # The provisioning profile will be automatically selected
+    update_code_signing_settings(
+      use_automatic_signing: true,
+      path: "Runner.xcodeproj",
+      team_id: "3G34999H3A",
+      bundle_identifier: "com.depozio"
+    )
+    
+    profile_path
   end
 
   desc "Deploy to App Store"
