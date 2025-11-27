@@ -1,251 +1,87 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+# Fastlane Configuration for iOS App Store Deployment
+# Documentation: https://docs.fastlane.tools
 
 default_platform(:ios)
 
 platform :ios do
-  desc "Setup code signing certificates and provisioning profiles"
-  lane :setup_certificates do
-    # Ensure we use username/password authentication for cert/sigh
-    # Unset API key environment variables to avoid conflicts
-    ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
-    ENV.delete("APP_STORE_CONNECT_API_KEY")
-    
-    # Verify credentials are available
-    username = ENV["FASTLANE_USER"]
-    app_specific_password = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
-    
-    # Debug: Check what we received (without showing sensitive data)
-    UI.message("Checking environment variables...")
-    UI.message("FASTLANE_USER is #{username ? 'SET' : 'NOT SET'}")
-    UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD is #{app_specific_password ? 'SET' : 'NOT SET'}")
-    
-    unless username
-      UI.user_error!("FASTLANE_USER must be set. Check your GitHub secrets.")
+  desc "Download certificates and provisioning profiles"
+  lane :certificates do
+    # Use App Store Connect API key if available, otherwise use username/password
+    if ENV["APP_STORE_CONNECT_API_KEY_PATH"] && File.exist?(File.expand_path(ENV["APP_STORE_CONNECT_API_KEY_PATH"]))
+      UI.message("Using App Store Connect API key")
+      
+      cert(
+        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+        team_id: "3G34999H3A"
+      )
+      
+      sigh(
+        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+        app_identifier: "com.depozio",
+        team_id: "3G34999H3A",
+        force: true
+      )
+    else
+      UI.message("Using Apple ID authentication")
+      
+      # Ensure password is set
+      unless ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+        ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] if ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+      end
+      
+      cert(
+        username: ENV["FASTLANE_USER"],
+        team_id: "3G34999H3A"
+      )
+      
+      sigh(
+        username: ENV["FASTLANE_USER"],
+        app_identifier: "com.depozio",
+        team_id: "3G34999H3A",
+        force: true
+      )
     end
-    
-    unless app_specific_password
-      UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts. Check your GitHub secrets.")
-    end
-    
-    # Set both FASTLANE_PASSWORD and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
-    # Some fastlane actions look for FASTLANE_PASSWORD
-    ENV["FASTLANE_PASSWORD"] = app_specific_password
-    ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = app_specific_password
-    
-    UI.message("Using username: #{username}")
-    UI.message("App-specific password provided: Yes")
-    UI.message("Environment variables set for authentication")
-    
-    # Get App Store distribution certificate
-    # cert automatically installs it in the default keychain
-    # It will use FASTLANE_PASSWORD or FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD from ENV
-    cert(
-      username: username,
-      team_id: "3G34999H3A"
-    )
-    
-    # Get App Store provisioning profile
-    # sigh automatically installs it in ~/Library/MobileDevice/Provisioning Profiles
-    profile_path = sigh(
-      username: username,
-      app_identifier: "com.depozio",
-      team_id: "3G34999H3A",
-      force: true,
-      readonly: false
-    )
-    
-    # Extract provisioning profile UUID from the profile for reference
-    require 'plist'
-    profile_data = Plist.parse_xml(profile_path)
-    profile_uuid = profile_data["UUID"]
-    profile_name = profile_data["Name"]
-    
-    UI.message("Provisioning profile UUID: #{profile_uuid}")
-    UI.message("Provisioning profile Name: #{profile_name}")
-    UI.message("Provisioning profile path: #{profile_path}")
-    
-    # Verify the profile is installed in the correct location
-    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
-    profile_filename = "#{profile_uuid}.mobileprovision"
-    expected_profile_path = File.join(profiles_dir, profile_filename)
-    
-    unless File.exist?(expected_profile_path)
-      UI.important("Provisioning profile not found at expected location: #{expected_profile_path}")
-      UI.important("Copying profile to correct location...")
-      FileUtils.mkdir_p(profiles_dir)
-      FileUtils.cp(profile_path, expected_profile_path)
-    end
-    
-    UI.message("Provisioning profile verified at: #{expected_profile_path}")
-    
-    # Update Xcode project to use manual signing with the specific provisioning profile
-    update_code_signing_settings(
-      use_automatic_signing: false,
-      path: "Runner.xcodeproj",
-      team_id: "3G34999H3A",
-      code_sign_identity: "Apple Distribution",
-      bundle_identifier: "com.depozio"
-    )
-    
-    # Update the provisioning profile in the project
-    update_project_provisioning(
-      xcodeproj: "Runner.xcodeproj",
-      profile: expected_profile_path,
-      target_filter: "Runner",
-      code_signing_identity: "Apple Distribution"
-    )
-    
-    UI.message("Updated Xcode project to use provisioning profile: #{profile_uuid}")
-    UI.message("Profile path: #{expected_profile_path}")
-    
-    # Store profile UUID in a file for use in build step
-    profile_uuid_dir = "../build/ios"
-    Dir.mkdir(profile_uuid_dir) unless Dir.exist?(profile_uuid_dir)
-    File.write("#{profile_uuid_dir}/profile_uuid.txt", profile_uuid)
-    
-    UI.success("Provisioning profile setup complete: #{profile_uuid}")
-    profile_path
   end
 
-  desc "Create export options with provisioning profile"
-  lane :create_export_options do
-    # Read profile UUID from file
-    profile_uuid_file = "../build/ios/profile_uuid.txt"
-    unless File.exist?(profile_uuid_file)
-      UI.user_error!("Provisioning profile UUID file not found. Run setup_certificates first.")
-    end
+  desc "Build and export IPA"
+  lane :build do
+    # Download certificates first
+    certificates
     
-    profile_uuid = File.read(profile_uuid_file).strip
-    
-    # Create export options plist with the provisioning profile
-    export_options = {
-      method: "app-store",
-      teamID: "3G34999H3A",
-      signingStyle: "manual",
-      provisioningProfiles: {
-        "com.depozio" => profile_uuid
-      }
-    }
-    
-    # Write export options to file
-    require 'plist'
-    export_options_path = "../build/ios/ExportOptions.plist"
-    File.write(export_options_path, export_options.to_plist)
-    
-    UI.message("Export options created at: #{export_options_path}")
-    UI.message("Using provisioning profile: #{profile_uuid}")
-    
-    export_options_path
-  end
-
-  desc "Build iOS app using fastlane gym"
-  lane :build_with_gym do
-    # Setup certificates first
-    profile_path = setup_certificates
-    
-    # Extract provisioning profile info
-    require 'plist'
-    profile_data = Plist.parse_xml(profile_path)
-    profile_uuid = profile_data["UUID"]
-    
-    # Get the profile path in the correct location
-    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
-    profile_filename = "#{profile_uuid}.mobileprovision"
-    expected_profile_path = File.join(profiles_dir, profile_filename)
-    
-    # Build using gym which handles code signing properly
-    # gym will use the certificates and provisioning profiles we set up
+    # Build the app
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
       output_directory: "../build/ios/ipa",
-      output_name: "Runner",
-      clean: true,
-      include_bitcode: false,
-      include_symbols: true,
-      codesigning_identity: "Apple Distribution",
-      export_options: {
-        method: "app-store",
-        teamID: "3G34999H3A",
-        signingStyle: "manual",
-        provisioningProfiles: {
-          "com.depozio" => profile_uuid
-        }
-      }
+      clean: true
     )
-    
-    UI.success("Build completed successfully!")
   end
 
-  desc "Deploy to App Store"
-  lane :deploy_app_store do
-    # Find the IPA file
+  desc "Upload to App Store Connect"
+  lane :upload do
+    # Find the IPA
     ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
     
-    if ipa_path.nil?
-      UI.user_error!("IPA file not found. Make sure Flutter build completed successfully.")
+    unless ipa_path
+      UI.user_error!("IPA not found. Run 'fastlane build' first.")
     end
     
-    UI.message("Found IPA at: #{ipa_path}")
+    UI.message("Uploading: #{ipa_path}")
     
-    # Upload to App Store Connect
-    # Uses App Store Connect API key if available, otherwise falls back to Apple ID
     upload_to_app_store(
       ipa: ipa_path,
-      force: true,
       skip_metadata: true,
       skip_screenshots: true,
-      submit_for_review: false,
-      automatic_release: false
+      submit_for_review: false
     )
     
-    UI.success("Successfully uploaded to App Store Connect!")
+    UI.success("Upload complete!")
   end
-  
-  desc "Deploy to App Store and submit for review"
-  lane :deploy_and_submit do
-    # Ensure we're on the main branch or a release tag
-    ensure_git_branch(branch: 'main')
-    
-    # Increment build number
-    increment_build_number(
-      xcodeproj: "Runner.xcodeproj"
-    )
-    
-    # Find the IPA file
-    ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
-    
-    if ipa_path.nil?
-      UI.user_error!("IPA file not found. Make sure Flutter build completed successfully.")
-    end
-    
-    UI.message("Found IPA at: #{ipa_path}")
-    
-    # Upload to App Store Connect and submit for review
-    upload_to_app_store(
-      ipa: ipa_path,
-      force: true,
-      skip_metadata: true,
-      skip_screenshots: true,
-      submit_for_review: true,
-      automatic_release: false
-    )
-    
-    UI.success("Successfully uploaded and submitted for review!")
+
+  desc "Deploy to App Store (build + upload)"
+  lane :deploy do
+    build
+    upload
   end
 end
-

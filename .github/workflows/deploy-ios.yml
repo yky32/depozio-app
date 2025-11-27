@@ -121,59 +121,34 @@ jobs:
           fi
           
           # Use fastlane to get certificates and provisioning profiles
-          # cert and sigh will install them in the default locations
-          if [ -n "$FASTLANE_USER" ] && [ -n "$FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD" ]; then
-            PROFILE_PATH=$(bundle exec fastlane setup_certificates 2>&1 | grep -i "profile.*path" | tail -1 || echo "")
-            echo "Profile setup output: $PROFILE_PATH"
-            
-            # Verify provisioning profiles are installed
-            echo "Checking provisioning profiles..."
-            if [ -d ~/Library/MobileDevice/Provisioning\ Profiles/ ]; then
-              ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ | head -5
-              echo "Provisioning profiles directory exists"
-            else
-              echo "Warning: No provisioning profiles directory found"
-            fi
-          else
-            echo "Error: FASTLANE_USER and FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD are required for code signing."
-            echo "FASTLANE_USER: ${FASTLANE_USER:+SET}"
-            echo "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:+SET}"
-            exit 1
-          fi
+          bundle exec fastlane certificates
           cd ..
 
-      - name: Build Flutter framework
-        env:
-          VERSION: ${{ env.VERSION }}
-          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
-        run: |
-          # Build Flutter framework first (needed for Xcode build)
-          flutter build ios --release --no-codesign
-
-      - name: Build iOS app with fastlane
+      - name: Build iOS app
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
           VERSION: ${{ env.VERSION }}
           BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
         run: |
           cd ios
           
-          # Set version and build number in Xcode project
+          # Set version and build number
           bundle exec fastlane run increment_build_number build_number:$BUILD_NUMBER xcodeproj:Runner.xcodeproj || true
           bundle exec fastlane run increment_version_number version_number:$VERSION xcodeproj:Runner.xcodeproj || true
           
-          # Build using fastlane gym which handles code signing properly
-          # This will setup certificates, build, and export the IPA
-          bundle exec fastlane build_with_gym
+          # Build using fastlane - it will handle certificates and code signing
+          bundle exec fastlane build
           cd ..
 
       - name: Deploy to App Store
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
         run: |
@@ -181,7 +156,7 @@ jobs:
             export APP_STORE_CONNECT_API_KEY_PATH="$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
           fi
           cd ios
-          bundle exec fastlane deploy_app_store
+          bundle exec fastlane upload
           cd ..
 
       - name: Upload build artifacts
