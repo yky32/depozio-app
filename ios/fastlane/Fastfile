@@ -56,6 +56,14 @@ platform :ios do
     # Archive with development signing (Xcode can do this automatically), then export with App Store signing
     UI.message("Archiving app with automatic signing...")
     
+    # Get absolute paths (we're in ios/fastlane, so go up one level to ios/)
+    ios_dir = File.expand_path('..', __dir__)
+    workspace_path = File.expand_path('Runner.xcworkspace', ios_dir)
+    
+    unless File.exist?(workspace_path)
+      UI.user_error!("Workspace not found at: #{workspace_path}")
+    end
+    
     # Create archive directory
     archive_dir = "#{Dir.home}/Library/Developer/Xcode/Archives/#{Time.now.strftime('%Y-%m-%d')}"
     FileUtils.mkdir_p(archive_dir)
@@ -63,7 +71,7 @@ platform :ios do
     archive_path = "#{archive_dir}/#{archive_name}.xcarchive"
     
     # Archive - Xcode will use development signing automatically, but export will re-sign with App Store
-    sh("xcodebuild archive -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath '#{archive_path}' -allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id} 2>&1 | xcbeautify")
+    sh("cd '#{ios_dir}' && xcodebuild archive -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath '#{archive_path}' -allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=#{team_id} 2>&1 | xcbeautify")
     
     unless File.exist?(archive_path)
       UI.user_error!("Archive failed. Check build logs above.")
@@ -73,7 +81,7 @@ platform :ios do
     
     # Export with App Store signing (this will re-sign the app with App Store distribution)
     UI.message("Exporting IPA with App Store signing...")
-    export_path = "./build"
+    export_path = File.expand_path('./build', __dir__)
     FileUtils.mkdir_p(export_path)
     
     sh("xcodebuild -exportArchive -archivePath '#{archive_path}' -exportOptionsPlist '#{export_options_path}' -exportPath '#{export_path}' -allowProvisioningUpdates 2>&1")
