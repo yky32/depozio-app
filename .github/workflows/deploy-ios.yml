@@ -179,7 +179,6 @@ jobs:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
           VERSION: ${{ env.VERSION }}
           BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
         run: |

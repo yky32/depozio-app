@@ -80,6 +80,10 @@ platform :ios do
         is_key_content_base64: false
       )
       
+      # Unset APP_STORE_CONNECT_API_KEY_PATH to prevent Fastlane from trying to use it
+      # We've already authenticated with app_store_connect_api_key, so we don't need the path
+      ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
+      
       # Check if certificates exist first by trying to get them in readonly mode
       certificates_exist = false
       begin
