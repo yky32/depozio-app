@@ -23,17 +23,33 @@ platform :ios do
     ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
     ENV.delete("APP_STORE_CONNECT_API_KEY")
     
+    # Verify credentials are available
+    username = ENV["FASTLANE_USER"]
+    app_specific_password = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
+    
+    unless username
+      UI.user_error!("FASTLANE_USER must be set")
+    end
+    
+    unless app_specific_password
+      UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts")
+    end
+    
+    UI.message("Using username: #{username}")
+    UI.message("App-specific password provided: Yes")
+    
     # Get App Store distribution certificate
     # cert automatically installs it in the default keychain
+    # Use app-specific password if available, otherwise regular password
     cert(
-      username: ENV["FASTLANE_USER"],
+      username: username,
       team_id: "3G34999H3A"
     )
     
     # Get App Store provisioning profile
     # sigh automatically installs it in ~/Library/MobileDevice/Provisioning Profiles
     profile_path = sigh(
-      username: ENV["FASTLANE_USER"],
+      username: username,
       app_identifier: "com.depozio",
       team_id: "3G34999H3A",
       force: true,
