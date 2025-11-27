@@ -1,0 +1,25 @@
+# Matchfile for certificate and provisioning profile management
+# Match stores certificates and profiles securely in a git repository
+
+# Git repository URL for storing certificates and profiles
+# Set MATCH_GIT_URL in GitHub Secrets to enable Match
+git_url(ENV["MATCH_GIT_URL"] || "")
+
+# Storage mode - git is recommended
+storage_mode("git")
+
+# App Store distribution
+type("appstore")
+
+# Your app's bundle identifier
+app_identifier("com.depozio")
+
+# Team ID
+team_id(ENV["TEAM_ID"] || "3G34999H3A")
+
+# Note: Match will use App Store Connect API key if available via environment variables
+# Set via environment variables:
+# - APP_STORE_CONNECT_API_KEY_ID
+# - APP_STORE_CONNECT_ISSUER_ID  
+# - APP_STORE_CONNECT_API_KEY_PATH
+

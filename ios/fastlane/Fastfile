@@ -1,0 +1,93 @@
+# Fastfile for iOS deployment
+# This file contains the lanes for building and deploying your app
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Increment build number
+    increment_build_number(
+      build_number: ENV["FLUTTER_BUILD_NUMBER"] || number_of_commits
+    )
+
+    # Sync certificates and provisioning profiles using Match
+    if ENV["MATCH_GIT_URL"]
+      match(
+        type: "appstore",
+        app_identifier: "com.depozio",
+        readonly: true,
+        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      )
+    end
+
+    # Build the app
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      silent: false,
+      suppress_xcode_output: false,
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_waiting_for_build_processing: false,
+      skip_submission: true,
+      distribute_external: false,
+      notify_external_testers: false
+    )
+
+    # Clean up
+    clean_build_artifacts
+  end
+
+  desc "Build and upload to App Store (for production release)"
+  lane :release do
+    # Increment build number
+    increment_build_number(
+      build_number: ENV["FLUTTER_BUILD_NUMBER"] || number_of_commits
+    )
+
+    # Sync certificates and provisioning profiles using Match
+    if ENV["MATCH_GIT_URL"]
+      match(
+        type: "appstore",
+        app_identifier: "com.depozio",
+        readonly: true,
+        api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      )
+    end
+
+    # Build the app
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "Depozio.ipa",
+      silent: false,
+      suppress_xcode_output: false,
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    # Upload to App Store Connect
+    upload_to_app_store(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_metadata: false,
+      skip_screenshots: true,
+      submit_for_review: false,
+      force: false
+    )
+
+    # Clean up
+    clean_build_artifacts
+  end
+end
+
