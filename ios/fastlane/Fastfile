@@ -18,6 +18,11 @@ default_platform(:ios)
 platform :ios do
   desc "Setup code signing certificates and provisioning profiles"
   lane :setup_certificates do
+    # Ensure we use username/password authentication for cert/sigh
+    # Unset API key environment variables to avoid conflicts
+    ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
+    ENV.delete("APP_STORE_CONNECT_API_KEY")
+    
     # Get App Store distribution certificate
     # cert automatically installs it in the default keychain
     cert(

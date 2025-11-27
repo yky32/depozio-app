@@ -93,15 +93,16 @@ jobs:
 
       - name: Setup Code Signing
         env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_PATH: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' && format('~/private_keys/AuthKey_{0}.p8', secrets.APP_STORE_CONNECT_API_KEY_ID) || '' }}
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
         run: |
           # Setup keychain - use login keychain for cert/sigh
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db || true
           security set-keychain-settings -t 3600 -u ~/Library/Keychains/login.keychain-db || true
+          
+          # Unset API key path for cert/sigh - they should use username/password
+          # The API key is only used for upload_to_app_store later
+          unset APP_STORE_CONNECT_API_KEY_PATH || true
           
           cd ios
           
