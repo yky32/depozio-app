@@ -63,7 +63,9 @@ platform :ios do
     UI.message("Updated Xcode project to use provisioning profile: #{profile_uuid}")
     
     # Store profile UUID in a file for use in build step
-    File.write("../build/ios/profile_uuid.txt", profile_uuid)
+    profile_uuid_dir = "../build/ios"
+    Dir.mkdir(profile_uuid_dir) unless Dir.exist?(profile_uuid_dir)
+    File.write("#{profile_uuid_dir}/profile_uuid.txt", profile_uuid)
     
     UI.success("Provisioning profile setup complete: #{profile_uuid}")
     profile_path

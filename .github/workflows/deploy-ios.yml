@@ -126,15 +126,6 @@ jobs:
           fi
           cd ..
 
-      - name: Create export options
-        env:
-          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
-        run: |
-          cd ios
-          mkdir -p ../build/ios
-          bundle exec fastlane create_export_options
-          cd ..
-
       - name: Build iOS app
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
