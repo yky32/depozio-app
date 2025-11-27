@@ -284,21 +284,26 @@ platform :ios do
     # Get the provisioning profile UUID from sigh
     profile_uuid = lane_context[Fastlane::Actions::SharedValues::SIGH_UUID]
     
+    # Install the provisioning profile to ensure Xcode can find it
+    # Copy to the standard location where Xcode looks for profiles
+    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+    FileUtils.mkdir_p(profiles_dir)
+    installed_profile_path = File.join(profiles_dir, "#{profile_uuid}.mobileprovision")
+    FileUtils.cp(profile_path, installed_profile_path)
+    UI.message("Installed provisioning profile to: #{installed_profile_path}")
+    
     # Build the app using gym (build_app)
     # Use xcargs to pass xcodebuild arguments for archive phase
-    # For manual signing, we can use either PROVISIONING_PROFILE (UUID) or PROVISIONING_PROFILE_SPECIFIER (name)
+    # Use PROVISIONING_PROFILE_SPECIFIER with profile name (more reliable than UUID)
     xcargs_array = [
       "CODE_SIGN_STYLE=Manual",
-      "CODE_SIGN_IDENTITY=iPhone Distribution"
+      "CODE_SIGN_IDENTITY=iPhone Distribution",
+      "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
     ]
     
-    # Use UUID if available (more reliable), otherwise use profile name
+    UI.message("Using provisioning profile name: #{profile_name}")
     if profile_uuid
-      xcargs_array << "PROVISIONING_PROFILE=#{profile_uuid}"
-      UI.message("Using provisioning profile UUID: #{profile_uuid}")
-    else
-      xcargs_array << "PROVISIONING_PROFILE_SPECIFIER=#{profile_name}"
-      UI.message("Using provisioning profile name: #{profile_name}")
+      UI.message("Profile UUID: #{profile_uuid}")
     end
     
     # Convert array to string for xcargs (space-separated)
