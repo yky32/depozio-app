@@ -61,11 +61,49 @@ platform :ios do
     UI.message("FASTLANE_PASSWORD: #{ENV['FASTLANE_PASSWORD'] ? 'SET' : 'NOT SET'}")
     UI.message("APP_STORE_CONNECT_API_KEY_ID: #{ENV['APP_STORE_CONNECT_API_KEY_ID'] ? 'SET' : 'NOT SET'}")
     UI.message("APP_STORE_CONNECT_ISSUER_ID: #{ENV['APP_STORE_CONNECT_ISSUER_ID'] ? 'SET' : 'NOT SET'}")
-    UI.message("APP_STORE_CONNECT_API_KEY_PATH: #{ENV['APP_STORE_CONNECT_API_KEY_PATH'] ? 'SET (' + ENV['APP_STORE_CONNECT_API_KEY_PATH'] + ')' : 'NOT SET'}")
+    UI.message("APP_STORE_CONNECT_API_KEY_CONTENT: #{ENV['APP_STORE_CONNECT_API_KEY_CONTENT'] ? 'SET' : 'NOT SET'}")
     
-    if ENV['APP_STORE_CONNECT_API_KEY_PATH']
-      key_exists = File.exist?(File.expand_path(ENV['APP_STORE_CONNECT_API_KEY_PATH']))
-      UI.message("API Key file exists: #{key_exists}")
+    # Check for API key file or create from content if available
+    api_key_id = ENV['APP_STORE_CONNECT_API_KEY_ID']
+    api_key_content = ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
+    api_key_path = nil
+    
+    if api_key_id
+      # Check if file exists
+      possible_paths = [
+        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
+        "~/private_keys/AuthKey_#{api_key_id}.p8"
+      ].compact
+      
+      possible_paths.each do |path|
+        expanded_path = File.expand_path(path)
+        if File.exist?(expanded_path)
+          api_key_path = expanded_path
+          break
+        end
+      end
+      
+      # If file doesn't exist but we have content, create it
+      unless api_key_path
+        if api_key_content && !api_key_content.strip.empty?
+          UI.message("Creating API key file from APP_STORE_CONNECT_API_KEY_CONTENT...")
+          private_keys_dir = File.expand_path("~/private_keys")
+          FileUtils.mkdir_p(private_keys_dir)
+          api_key_path = File.join(private_keys_dir, "AuthKey_#{api_key_id}.p8")
+          File.write(api_key_path, api_key_content)
+          File.chmod(0600, api_key_path)
+          UI.message("✓ Created API key file: #{api_key_path}")
+        end
+      end
+      
+      if api_key_path
+        UI.message("APP_STORE_CONNECT_API_KEY_PATH: SET (#{api_key_path})")
+        UI.message("API Key file exists: #{File.exist?(api_key_path)}")
+      else
+        UI.message("APP_STORE_CONNECT_API_KEY_PATH: NOT SET (file not found and no content to create from)")
+      end
+    else
+      UI.message("APP_STORE_CONNECT_API_KEY_PATH: NOT SET (no API key ID)")
     end
     
     UI.message("Team ID: 3G34999H3A")
@@ -80,10 +118,10 @@ platform :ios do
     api_key_path = nil
     api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
     api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
+    api_key_content = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
     
     if api_key_id
-      # Try to find the API key file
-      # Don't use ENV["APP_STORE_CONNECT_API_KEY_PATH"] as it might confuse Fastlane's auto-detection
+      # First, try to find existing API key file
       possible_paths = [
         "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
         "~/private_keys/AuthKey_#{api_key_id}.p8"
@@ -97,9 +135,21 @@ platform :ios do
         end
       end
       
+      # If file doesn't exist but we have the content, create it
       unless api_key_path
-        UI.important("API key file not found. Tried: #{possible_paths.join(', ')}")
-        UI.important("Falling back to Apple ID authentication")
+        if api_key_content && !api_key_content.strip.empty?
+          UI.message("API key file not found, creating from APP_STORE_CONNECT_API_KEY_CONTENT...")
+          private_keys_dir = File.expand_path("~/private_keys")
+          FileUtils.mkdir_p(private_keys_dir)
+          api_key_path = File.join(private_keys_dir, "AuthKey_#{api_key_id}.p8")
+          File.write(api_key_path, api_key_content)
+          File.chmod(0600, api_key_path)
+          UI.success("✓ Created API key file: #{api_key_path}")
+        else
+          UI.important("API key file not found and APP_STORE_CONNECT_API_KEY_CONTENT not set")
+          UI.important("Tried: #{possible_paths.join(', ')}")
+          UI.important("Falling back to Apple ID authentication")
+        end
       end
     end
     
