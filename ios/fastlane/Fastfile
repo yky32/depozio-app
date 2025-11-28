@@ -1,445 +1,424 @@
-# Fastlane Configuration for iOS App Store Deployment
-# Documentation: https://docs.fastlane.tools
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Get the project root directory (two levels up from fastlane directory)
+# Fastfile is in ios/fastlane/, so ../.. gets us to project root
+FASTLANE_DIR = File.dirname(__FILE__)
+IOS_DIR = File.expand_path("..", FASTLANE_DIR)
+PROJECT_ROOT = File.expand_path("..", IOS_DIR)
 
 default_platform(:ios)
 
-# Trigger GitHub Actions workflow - test build with quoted args
-
 platform :ios do
-  desc "List existing distribution certificates"
-  lane :list_certificates do
-    # Authenticate first if using API key
-    api_key_path = nil
-    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
-    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
+  desc "Build iOS app for development (Debug)"
+  lane :build_debug do
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
     
-    if api_key_id
-      possible_paths = [
-        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
-        "~/private_keys/AuthKey_#{api_key_id}.p8"
-      ].compact
-      
-      possible_paths.each do |path|
-        expanded_path = File.expand_path(path)
-        if File.exist?(expanded_path)
-          api_key_path = expanded_path
-          break
-        end
-      end
-      
-      if api_key_path && File.exist?(api_key_path)
-        key_content = File.read(api_key_path)
-        app_store_connect_api_key(
-          key_id: api_key_id,
-          issuer_id: api_key_issuer_id,
-          key_content: key_content,
-          is_key_content_base64: false
-        )
-      end
-    end
+    # Build iOS app in debug mode (Flutter will automatically run pod install if needed)
+    # Using clean environment to avoid Bundler conflicts with CocoaPods
+    sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --debug --no-codesign")
     
-    UI.message("=== Listing Distribution Certificates ===")
-    begin
-      get_certificates(
-        team_id: "3G34999H3A",
-        readonly: true
-      )
-      UI.success("✓ Certificates found and listed")
-    rescue => e
-      UI.important("No certificates found or error: #{e.message}")
-      UI.important("")
-      UI.important("To view certificates in Apple Developer Portal:")
-      UI.important("https://developer.apple.com/account/resources/certificates/list")
-    end
+    UI.success("✅ iOS Debug build completed!")
   end
 
-  desc "Debug: Check environment variables (for troubleshooting)"
-  lane :check_env do
-    UI.message("=== Environment Variables Check ===")
-    UI.message("FASTLANE_USER: #{ENV['FASTLANE_USER'] ? 'SET (' + ENV['FASTLANE_USER'] + ')' : 'NOT SET'}")
-    UI.message("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: #{ENV['FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD'] ? 'SET' : 'NOT SET'}")
-    UI.message("FASTLANE_PASSWORD: #{ENV['FASTLANE_PASSWORD'] ? 'SET' : 'NOT SET'}")
-    UI.message("APP_STORE_CONNECT_API_KEY_ID: #{ENV['APP_STORE_CONNECT_API_KEY_ID'] ? 'SET' : 'NOT SET'}")
-    UI.message("APP_STORE_CONNECT_ISSUER_ID: #{ENV['APP_STORE_CONNECT_ISSUER_ID'] ? 'SET' : 'NOT SET'}")
-    UI.message("APP_STORE_CONNECT_API_KEY_CONTENT: #{ENV['APP_STORE_CONNECT_API_KEY_CONTENT'] ? 'SET' : 'NOT SET'}")
+  desc "Build iOS app for release"
+  lane :build_release do
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
     
-    # Check for API key file or create from content if available
-    api_key_id = ENV['APP_STORE_CONNECT_API_KEY_ID']
-    api_key_content = ENV['APP_STORE_CONNECT_API_KEY_CONTENT']
-    api_key_path = nil
+    # Build iOS app in release mode (Flutter will automatically run pod install if needed)
+    # Using clean environment to avoid Bundler conflicts with CocoaPods
+    sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release --no-codesign")
     
-    if api_key_id
-      # Check if file exists
-      possible_paths = [
-        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
-        "~/private_keys/AuthKey_#{api_key_id}.p8"
-      ].compact
-      
-      possible_paths.each do |path|
-        expanded_path = File.expand_path(path)
-        if File.exist?(expanded_path)
-          api_key_path = expanded_path
-          break
-        end
-      end
-      
-      # If file doesn't exist but we have content, create it
-      unless api_key_path
-        if api_key_content && !api_key_content.strip.empty?
-          UI.message("Creating API key file from APP_STORE_CONNECT_API_KEY_CONTENT...")
-          private_keys_dir = File.expand_path("~/private_keys")
-          FileUtils.mkdir_p(private_keys_dir)
-          api_key_path = File.join(private_keys_dir, "AuthKey_#{api_key_id}.p8")
-          File.write(api_key_path, api_key_content)
-          File.chmod(0600, api_key_path)
-          UI.message("✓ Created API key file: #{api_key_path}")
-        end
-      end
-      
-      if api_key_path
-        UI.message("APP_STORE_CONNECT_API_KEY_PATH: SET (#{api_key_path})")
-        UI.message("API Key file exists: #{File.exist?(api_key_path)}")
-      else
-        UI.message("APP_STORE_CONNECT_API_KEY_PATH: NOT SET (file not found and no content to create from)")
-      end
-    else
-      UI.message("APP_STORE_CONNECT_API_KEY_PATH: NOT SET (no API key ID)")
-    end
-    
-    UI.message("Team ID: 3G34999H3A")
-    UI.message("App Identifier: com.depozio")
-    UI.message("================================")
+    UI.success("✅ iOS Release build completed!")
   end
 
-
-  desc "Download certificates and provisioning profiles"
-  lane :certificates do
-    # Check for App Store Connect API key
-    api_key_path = nil
-    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
-    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
-    api_key_content = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+  desc "Build iOS app and create IPA (requires code signing)"
+  desc "Options: export_method - 'development', 'ad-hoc', 'app-store', or 'enterprise' (default: 'development')"
+  lane :build_ipa do |options|
+    export_method = options[:export_method] || "development"
     
-    if api_key_id
-      # First, try to find existing API key file
-      possible_paths = [
-        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
-        "~/private_keys/AuthKey_#{api_key_id}.p8"
-      ].compact
-      
-      possible_paths.each do |path|
-        expanded_path = File.expand_path(path)
-        if File.exist?(expanded_path)
-          api_key_path = expanded_path
-          break
-        end
-      end
-      
-      # If file doesn't exist but we have the content, create it
-      unless api_key_path
-        if api_key_content && !api_key_content.strip.empty?
-          UI.message("API key file not found, creating from APP_STORE_CONNECT_API_KEY_CONTENT...")
-          private_keys_dir = File.expand_path("~/private_keys")
-          FileUtils.mkdir_p(private_keys_dir)
-          api_key_path = File.join(private_keys_dir, "AuthKey_#{api_key_id}.p8")
-          File.write(api_key_path, api_key_content)
-          File.chmod(0600, api_key_path)
-          UI.success("✓ Created API key file: #{api_key_path}")
-        else
-          UI.important("API key file not found and APP_STORE_CONNECT_API_KEY_CONTENT not set")
-          UI.important("Tried: #{possible_paths.join(', ')}")
-          UI.important("Falling back to Apple ID authentication")
-        end
-      end
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
+    
+    # Build iOS app in release mode (Flutter will automatically run pod install if needed)
+    # Using clean environment to avoid Bundler conflicts with CocoaPods
+    sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release")
+    
+    # Build IPA using xcodebuild
+    # Configure export to use automatic signing (matching the archive)
+    # For app-store, ensure we're using Distribution certificate
+    export_opts = {
+      method: export_method,
+      signingStyle: "automatic",
+      teamID: "3G34999H3A"  # Your team ID from Appfile
+    }
+    
+    # For app-store, try to ensure Distribution certificate is used
+    if export_method == "app-store"
+      UI.message("📦 Building for App Store - will use Distribution certificate")
+      # Xcode should automatically select Distribution certificate for app-store export
     end
     
-    # Use App Store Connect API key if available, otherwise use username/password
-    if api_key_path && File.exist?(api_key_path)
-      UI.message("Using App Store Connect API key: #{api_key_path}")
-      
-      # Verify file content starts with BEGIN PRIVATE KEY
-      first_line = File.readlines(api_key_path).first&.strip
-      unless first_line == "-----BEGIN PRIVATE KEY-----"
-        UI.user_error!("Invalid API key file format. First line should be '-----BEGIN PRIVATE KEY-----', got: #{first_line}")
-      end
-      
-      # Read the key content from file
-      key_content = File.read(api_key_path)
-      
-      unless api_key_issuer_id
-        UI.user_error!("APP_STORE_CONNECT_ISSUER_ID must be set when using API key")
-      end
-      
-      # Use app_store_connect_api_key action to authenticate first
-      # This sets up the API key for subsequent actions
-      app_store_connect_api_key(
-        key_id: api_key_id,
-        issuer_id: api_key_issuer_id,
-        key_content: key_content,
-        is_key_content_base64: false
-      )
-      
-      # Unset APP_STORE_CONNECT_API_KEY_PATH to prevent Fastlane from trying to use it
-      # We've already authenticated with app_store_connect_api_key, so we don't need the path
-      ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
-      
-      # Use cert action - it will automatically reuse existing certificates from portal
-      # and install them into the keychain. Only creates new ones if none exist.
-      begin
-        UI.message("Getting distribution certificate (will reuse existing if available)...")
-        cert(
-          team_id: "3G34999H3A"
-        )
-        UI.success("✓ Certificate ready (reused existing or created new)")
-      rescue => e
-        error_message = e.message.to_s.downcase
-        error_output = e.message
-        
-        # Check if certificates exist in portal but private keys are missing locally
-        if error_output.include?("can't be found on your local computer") ||
-           error_output.include?("There are no local code signing identities found")
-          UI.important("⚠️ Certificates exist in Apple Developer Portal but private keys are missing locally")
-          UI.important("⚠️ This usually means certificates were created on a different machine")
-          UI.important("")
-          UI.important("Options:")
-          UI.important("1. Export certificate with private key from the original machine and add to workflow")
-          UI.important("2. Revoke old certificates and create new ones (if under limit)")
-          UI.important("")
-          UI.important("Since you've hit the certificate limit, you need to:")
-          UI.user_error!("Certificate limit reached! Certificates exist in portal but can't be used locally.\n\n" +
-                        "Steps to fix:\n" +
-                        "1. Go to: https://developer.apple.com/account/resources/certificates/list\n" +
-                        "2. Filter by 'Production' to see Distribution certificates\n" +
-                        "3. Revoke expired or unused certificates (you have: TDMN54S859, U6AY8DY6XC)\n" +
-                        "4. Wait a few minutes for changes to propagate\n" +
-                        "5. Retry the workflow - it will create a new certificate with the private key\n\n" +
-                        "Note: The existing certificates can't be used because their private keys\n" +
-                        "are not available on this machine. After revoking old ones, a new certificate\n" +
-                        "will be created with the private key stored locally.")
-        elsif error_message.include?("maximum number") || 
-             error_message.include?("reached the maximum") ||
-             error_message.include?("certificate limit")
-          UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
-                        "https://developer.apple.com/account/resources/certificates/list\n\n" +
-                        "Steps to fix:\n" +
-                        "1. Go to the link above\n" +
-                        "2. Filter by 'Production' to see Distribution certificates\n" +
-                        "3. Revoke expired or unused certificates\n" +
-                        "4. Wait a few minutes for changes to propagate\n" +
-                        "5. Retry the workflow\n\n" +
-                        "The cert action will automatically reuse existing certificates if they exist in the portal.")
-        else
-          # Re-raise other errors
-          raise
-        end
-      end
-      
-      sigh(
-        app_identifier: "com.depozio",
-        team_id: "3G34999H3A",
-        force: true
-      )
-    else
-      UI.message("Using Apple ID authentication")
-      
-      # Verify credentials are available
-      unless ENV["FASTLANE_USER"]
-        UI.user_error!("FASTLANE_USER must be set when API key is not available")
-      end
-      
-      unless ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
-        UI.user_error!("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD must be set for 2FA accounts")
-      end
-      
-      # Set password for fastlane
-      ENV["FASTLANE_PASSWORD"] = ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"]
-      
-      # Use cert action - it will automatically reuse existing certificates from portal
-      # and install them into the keychain. Only creates new ones if none exist.
-      begin
-        UI.message("Getting distribution certificate (will reuse existing if available)...")
-        cert(
-          username: ENV["FASTLANE_USER"],
-          team_id: "3G34999H3A"
-        )
-        UI.success("✓ Certificate ready (reused existing or created new)")
-      rescue => e
-        error_message = e.message.to_s.downcase
-        error_output = e.message
-        
-        # Check if certificates exist in portal but private keys are missing locally
-        if error_output.include?("can't be found on your local computer") ||
-           error_output.include?("There are no local code signing identities found")
-          UI.important("⚠️ Certificates exist in Apple Developer Portal but private keys are missing locally")
-          UI.important("⚠️ This usually means certificates were created on a different machine")
-          UI.important("")
-          UI.important("Options:")
-          UI.important("1. Export certificate with private key from the original machine and add to workflow")
-          UI.important("2. Revoke old certificates and create new ones (if under limit)")
-          UI.important("")
-          UI.important("Since you've hit the certificate limit, you need to:")
-          UI.user_error!("Certificate limit reached! Certificates exist in portal but can't be used locally.\n\n" +
-                        "Steps to fix:\n" +
-                        "1. Go to: https://developer.apple.com/account/resources/certificates/list\n" +
-                        "2. Filter by 'Production' to see Distribution certificates\n" +
-                        "3. Revoke expired or unused certificates\n" +
-                        "4. Wait a few minutes for changes to propagate\n" +
-                        "5. Retry the workflow - it will create a new certificate with the private key\n\n" +
-                        "Note: The existing certificates can't be used because their private keys\n" +
-                        "are not available on this machine. After revoking old ones, a new certificate\n" +
-                        "will be created with the private key stored locally.")
-        elsif error_message.include?("maximum number") || 
-             error_message.include?("reached the maximum") ||
-             error_message.include?("certificate limit")
-          UI.user_error!("Certificate limit reached! Please remove old certificates from Apple Developer Portal:\n" +
-                        "https://developer.apple.com/account/resources/certificates/list\n\n" +
-                        "Steps to fix:\n" +
-                        "1. Go to the link above\n" +
-                        "2. Filter by 'Production' to see Distribution certificates\n" +
-                        "3. Revoke expired or unused certificates\n" +
-                        "4. Wait a few minutes for changes to propagate\n" +
-                        "5. Retry the workflow\n\n" +
-                        "The cert action will automatically reuse existing certificates if they exist in the portal.")
-        else
-          # Re-raise other errors
-          raise
-        end
-      end
-      
-      sigh(
-        username: ENV["FASTLANE_USER"],
-        app_identifier: "com.depozio",
-        team_id: "3G34999H3A",
-        force: true
-      )
-    end
-  end
-
-  desc "Build and export IPA"
-  lane :build do
-    # Download certificates first
-    certificates
-    
-    # Get the provisioning profile info from sigh
-    profile_path = lane_context[Fastlane::Actions::SharedValues::SIGH_PROFILE_PATH]
-    profile_name = lane_context[Fastlane::Actions::SharedValues::SIGH_NAME]
-    
-    unless profile_path && File.exist?(profile_path)
-      UI.user_error!("Provisioning profile not found. Run 'fastlane certificates' first.")
-    end
-    
-    UI.message("Using provisioning profile: #{profile_path}")
-    UI.message("Profile name: #{profile_name}")
-    
-    # Get the provisioning profile UUID from sigh
-    profile_uuid = lane_context[Fastlane::Actions::SharedValues::SIGH_UUID]
-    
-    # Install the provisioning profile to ensure Xcode can find it
-    # Copy to the standard location where Xcode looks for profiles
-    profiles_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
-    FileUtils.mkdir_p(profiles_dir)
-    installed_profile_path = File.join(profiles_dir, "#{profile_uuid}.mobileprovision")
-    FileUtils.cp(profile_path, installed_profile_path)
-    UI.message("Installed provisioning profile to: #{installed_profile_path}")
-    
-    # Build the app using gym (build_app)
-    # Use xcargs to pass xcodebuild arguments for archive phase
-    # Use PROVISIONING_PROFILE_SPECIFIER with profile name (more reliable than UUID)
-    # Quote the profile name if it contains spaces
-    profile_specifier = profile_name.include?(" ") ? "\"#{profile_name}\"" : profile_name
-    
-    xcargs_array = [
-      "CODE_SIGN_STYLE=Manual",
-      "CODE_SIGN_IDENTITY=\"iPhone Distribution\"",
-      "PROVISIONING_PROFILE_SPECIFIER=#{profile_specifier}"
-    ]
-    
-    UI.message("Using provisioning profile name: #{profile_name}")
-    if profile_uuid
-      UI.message("Profile UUID: #{profile_uuid}")
-    end
-    
-    # Convert array to string for xcargs (space-separated)
-    # Note: xcargs expects a string, and xcodebuild will parse the arguments
-    xcargs_string = xcargs_array.join(" ")
-    
-    # export_options handles code signing during export phase
     build_app(
-      workspace: "Runner.xcworkspace",
+      workspace: "#{IOS_DIR}/Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store",
-      output_directory: "../build/ios/ipa",
-      clean: true,
-      include_bitcode: false,
-      include_symbols: true,
-      codesigning_identity: "iPhone Distribution",
-      xcargs: xcargs_string,
-      export_options: {
-        provisioningProfiles: {
-          "com.depozio" => profile_name || "com.depozio AppStore"
-        },
-        signingStyle: "manual",
-        method: "app-store"
-      }
+      export_method: export_method,
+      output_directory: "#{PROJECT_ROOT}/build/ios/ipa",
+      export_options: export_opts
     )
+    
+    UI.success("✅ IPA created successfully!")
+    UI.message("📦 IPA location: #{PROJECT_ROOT}/build/ios/ipa/")
   end
 
-  desc "Upload to App Store Connect"
-  lane :upload do
-    # Find the IPA
-    ipa_path = Dir.glob("../build/ios/ipa/*.ipa").first
+  desc "Build IPA and upload to TestFlight"
+  desc "Options: skip_build - set to true to skip building and use existing IPA (default: false)"
+  lane :upload_testflight do |options|
+    skip_build = options[:skip_build] || false
     
-    unless ipa_path
-      UI.user_error!("IPA not found. Run 'fastlane build' first.")
-    end
-    
-    UI.message("Uploading: #{ipa_path}")
-    
-    # Use API key if available - authenticate first
-    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"]
-    api_key_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"]
-    
-    if api_key_id && api_key_issuer_id
-      possible_paths = [
-        "#{ENV['HOME']}/private_keys/AuthKey_#{api_key_id}.p8",
-        "~/private_keys/AuthKey_#{api_key_id}.p8"
-      ].compact
+    unless skip_build
+      UI.important("📦 Building IPA for App Store...")
+      UI.important("⚠️  Note: App Store builds require Distribution certificate and App Store provisioning profile")
+      UI.important("")
       
-      api_key_path = nil
-      possible_paths.each do |path|
-        expanded_path = File.expand_path(path)
-        if File.exist?(expanded_path)
-          api_key_path = expanded_path
-          break
+      build_success = false
+      retry_count = 0
+      max_retries = 1
+      
+      begin
+        # Build IPA with app-store export method for TestFlight
+        build_ipa(export_method: "app-store")
+        build_success = true
+      rescue => ex
+        error_msg = ex.message
+        
+        # Check if it's a certificate/provisioning profile error
+        is_signing_error = error_msg.include?("provisioning profile") || 
+                          error_msg.include?("certificate") || 
+                          error_msg.include?("signing") ||
+                          error_msg.include?("CodeSign") ||
+                          error_msg.include?("packaging")
+        
+        if is_signing_error && retry_count < max_retries
+          retry_count += 1
+          UI.important("")
+          UI.important("🔧 Detected code signing issue. Attempting to configure certificates automatically...")
+          UI.important("")
+          
+          begin
+            # Try to setup App Store signing automatically
+            setup_appstore_signing
+            UI.important("")
+            UI.important("🔄 Retrying build with newly configured certificates...")
+            UI.important("")
+            
+            # Retry the build
+            build_ipa(export_method: "app-store")
+            build_success = true
+          rescue => setup_ex
+            UI.error("")
+            UI.error("❌ Automatic certificate setup failed: #{setup_ex.message}")
+            UI.error("")
+            UI.error("   This usually means you need to set up App Store distribution certificates.")
+            UI.error("")
+            UI.error("   📋 Manual Setup (Xcode):")
+            UI.error("      1. open ios/Runner.xcworkspace")
+            UI.error("      2. Select Runner target → Signing & Capabilities")
+            UI.error("      3. Enable 'Automatically manage signing'")
+            UI.error("      4. Select your team (3G34999H3A)")
+            UI.error("      5. Xcode will create App Store provisioning profile automatically")
+            UI.error("")
+            UI.error("   🔧 Or try manual CLI setup:")
+            UI.error("      bundle exec fastlane ios setup_appstore_signing")
+            UI.error("")
+            UI.error("   💡 Alternative: Build development IPA for local testing:")
+            UI.error("      bundle exec fastlane ios build_ipa")
+            UI.error("")
+            raise
+          end
+        else
+          # Not a signing error or already retried
+          UI.error("❌ Failed to build IPA for App Store")
+          UI.error("   Error: #{error_msg}")
+          UI.error("")
+          
+          if is_signing_error
+            UI.error("   This appears to be a code signing issue.")
+            UI.error("   Try running: bundle exec fastlane ios setup_appstore_signing")
+          end
+          UI.error("")
+          raise
         end
       end
       
-      if api_key_path
-        key_content = File.read(api_key_path)
-        # Authenticate with API key first
-        app_store_connect_api_key(
-          key_id: api_key_id,
-          issuer_id: api_key_issuer_id,
-          key_content: key_content,
-          is_key_content_base64: false
-        )
+      unless build_success
+        UI.user_error!("Failed to build IPA for App Store after setup attempts")
       end
     end
     
-    # Upload will use the authenticated session
-    upload_to_app_store(
-      ipa: ipa_path,
-      skip_metadata: true,
-      skip_screenshots: true,
-      submit_for_review: false
-    )
+    # Find the IPA file
+    ipa_path = "#{PROJECT_ROOT}/build/ios/ipa/Runner.ipa"
     
-    UI.success("Upload complete!")
+    unless File.exist?(ipa_path)
+      UI.user_error!("❌ IPA file not found at #{ipa_path}.\n" +
+                    "   Please build the IPA first or run without skip_build option.\n" +
+                    "   For development/testing, use: bundle exec fastlane ios build_ipa")
+    end
+    
+    UI.message("🚀 Uploading to TestFlight...")
+    
+    begin
+      # Upload to TestFlight
+      upload_to_testflight(
+        ipa: ipa_path,
+        skip_waiting_for_build_processing: false,  # Wait for processing to complete
+        skip_submission: true,  # Don't automatically submit for review
+        distribute_external: false,  # Internal testing only (set to true for external)
+        notify_external_testers: false  # Don't notify testers automatically
+      )
+      
+      UI.success("✅ Successfully uploaded to TestFlight!")
+      UI.message("📱 Check App Store Connect for build processing status")
+    rescue => ex
+      error_msg = ex.message
+      
+      # Check if it's an "app not found" error
+      if error_msg.include?("Couldn't find app") || error_msg.include?("not found on the account")
+        UI.important("")
+        UI.important("🔧 App not found in App Store Connect. Attempting to create it automatically...")
+        UI.important("")
+        
+        begin
+          # Try to create the app automatically
+          create_app
+          UI.important("")
+          UI.important("🔄 Retrying upload to TestFlight...")
+          UI.important("")
+          
+          # Retry the upload
+          upload_to_testflight(
+            ipa: ipa_path,
+            skip_waiting_for_build_processing: false,
+            skip_submission: true,
+            distribute_external: false,
+            notify_external_testers: false
+          )
+          
+          UI.success("✅ Successfully uploaded to TestFlight!")
+          UI.message("📱 Check App Store Connect for build processing status")
+        rescue => create_ex
+          UI.error("")
+          UI.error("❌ Failed to create app or upload: #{create_ex.message}")
+          UI.error("")
+          UI.error("   📋 Manual Setup Steps:")
+          UI.error("")
+          UI.error("   1. Go to App Store Connect: https://appstoreconnect.apple.com")
+          UI.error("   2. Sign in with your Apple ID: wayneyu.dev@gmail.com")
+          UI.error("   3. Click 'My Apps' → Click the '+' button → 'New App'")
+          UI.error("   4. Fill in the required information:")
+          UI.error("      - Platform: iOS")
+          UI.error("      - Name: Depozio (or your app name)")
+          UI.error("      - Primary Language: (select your language)")
+          UI.error("      - Bundle ID: com.depozio")
+          UI.error("      - SKU: (any unique identifier, e.g., 'depozio-001')")
+          UI.error("      - User Access: Full Access (or as needed)")
+          UI.error("   5. Click 'Create'")
+          UI.error("")
+          UI.error("   ⚠️  Note: After creating the app, wait a few minutes for it to propagate")
+          UI.error("      Then try uploading again.")
+          UI.error("")
+          UI.error("   💡 Or try creating the app using Fastlane:")
+          UI.error("      bundle exec fastlane ios create_app")
+          UI.error("")
+          raise
+        end
+      else
+        UI.error("❌ Failed to upload to TestFlight")
+        UI.error("   Error: #{error_msg}")
+        UI.error("")
+        raise
+      end
+    end
   end
 
-  desc "Deploy to App Store (build + upload)"
-  lane :deploy do
-    build
-    upload
+  desc "Create app in App Store Connect"
+  desc "This will register your app in App Store Connect if it doesn't exist"
+  lane :create_app do
+    UI.message("📱 Creating app in App Store Connect...")
+    UI.important("⚠️  This requires App Store Connect access")
+    
+    begin
+      produce(
+        username: ENV["FASTLANE_USER"] || "wayneyu.dev@gmail.com",
+        app_identifier: "com.depozio",
+        app_name: "Depozio",
+        team_id: "3G34999H3A",
+        skip_itc: false,  # Don't skip App Store Connect creation
+        skip_devcenter: false  # Don't skip Developer Center
+      )
+      
+      UI.success("✅ App created successfully in App Store Connect!")
+      UI.message("📝 You can now upload to TestFlight using: bundle exec fastlane ios upload_testflight")
+    rescue => ex
+      error_msg = ex.message
+      
+      if error_msg.include?("already exists") || error_msg.include?("already registered")
+        UI.important("ℹ️  App already exists in App Store Connect")
+        UI.message("   You can proceed with uploading to TestFlight")
+      else
+        UI.error("❌ Failed to create app: #{error_msg}")
+        UI.error("")
+        UI.error("   📋 Manual Setup:")
+        UI.error("      1. Go to https://appstoreconnect.apple.com")
+        UI.error("      2. Sign in and create the app manually")
+        UI.error("      3. Bundle ID: com.depozio")
+        UI.error("")
+        raise
+      end
+    end
+  end
+
+  desc "Setup App Store distribution certificates and provisioning profiles"
+  desc "This will download/create Distribution certificate and App Store provisioning profile"
+  lane :setup_appstore_signing do
+    UI.message("🔧 Setting up App Store distribution signing...")
+    UI.important("⚠️  This requires App Store Connect API access or Apple ID authentication")
+    
+    begin
+      # Get or create App Store Distribution certificate
+      UI.message("📜 Getting App Store Distribution certificate...")
+      get_certificates(
+        development: false,  # Get Distribution certificate
+        username: ENV["FASTLANE_USER"] || "wayneyu.dev@gmail.com",
+        team_id: "3G34999H3A"
+      )
+      
+      # Get or create App Store provisioning profile
+      # By default (no development/adhoc specified), it gets App Store profiles
+      UI.message("📋 Getting App Store provisioning profile...")
+      get_provisioning_profile(
+        app_identifier: "com.depozio",
+        username: ENV["FASTLANE_USER"] || "wayneyu.dev@gmail.com",
+        team_id: "3G34999H3A"
+        # Not specifying development/adhoc defaults to App Store provisioning profile
+      )
+      
+      UI.success("✅ App Store distribution certificates and profiles are ready!")
+      UI.message("📝 You can now build for App Store using: bundle exec fastlane ios build_ipa export_method:app-store")
+    rescue => ex
+      UI.important("⚠️  Automatic certificate setup failed: #{ex.message}")
+      UI.important("")
+      UI.important("   Alternative: Set up manually in Xcode:")
+      UI.important("   1. open ios/Runner.xcworkspace")
+      UI.important("   2. Select Runner target → Signing & Capabilities")
+      UI.important("   3. Enable 'Automatically manage signing'")
+      UI.important("   4. Select your team")
+      UI.important("   5. Xcode will create certificates automatically")
+      UI.important("")
+      raise
+    end
+  end
+
+  desc "Increment build number"
+  lane :increment_build do
+    increment_build_number(
+      xcodeproj: "#{IOS_DIR}/Runner.xcodeproj"
+    )
+    UI.success("✅ Build number incremented!")
+  end
+
+  desc "Clean iOS build artifacts"
+  lane :clean do
+    sh("cd #{PROJECT_ROOT} && flutter clean")
+    sh("cd #{IOS_DIR} && rm -rf Pods Podfile.lock")
+    begin
+      sh("cd #{IOS_DIR} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH /opt/homebrew/bin/pod install", log: false)
+    rescue => ex
+      # Silently continue - user can run pod install manually if needed
+    end
+    UI.success("✅ Clean completed!")
   end
 end
+
+platform :android do
+  desc "Build Android app for development (Debug)"
+  lane :build_debug do
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
+    
+    # Build Android app in debug mode
+    sh("cd #{PROJECT_ROOT} && flutter build apk --debug")
+    
+    UI.success("✅ Android Debug APK built successfully!")
+    UI.message("📦 APK location: #{PROJECT_ROOT}/build/app/outputs/flutter-apk/app-debug.apk")
+  end
+
+  desc "Build Android app for release (APK)"
+  lane :build_release_apk do
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
+    
+    # Build Android app in release mode (APK)
+    sh("cd #{PROJECT_ROOT} && flutter build apk --release")
+    
+    UI.success("✅ Android Release APK built successfully!")
+    UI.message("📦 APK location: #{PROJECT_ROOT}/build/app/outputs/flutter-apk/app-release.apk")
+  end
+
+  desc "Build Android app for release (App Bundle)"
+  lane :build_release_bundle do
+    # Get dependencies
+    sh("cd #{PROJECT_ROOT} && flutter pub get")
+    
+    # Build Android app in release mode (App Bundle)
+    sh("cd #{PROJECT_ROOT} && flutter build appbundle --release")
+    
+    UI.success("✅ Android Release App Bundle built successfully!")
+    UI.message("📦 AAB location: #{PROJECT_ROOT}/build/app/outputs/bundle/release/app-release.aab")
+  end
+
+  desc "Clean Android build artifacts"
+  lane :clean do
+    sh("cd #{PROJECT_ROOT} && flutter clean")
+    sh("cd #{PROJECT_ROOT}/android && ./gradlew clean")
+    UI.success("✅ Clean completed!")
+  end
+end
+
+# Common lanes that work for both platforms
+desc "Get Flutter dependencies"
+lane :get_dependencies do
+  sh("cd #{PROJECT_ROOT} && flutter pub get")
+  UI.success("✅ Dependencies fetched!")
+end
+
+desc "Run Flutter tests"
+lane :test do
+  sh("cd #{PROJECT_ROOT} && flutter test")
+  UI.success("✅ Tests completed!")
+end
+
+desc "Clean all build artifacts"
+lane :clean_all do
+  sh("cd #{PROJECT_ROOT} && flutter clean")
+  sh("cd #{IOS_DIR} && rm -rf Pods Podfile.lock")
+  begin
+    sh("cd #{IOS_DIR} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH /opt/homebrew/bin/pod install", log: false)
+  rescue => ex
+    # Silently continue - user can run pod install manually if needed
+  end
+  sh("cd #{PROJECT_ROOT}/android && ./gradlew clean")
+  UI.success("✅ All build artifacts cleaned!")
+end
+
