@@ -9,18 +9,13 @@ class AnalyticsPage extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Analytics',
-                style: theme.textTheme.displayMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        child: Center(
+          child: Text(
+            'Coming Soon',
+            style: theme.textTheme.displayLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 48,
+            ),
           ),
         ),
       ),
