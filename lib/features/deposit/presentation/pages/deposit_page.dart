@@ -15,13 +15,9 @@ class DepositPage extends StatelessWidget {
       isDismissible: true,
       enableDrag: true,
       useRootNavigator: true,
+      useSafeArea: true,
       builder:
-          (context) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: const AddCategoryBottomSheet(maxHeightPercentage: 0.9),
-          ),
+          (context) => const AddCategoryBottomSheet(maxHeightPercentage: 0.9),
     );
   }
 
