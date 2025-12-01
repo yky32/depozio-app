@@ -14,10 +14,44 @@ class DepositPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      useRootNavigator: true,
-      useSafeArea: true,
-      builder:
-          (context) => const AddCategoryBottomSheet(maxHeightPercentage: 0.9),
+      useRootNavigator: true, // Use root navigator to show above navigation bar
+      useSafeArea: false, // Don't use safe area to cover navigation bar
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final keyboardHeight = mediaQuery.viewInsets.bottom;
+        final screenHeight = mediaQuery.size.height;
+        final hasKeyboard = keyboardHeight > 0;
+
+        // When keyboard is visible, reduce max height to leave space at top for dismissal
+        // Reserve about 10% of screen height at the top when keyboard is up
+        final maxHeightPercentage = hasKeyboard ? 0.85 : 0.95;
+        final topMargin = hasKeyboard ? screenHeight * 0.1 : 0.0;
+
+        return Stack(
+          children: [
+            // Backdrop to cover navigation bar - tappable to dismiss
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(color: Colors.black.withValues(alpha: 0.5)),
+              ),
+            ),
+            // Bottom sheet content
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: keyboardHeight,
+                  top: topMargin,
+                ),
+                child: AddCategoryBottomSheet(
+                  maxHeightPercentage: maxHeightPercentage,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -23,66 +23,75 @@ class AddCategoryBottomSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final maxHeight = (screenHeight * maxHeightPercentage) - keyboardHeight;
-    final formKey = GlobalKey<FormState>();
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final safeAreaBottom = mediaQuery.padding.bottom;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardHeight),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+    // Calculate available height considering keyboard
+    final availableHeight = screenHeight - keyboardHeight - safeAreaBottom;
+    final maxHeight = (screenHeight * maxHeightPercentage).clamp(
+      0.0,
+      availableHeight,
+    );
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        // Add shadow to ensure it's visually above navigation bar
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle area - expanded for easier tapping
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              width: double.infinity,
+              alignment: Alignment.center,
+              child: Container(
+                width: 80,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurface.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle area
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Container(
-                    width: 80,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colorScheme.onSurface.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Text(
+              l10n.add_category_bottom_sheet_title,
+              style: theme.textTheme.displayMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              // Title
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                child: Text(
-                  l10n.add_category_bottom_sheet_title,
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              // Form content - use a helper widget to maintain state
-              Flexible(
-                child: Form(
-                  key: formKey,
-                  child: _CategoryFormContent(
-                    formKey: formKey,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    l10n: l10n,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          // Form content - use a helper widget to maintain state
+          Flexible(
+            child: _CategoryFormContent(
+              theme: theme,
+              colorScheme: colorScheme,
+              l10n: l10n,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -91,13 +100,11 @@ class AddCategoryBottomSheet extends StatelessWidget {
 /// Internal widget that maintains form state
 class _CategoryFormContent extends StatefulWidget {
   const _CategoryFormContent({
-    required this.formKey,
     required this.theme,
     required this.colorScheme,
     required this.l10n,
   });
 
-  final GlobalKey<FormState> formKey;
   final ThemeData theme;
   final ColorScheme colorScheme;
   final AppLocalizations l10n;
@@ -134,14 +141,16 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
 
   @override
   Widget build(BuildContext context) {
-    // Get keyboard height for proper scrolling
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
-        bottom: keyboardHeight > 0 ? keyboardHeight + 16 : 0,
+        bottom: keyboardHeight > 0 ? 16 : 24,
+        top: 0,
       ),
       child: ValueListenableBuilder<IconData?>(
         valueListenable: _selectedIconNotifier,
@@ -150,45 +159,40 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
             valueListenable: _selectedTypeNotifier,
             builder: (context, selectedType, _) {
               return Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Name input
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: TextFormField(
-                      controller: _nameController,
-                      focusNode: _nameFocusNode,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.next,
-                      enableInteractiveSelection: true,
-                      style: widget.theme.textTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        labelText: widget.l10n.add_category_name,
-                        hintText: widget.l10n.add_category_name_hint,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        filled: true,
-                        fillColor: widget.colorScheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20,
+                  // Name input field - optimized for mobile keyboard
+                  TextField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
+                    style: widget.theme.textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      labelText: widget.l10n.add_category_name,
+                      hintText: widget.l10n.add_category_name_hint,
+                      filled: true,
+                      fillColor: widget.colorScheme.surface,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: widget.colorScheme.primary,
+                          width: 2,
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a category name';
-                        }
-                        return null;
-                      },
-                      onTap: () {
-                        // Explicitly request focus to show keyboard
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _nameFocusNode.requestFocus();
-                        });
-                      },
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -201,9 +205,9 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                   ),
                   const SizedBox(height: 16),
                   LayoutBuilder(
-                    builder: (context, constraints) {
+                    builder: (context, iconConstraints) {
                       // Calculate exact dimensions for 5 columns × 3 rows
-                      final availableWidth = constraints.maxWidth - 32;
+                      final availableWidth = iconConstraints.maxWidth;
                       final totalSpacing = 4 * 12;
                       final itemSize = (availableWidth - totalSpacing) / 5;
                       final totalHeight = (itemSize * 3) + (2 * 12) + 32;
@@ -324,19 +328,24 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  widget.l10n.add_category_type_deposits,
-                                  style: widget.theme.textTheme.bodyLarge
-                                      ?.copyWith(
-                                        fontWeight:
-                                            selectedType == 'deposits'
-                                                ? FontWeight.w600
-                                                : FontWeight.normal,
-                                        color:
-                                            selectedType == 'deposits'
-                                                ? widget.colorScheme.primary
-                                                : widget.colorScheme.onSurface,
-                                      ),
+                                Flexible(
+                                  child: Text(
+                                    widget.l10n.add_category_type_deposits,
+                                    style: widget.theme.textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight:
+                                              selectedType == 'deposits'
+                                                  ? FontWeight.w600
+                                                  : FontWeight.normal,
+                                          color:
+                                              selectedType == 'deposits'
+                                                  ? widget.colorScheme.primary
+                                                  : widget
+                                                      .colorScheme
+                                                      .onSurface,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),
@@ -376,19 +385,24 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  widget.l10n.add_category_type_expenses,
-                                  style: widget.theme.textTheme.bodyLarge
-                                      ?.copyWith(
-                                        fontWeight:
-                                            selectedType == 'expenses'
-                                                ? FontWeight.w600
-                                                : FontWeight.normal,
-                                        color:
-                                            selectedType == 'expenses'
-                                                ? widget.colorScheme.primary
-                                                : widget.colorScheme.onSurface,
-                                      ),
+                                Flexible(
+                                  child: Text(
+                                    widget.l10n.add_category_type_expenses,
+                                    style: widget.theme.textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight:
+                                              selectedType == 'expenses'
+                                                  ? FontWeight.w600
+                                                  : FontWeight.normal,
+                                          color:
+                                              selectedType == 'expenses'
+                                                  ? widget.colorScheme.primary
+                                                  : widget
+                                                      .colorScheme
+                                                      .onSurface,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),
@@ -427,9 +441,18 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (widget.formKey.currentState!.validate() &&
-                                selectedIcon != null &&
-                                selectedType != null) {
+                            // Validate name manually since we're using TextField
+                            if (_nameController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please enter a category name'),
+                                ),
+                              );
+                              _nameFocusNode.requestFocus();
+                              return;
+                            }
+
+                            if (selectedIcon != null && selectedType != null) {
                               // Save category to Hive
                               final icon = selectedIcon;
                               final type = selectedType;
@@ -462,6 +485,14 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                                   );
                                 }
                               }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please select an icon and type',
+                                  ),
+                                ),
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
