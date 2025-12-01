@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -18,7 +19,7 @@ class SettingPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-          'Settings',
+                'Settings',
                 style: theme.textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -26,6 +27,9 @@ class SettingPage extends StatelessWidget {
               const SizedBox(height: 32),
               // Testing Section
               _buildTestingSection(context, theme, colorScheme),
+              const SizedBox(height: 32),
+              // App Info Section
+              _buildAppInfoSection(context, theme, colorScheme),
             ],
           ),
         ),
@@ -53,6 +57,52 @@ class SettingPage extends StatelessWidget {
     );
   }
 
+  Widget _buildAppInfoSection(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        final packageInfo = snapshot.data;
+        if (packageInfo == null) {
+          return const SizedBox.shrink();
+        }
+
+        final version = packageInfo.version;
+        final buildNumber = packageInfo.buildNumber;
+        final appName = packageInfo.appName;
+
+        return _buildSettingsSection(
+          'App Information',
+          [
+            _buildInfoTile(
+              icon: Icons.info_outline,
+              title: 'App Version',
+              subtitle: '$version ($buildNumber)',
+              theme: theme,
+              colorScheme: colorScheme,
+            ),
+            _buildInfoTile(
+              icon: Icons.phone_android,
+              title: 'App Name',
+              subtitle: appName,
+              theme: theme,
+              colorScheme: colorScheme,
+            ),
+          ],
+          theme,
+          colorScheme,
+        );
+      },
+    );
+  }
+
   Widget _buildSettingsSection(
     String title,
     List<Widget> children,
@@ -62,10 +112,7 @@ class SettingPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: theme.textTheme.titleLarge,
-        ),
+        Text(title, style: theme.textTheme.titleLarge),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
@@ -136,6 +183,51 @@ class SettingPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: colorScheme.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
