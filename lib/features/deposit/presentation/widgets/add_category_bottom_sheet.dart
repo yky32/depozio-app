@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
+import 'package:depozio/features/deposit/data/models/category_model.dart';
+import 'package:depozio/features/deposit/data/services/category_service.dart';
 
 /// Bottom sheet for adding category that covers the navigation bar
 /// This widget is specific to the deposit page
@@ -12,6 +14,7 @@ class AddCategoryBottomSheet extends StatelessWidget {
   /// Maximum height as a percentage of screen height (0.0 to 1.0)
   /// Default is 0.9 (90%)
   final double maxHeightPercentage;
+
 
   // Common icons for categories
   static final List<IconData> _availableIcons = [
@@ -90,6 +93,8 @@ class AddCategoryBottomSheet extends StatelessWidget {
                     // Use ValueNotifier for state management in StatelessWidget
                     final selectedIconNotifier = ValueNotifier<IconData?>(null);
                     final selectedTypeNotifier = ValueNotifier<String?>(null);
+                    final nameController = TextEditingController();
+                    final categoryService = CategoryService();
 
                     return ValueListenableBuilder<IconData?>(
                       valueListenable: selectedIconNotifier,
@@ -107,6 +112,7 @@ class AddCategoryBottomSheet extends StatelessWidget {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
                                     child: TextFormField(
+                                      controller: nameController,
                                       style: theme.textTheme.bodyLarge,
                                       decoration: InputDecoration(
                                         labelText: l10n.add_category_name,
@@ -390,13 +396,41 @@ class AddCategoryBottomSheet extends StatelessWidget {
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: ElevatedButton(
-                                          onPressed: () {
+                                          onPressed: () async {
                                             if (formKey.currentState!
                                                     .validate() &&
                                                 selectedIcon != null &&
                                                 selectedType != null) {
-                                              // TODO: Save category
-                                              Navigator.of(context).pop();
+                                              // Save category to Hive
+                                              final icon = selectedIcon;
+                                              final type = selectedType;
+                                              final category = CategoryModel(
+                                                id: DateTime.now()
+                                                    .millisecondsSinceEpoch
+                                                    .toString(),
+                                                name: nameController.text.trim(),
+                                                iconCodePoint: icon.codePoint,
+                                                type: type,
+                                                createdAt: DateTime.now(),
+                                              );
+
+                                              try {
+                                                await categoryService
+                                                    .addCategory(category);
+                                                if (context.mounted) {
+                                                  Navigator.of(context).pop();
+                                                }
+                                              } catch (e) {
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                          'Failed to save category: $e'),
+                                                    ),
+                                                  );
+                                                }
+                                              }
                                             }
                                           },
                                           style: ElevatedButton.styleFrom(

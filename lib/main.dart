@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/login/bloc/login_bloc.dart';
 import 'package:depozio/core/environment.dart';
 import 'package:depozio/router/app_router.dart';
 import 'package:depozio/core/theme/theme.dart';
+import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive
+  await Hive.initFlutter();
+  
+  // Initialize CategoryService
+  await CategoryService.init();
   
   // Set up error handling
   FlutterError.onError = (FlutterErrorDetails details) {
