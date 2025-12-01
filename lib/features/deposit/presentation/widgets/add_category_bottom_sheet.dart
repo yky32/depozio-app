@@ -78,7 +78,7 @@ class AddCategoryBottomSheet extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Text(
               l10n.add_category_bottom_sheet_title,
-              style: theme.textTheme.displayMedium?.copyWith(
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -184,6 +184,45 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                   ),
                   const SizedBox(height: 32),
                   Text(
+                    widget.l10n.add_category_type,
+                    style: widget.theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTypeButton(
+                          type: 'deposits',
+                          selectedType: selectedType,
+                          icon: Icons.account_balance_wallet,
+                          label: widget.l10n.add_category_type_deposits,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTypeButton(
+                          type: 'expenses',
+                          selectedType: selectedType,
+                          icon: Icons.receipt_long,
+                          label: widget.l10n.add_category_type_expenses,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (selectedType == null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Please select a type',
+                        style: widget.theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.red.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 32),
+                  Text(
                     widget.l10n.add_category_icon,
                     style: widget.theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
@@ -264,45 +303,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         'Please select an icon',
-                        style: widget.theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.red.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 32),
-                  Text(
-                    widget.l10n.add_category_type,
-                    style: widget.theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTypeButton(
-                          type: 'deposits',
-                          selectedType: selectedType,
-                          icon: Icons.account_balance_wallet,
-                          label: widget.l10n.add_category_type_deposits,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildTypeButton(
-                          type: 'expenses',
-                          selectedType: selectedType,
-                          icon: Icons.receipt_long,
-                          label: widget.l10n.add_category_type_expenses,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (selectedType == null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Please select a type',
                         style: widget.theme.textTheme.bodySmall?.copyWith(
                           color: Colors.red.withValues(alpha: 0.7),
                         ),
