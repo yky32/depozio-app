@@ -26,10 +26,8 @@ class AddCategoryBottomSheet extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final keyboardHeight = mediaQuery.viewInsets.bottom;
-    final safeAreaBottom = mediaQuery.padding.bottom;
 
-    // Calculate available height considering keyboard
-    final availableHeight = screenHeight - keyboardHeight - safeAreaBottom;
+    final availableHeight = screenHeight - keyboardHeight;
     final maxHeight = (screenHeight * maxHeightPercentage).clamp(
       0.0,
       availableHeight,
@@ -43,7 +41,6 @@ class AddCategoryBottomSheet extends StatelessWidget {
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
-        // Add shadow to ensure it's visually above navigation bar
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
@@ -55,7 +52,6 @@ class AddCategoryBottomSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle area - expanded for easier tapping
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             behavior: HitTestBehavior.opaque,
@@ -73,7 +69,6 @@ class AddCategoryBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          // Title
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Text(
@@ -83,7 +78,6 @@ class AddCategoryBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          // Form content - use a helper widget to maintain state
           Flexible(
             child: _CategoryFormContent(
               theme: theme,
@@ -141,17 +135,11 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        bottom: keyboardHeight > 0 ? 16 : 24,
-        top: 0,
-      ),
+      padding: EdgeInsets.fromLTRB(24, 0, 24, keyboardHeight > 0 ? 16 : 24),
       child: ValueListenableBuilder<IconData?>(
         valueListenable: _selectedIconNotifier,
         builder: (context, selectedIcon, _) {
@@ -162,12 +150,12 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Name input field - optimized for mobile keyboard
                   TextField(
                     controller: _nameController,
                     focusNode: _nameFocusNode,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
+                    onTapOutside: (event) => _nameFocusNode.unfocus(),
                     style: widget.theme.textTheme.bodyLarge,
                     decoration: InputDecoration(
                       labelText: widget.l10n.add_category_name,
@@ -182,10 +170,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
@@ -196,7 +180,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // Icon selection
                   Text(
                     widget.l10n.add_category_icon,
                     style: widget.theme.textTheme.titleMedium?.copyWith(
@@ -205,11 +188,8 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                   ),
                   const SizedBox(height: 16),
                   LayoutBuilder(
-                    builder: (context, iconConstraints) {
-                      // Calculate exact dimensions for 5 columns × 3 rows
-                      final availableWidth = iconConstraints.maxWidth;
-                      final totalSpacing = 4 * 12;
-                      final itemSize = (availableWidth - totalSpacing) / 5;
+                    builder: (context, constraints) {
+                      final itemSize = (constraints.maxWidth - (4 * 12)) / 5;
                       final totalHeight = (itemSize * 3) + (2 * 12) + 32;
 
                       return Container(
@@ -239,6 +219,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                             final isSelected = selectedIcon == icon;
                             return GestureDetector(
                               onTap: () {
+                                _nameFocusNode.unfocus();
                                 _selectedIconNotifier.value = icon;
                               },
                               child: Container(
@@ -286,7 +267,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       ),
                     ),
                   const SizedBox(height: 32),
-                  // Type selection
                   Text(
                     widget.l10n.add_category_type,
                     style: widget.theme.textTheme.titleMedium?.copyWith(
@@ -297,116 +277,20 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                   Row(
                     children: [
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            _selectedTypeNotifier.value = 'deposits';
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 20,
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  selectedType == 'deposits'
-                                      ? widget.colorScheme.primary.withValues(
-                                        alpha: 0.1,
-                                      )
-                                      : widget.colorScheme.surface,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.account_balance_wallet,
-                                  color:
-                                      selectedType == 'deposits'
-                                          ? widget.colorScheme.primary
-                                          : widget.colorScheme.onSurface
-                                              .withValues(alpha: 0.7),
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Flexible(
-                                  child: Text(
-                                    widget.l10n.add_category_type_deposits,
-                                    style: widget.theme.textTheme.bodyLarge
-                                        ?.copyWith(
-                                          fontWeight:
-                                              selectedType == 'deposits'
-                                                  ? FontWeight.w600
-                                                  : FontWeight.normal,
-                                          color:
-                                              selectedType == 'deposits'
-                                                  ? widget.colorScheme.primary
-                                                  : widget
-                                                      .colorScheme
-                                                      .onSurface,
-                                        ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        child: _buildTypeButton(
+                          type: 'deposits',
+                          selectedType: selectedType,
+                          icon: Icons.account_balance_wallet,
+                          label: widget.l10n.add_category_type_deposits,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            _selectedTypeNotifier.value = 'expenses';
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 20,
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  selectedType == 'expenses'
-                                      ? widget.colorScheme.primary.withValues(
-                                        alpha: 0.1,
-                                      )
-                                      : widget.colorScheme.surface,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.receipt_long,
-                                  color:
-                                      selectedType == 'expenses'
-                                          ? widget.colorScheme.primary
-                                          : widget.colorScheme.onSurface
-                                              .withValues(alpha: 0.7),
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Flexible(
-                                  child: Text(
-                                    widget.l10n.add_category_type_expenses,
-                                    style: widget.theme.textTheme.bodyLarge
-                                        ?.copyWith(
-                                          fontWeight:
-                                              selectedType == 'expenses'
-                                                  ? FontWeight.w600
-                                                  : FontWeight.normal,
-                                          color:
-                                              selectedType == 'expenses'
-                                                  ? widget.colorScheme.primary
-                                                  : widget
-                                                      .colorScheme
-                                                      .onSurface,
-                                        ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        child: _buildTypeButton(
+                          type: 'expenses',
+                          selectedType: selectedType,
+                          icon: Icons.receipt_long,
+                          label: widget.l10n.add_category_type_expenses,
                         ),
                       ),
                     ],
@@ -422,7 +306,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       ),
                     ),
                   const SizedBox(height: 32),
-                  // Action buttons
                   Row(
                     children: [
                       Expanded(
@@ -441,7 +324,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            // Validate name manually since we're using TextField
                             if (_nameController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -452,40 +334,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               return;
                             }
 
-                            if (selectedIcon != null && selectedType != null) {
-                              // Save category to Hive
-                              final icon = selectedIcon;
-                              final type = selectedType;
-                              final iconIndex = CategoryIconHelper.getIconIndex(
-                                icon,
-                              );
-                              final category = CategoryModel(
-                                id:
-                                    DateTime.now().millisecondsSinceEpoch
-                                        .toString(),
-                                name: _nameController.text.trim(),
-                                iconIndex: iconIndex,
-                                type: type,
-                                createdAt: DateTime.now(),
-                              );
-
-                              try {
-                                await _categoryService.addCategory(category);
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Failed to save category: $e',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                            } else {
+                            if (selectedIcon == null || selectedType == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
@@ -493,6 +342,36 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                                   ),
                                 ),
                               );
+                              return;
+                            }
+
+                            final category = CategoryModel(
+                              id:
+                                  DateTime.now().millisecondsSinceEpoch
+                                      .toString(),
+                              name: _nameController.text.trim(),
+                              iconIndex: CategoryIconHelper.getIconIndex(
+                                selectedIcon,
+                              ),
+                              type: selectedType,
+                              createdAt: DateTime.now(),
+                            );
+
+                            try {
+                              await _categoryService.addCategory(category);
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Failed to save category: $e',
+                                    ),
+                                  ),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -512,6 +391,58 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildTypeButton({
+    required String type,
+    required String? selectedType,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = selectedType == type;
+    return GestureDetector(
+      onTap: () {
+        _nameFocusNode.unfocus();
+        _selectedTypeNotifier.value = type;
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? widget.colorScheme.primary.withValues(alpha: 0.1)
+                  : widget.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color:
+                  isSelected
+                      ? widget.colorScheme.primary
+                      : widget.colorScheme.onSurface.withValues(alpha: 0.7),
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                label,
+                style: widget.theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color:
+                      isSelected
+                          ? widget.colorScheme.primary
+                          : widget.colorScheme.onSurface,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
