@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
-import 'category_icon_helper.dart';
+import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
 
 part 'category_model.g.dart';
 
