@@ -33,8 +33,8 @@ Future<bool> showDeleteCategoryDialog(
 }
 
 /// Handles the deletion of a category with confirmation dialog
-/// Shows a snackbar on successful deletion
-Future<void> deleteCategoryWithConfirmation(
+/// Returns true if deletion was successful, false otherwise
+Future<bool> deleteCategoryWithConfirmation(
   BuildContext context,
   CategoryModel category,
   CategoryService categoryService,
@@ -43,14 +43,43 @@ Future<void> deleteCategoryWithConfirmation(
 
   if (confirmed && context.mounted) {
     await categoryService.deleteCategory(category.id);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Category "${category.name}" deleted'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
+    return true;
   }
+  return false;
+}
+
+/// Shows an undo SnackBar after category deletion
+void showUndoSnackBar(
+  BuildContext context,
+  CategoryModel deletedCategory,
+  CategoryService categoryService,
+) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Category "${deletedCategory.name}" deleted'),
+      duration: const Duration(seconds: 4),
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: 16,
+      ),
+      action: SnackBarAction(
+        label: 'UNDO',
+        textColor: colorScheme.primary,
+        onPressed: () async {
+          // Restore the category
+          await categoryService.addCategory(deletedCategory);
+        },
+      ),
+    ),
+  );
 }
 

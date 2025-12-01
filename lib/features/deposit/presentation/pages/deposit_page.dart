@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/presentation/widgets/add_category_bottom_sheet.dart';
-import 'package:depozio/features/deposit/presentation/widgets/swipeable_category_card.dart';
+import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 
@@ -136,7 +136,7 @@ class DepositPage extends StatelessWidget {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final category = categories[index];
-                      return SwipeableCategoryCard(
+                      return SlidableCategoryCard(
                         category: category,
                         theme: theme,
                         colorScheme: colorScheme,
