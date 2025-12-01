@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/presentation/widgets/add_category_bottom_sheet.dart';
-import 'package:depozio/features/deposit/data/models/category_model.dart';
+import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 
 class DepositPage extends StatelessWidget {

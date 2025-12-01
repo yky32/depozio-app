@@ -1,5 +1,5 @@
 import 'package:hive_ce_flutter/hive_flutter.dart' as hive;
-import '../models/category_model.dart';
+import '../models/category_entity.dart';
 
 class CategoryService {
   static const String _boxName = 'categories';

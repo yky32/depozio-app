@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
 
-part 'category_model.g.dart';
+part 'category_entity.g.dart';
 
 @HiveType(typeId: 0)
 class CategoryModel extends HiveObject {
