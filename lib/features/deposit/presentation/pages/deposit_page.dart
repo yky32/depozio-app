@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/presentation/widgets/add_category_bottom_sheet.dart';
+import 'package:depozio/features/deposit/presentation/widgets/swipeable_category_card.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 
@@ -135,71 +136,12 @@ class DepositPage extends StatelessWidget {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final category = categories[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          leading: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              category.icon,
-                              color: colorScheme.primary,
-                              size: 24,
-                            ),
-                          ),
-                          title: Text(
-                            category.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            category.type == 'deposits'
-                                ? l10n.add_category_type_deposits
-                                : l10n.add_category_type_expenses,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  category.type == 'deposits'
-                                      ? Colors.green.withValues(alpha: 0.1)
-                                      : Colors.red.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              category.type == 'deposits'
-                                  ? 'Deposit'
-                                  : 'Expense',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    category.type == 'deposits'
-                                        ? Colors.green
-                                        : Colors.red,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
+                      return SwipeableCategoryCard(
+                        category: category,
+                        theme: theme,
+                        colorScheme: colorScheme,
+                        l10n: l10n,
+                        categoryService: categoryService,
                       );
                     },
                   );
