@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/core/network/logger.dart';
 
 part 'deposit_event.dart';
 part 'deposit_state.dart';
@@ -12,6 +13,7 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
   DepositBloc({CategoryService? categoryService})
     : _categoryService = categoryService ?? CategoryService(),
       super(const DepositInitial()) {
+    LoggerUtil.i('DepositBloc initialized');
     on<LoadDeposits>(_handleLoadDeposits);
     on<RefreshDeposits>(_handleRefreshDeposits);
     on<AddCategory>(_handleAddCategory);
@@ -24,19 +26,31 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     LoadDeposits event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d('📥 LoadDeposits event received');
     emit(const DepositLoading());
+    LoggerUtil.d('📤 State emitted: DepositLoading');
 
     try {
-      // Ensure Hive is initialized
+      LoggerUtil.d('🔧 Initializing Hive...');
       await CategoryService.init();
 
-      // Read all categories from Hive
+      LoggerUtil.d('📖 Reading categories from Hive...');
       final allCategories = _categoryService.getAllCategories();
+      LoggerUtil.i('📦 Loaded ${allCategories.length} categories from Hive');
 
       // Emit the loaded state with all categories
       emit(DepositLoaded(categories: [...allCategories]));
-    } catch (e) {
+      LoggerUtil.d(
+        '📤 State emitted: DepositLoaded with ${allCategories.length} categories',
+      );
+    } catch (e, stackTrace) {
+      LoggerUtil.e(
+        '❌ Error loading deposits',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(DepositError(error: e.toString()));
+      LoggerUtil.d('📤 State emitted: DepositError');
     }
   }
 
@@ -44,16 +58,29 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     RefreshDeposits event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d(
+      '🔄 RefreshDeposits event received, current state: ${state.runtimeType}',
+    );
+
     // If already loaded, keep the loaded state but refresh data
     if (state is DepositLoaded) {
       try {
+        LoggerUtil.d('📖 Refreshing categories from Hive...');
         final categories = _categoryService.getAllCategories();
+        LoggerUtil.i('🔄 Refreshed ${categories.length} categories');
         emit(DepositLoaded(categories: [...categories]));
-      } catch (e) {
+        LoggerUtil.d('📤 State emitted: DepositLoaded (refreshed)');
+      } catch (e, stackTrace) {
+        LoggerUtil.e(
+          '❌ Error refreshing deposits',
+          error: e,
+          stackTrace: stackTrace,
+        );
         emit(DepositError(error: e.toString()));
       }
     } else {
       // If not loaded, trigger load
+      LoggerUtil.d('⚠️ Not loaded yet, triggering LoadDeposits');
       add(LoadDeposits());
     }
   }
@@ -62,18 +89,30 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     AddCategory event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d(
+      '➕ AddCategory event received: ${event.category.name} (id: ${event.category.id}, type: ${event.category.type})',
+    );
+
     try {
       // Ensure Hive is initialized
       await CategoryService.init();
 
       // Add category to Hive
+      LoggerUtil.d('💾 Saving category to Hive...');
       await _categoryService.addCategory(event.category);
+      LoggerUtil.i('✅ Category added to Hive: ${event.category.name}');
 
       // Refresh the list after adding
       final categories = _categoryService.getAllCategories();
+      LoggerUtil.d('📊 Total categories after add: ${categories.length}');
       emit(DepositLoaded(categories: [...categories]));
-    } catch (e) {
+      LoggerUtil.d(
+        '📤 State emitted: DepositLoaded with ${categories.length} categories',
+      );
+    } catch (e, stackTrace) {
+      LoggerUtil.e('❌ Error adding category', error: e, stackTrace: stackTrace);
       emit(DepositError(error: e.toString()));
+      LoggerUtil.d('📤 State emitted: DepositError');
     }
   }
 
@@ -81,20 +120,36 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     DeleteCategory event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d(
+      '🗑️ DeleteCategory event received: categoryId=${event.categoryId}',
+    );
+
     try {
       // Delete category from Hive
+      LoggerUtil.d('💾 Deleting category from Hive...');
       await _categoryService.deleteCategory(event.categoryId);
+      LoggerUtil.i('✅ Category deleted from Hive: ${event.categoryId}');
 
       // Small delay to ensure Hive write is complete
       await Future.delayed(const Duration(milliseconds: 50));
 
       // Refresh the list after deleting
       final categories = _categoryService.getAllCategories();
+      LoggerUtil.d('📊 Total categories after delete: ${categories.length}');
 
       // Emit new state with updated list
       emit(DepositLoaded(categories: List.from(categories)));
-    } catch (e) {
+      LoggerUtil.d(
+        '📤 State emitted: DepositLoaded with ${categories.length} categories',
+      );
+    } catch (e, stackTrace) {
+      LoggerUtil.e(
+        '❌ Error deleting category',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(DepositError(error: e.toString()));
+      LoggerUtil.d('📤 State emitted: DepositError');
     }
   }
 
@@ -102,15 +157,27 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     UpdateCategory event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d(
+      '✏️ UpdateCategory event received: ${event.category.name} (id: ${event.category.id})',
+    );
+
     try {
       // Update category in Hive
+      LoggerUtil.d('💾 Updating category in Hive...');
       await _categoryService.addCategory(event.category);
+      LoggerUtil.i('✅ Category updated in Hive: ${event.category.name}');
 
       // Refresh the list after updating
       final categories = _categoryService.getAllCategories();
-
+      LoggerUtil.d('📊 Total categories after update: ${categories.length}');
       emit(DepositLoaded(categories: [...categories]));
-    } catch (e) {
+      LoggerUtil.d('📤 State emitted: DepositLoaded');
+    } catch (e, stackTrace) {
+      LoggerUtil.e(
+        '❌ Error updating category',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(DepositError(error: e.toString()));
     }
   }
@@ -119,15 +186,27 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
     RestoreCategory event,
     Emitter<DepositState> emit,
   ) async {
+    LoggerUtil.d(
+      '↩️ RestoreCategory event received: ${event.category.name} (id: ${event.category.id})',
+    );
+
     try {
       // Restore category to Hive
+      LoggerUtil.d('💾 Restoring category to Hive...');
       await _categoryService.addCategory(event.category);
+      LoggerUtil.i('✅ Category restored to Hive: ${event.category.name}');
 
       // Refresh the list after restoring
       final categories = _categoryService.getAllCategories();
-
+      LoggerUtil.d('📊 Total categories after restore: ${categories.length}');
       emit(DepositLoaded(categories: [...categories]));
-    } catch (e) {
+      LoggerUtil.d('📤 State emitted: DepositLoaded');
+    } catch (e, stackTrace) {
+      LoggerUtil.e(
+        '❌ Error restoring category',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(DepositError(error: e.toString()));
     }
   }

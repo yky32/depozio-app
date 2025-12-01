@@ -5,6 +5,7 @@ import 'package:depozio/features/deposit/presentation/widgets/add_category_botto
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
+import 'package:depozio/core/network/logger.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -18,8 +19,10 @@ class DepositPage extends StatelessWidget {
   }
 
   void _showAddCategoryBottomSheet(BuildContext context) {
+    LoggerUtil.d('📝 Opening add category bottom sheet');
     // Get the BLoC instance from the current context
     final depositBloc = context.read<DepositBloc>();
+    LoggerUtil.d('✅ BLoC obtained for bottom sheet');
     
     showModalBottomSheet(
       context: context,
@@ -77,16 +80,26 @@ class DepositPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
 
+    LoggerUtil.i('🏗️ Building DepositPage');
+    
     return BlocProvider(
-      create: (context) => DepositBloc()..add(LoadDeposits()),
+      create: (context) {
+        LoggerUtil.d('🔧 Creating DepositBloc instance');
+        return DepositBloc()..add(LoadDeposits());
+      },
         child: BlocListener<DepositBloc, DepositState>(
         listenWhen: (previous, current) {
           // Only listen to errors that occur after initial load
           // This prevents showing snackbar for initial load errors
-          return current is DepositError && previous is! DepositInitial;
+          if (current is DepositError && previous is! DepositInitial) {
+            LoggerUtil.w('⚠️ Error state detected: ${current.error}');
+            return true;
+          }
+          return false;
         },
         listener: (context, state) {
           if (state is DepositError) {
+            LoggerUtil.e('❌ Showing error snackbar: ${state.error}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Error: ${state.error}'),
@@ -130,19 +143,26 @@ class DepositPage extends StatelessWidget {
                   buildWhen: (previous, current) {
                     // Always rebuild on state type changes
                     if (previous.runtimeType != current.runtimeType) {
+                      LoggerUtil.d('🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}');
                       return true;
                     }
                     // For DepositLoaded states, rebuild when list changes
                     if (previous is DepositLoaded && current is DepositLoaded) {
                       final lengthChanged = previous.categories.length != current.categories.length;
                       final contentChanged = !_listsEqual(previous.categories, current.categories);
+                      if (lengthChanged || contentChanged) {
+                        LoggerUtil.d('🔄 List changed: ${previous.categories.length} -> ${current.categories.length} items');
+                      }
                       return lengthChanged || contentChanged;
                     }
                     return false;
                   },
                   builder: (context, state) {
+                    LoggerUtil.d('🎨 BlocBuilder building with state: ${state.runtimeType}');
+                    
                     // Show loading indicator
                     if (state is DepositLoading) {
+                      LoggerUtil.d('⏳ Showing loading indicator');
                       return Center(
                         child: CircularProgressIndicator(
                           color: colorScheme.primary,
@@ -152,6 +172,7 @@ class DepositPage extends StatelessWidget {
 
                     // Show error state
                     if (state is DepositError) {
+                      LoggerUtil.w('⚠️ Showing error state: ${state.error}');
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -194,8 +215,10 @@ class DepositPage extends StatelessWidget {
 
                     if (state is DepositLoaded) {
                       final categories = state.categories;
+                      LoggerUtil.d('📋 Rendering ${categories.length} categories');
 
                       if (categories.isEmpty) {
+                        LoggerUtil.d('📭 Showing empty state');
                         return Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -228,6 +251,7 @@ class DepositPage extends StatelessWidget {
                         );
                       }
 
+                      LoggerUtil.d('📜 Building ListView with ${categories.length} items');
                       return ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: categories.length,

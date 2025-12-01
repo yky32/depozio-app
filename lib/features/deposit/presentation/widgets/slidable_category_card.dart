@@ -4,6 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
+import 'package:depozio/core/network/logger.dart';
 
 /// A professional slidable card widget for category items
 /// Swipe left = Edit + Archive
@@ -24,32 +25,44 @@ class SlidableCategoryCard extends StatelessWidget {
   final dynamic l10n; // AppLocalizations
 
   Future<void> _handleDelete(BuildContext context) async {
+    LoggerUtil.d('🗑️ Delete action triggered for category: ${category.name} (id: ${category.id})');
+    
     // Get BLoC reference before showing dialog to avoid context issues
     final bloc = context.read<DepositBloc>();
+    LoggerUtil.d('✅ BLoC obtained for delete operation');
     final deletedCategory = category;
     
     // Show confirmation dialog
+    LoggerUtil.d('💬 Showing delete confirmation dialog');
     final confirmed = await showDeleteCategoryDialog(context, category);
     
     if (!confirmed) {
+      LoggerUtil.d('❌ Delete cancelled by user');
       return;
     }
     
+    LoggerUtil.i('✅ Delete confirmed, dispatching DeleteCategory event');
     try {
       // Delete via BLoC
       bloc.add(DeleteCategory(categoryId: category.id));
+      LoggerUtil.d('📤 DeleteCategory event dispatched');
       
       // Show undo SnackBar
       if (context.mounted) {
+        LoggerUtil.d('📢 Showing undo snackbar');
         showUndoSnackBar(
           context,
           deletedCategory,
           onCategoryRestored: () {
+            LoggerUtil.i('↩️ Undo clicked, restoring category: ${deletedCategory.name}');
             bloc.add(RestoreCategory(category: deletedCategory));
           },
         );
+      } else {
+        LoggerUtil.w('⚠️ Context not mounted, skipping snackbar');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      LoggerUtil.e('❌ Error in delete handler', error: e, stackTrace: stackTrace);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

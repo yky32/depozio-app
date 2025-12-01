@@ -5,6 +5,7 @@ import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
+import 'package:depozio/core/network/logger.dart';
 
 /// Bottom sheet for adding category that covers the navigation bar
 /// This widget is specific to the deposit page
@@ -359,13 +360,29 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               createdAt: DateTime.now(),
                             );
 
-                            // Add category via BLoC
-                            context.read<DepositBloc>().add(
-                                  AddCategory(category: category),
-                                );
+                            LoggerUtil.d('➕ Creating category: ${category.name} (type: ${category.type}, id: ${category.id})');
                             
-                            if (context.mounted) {
-                              Navigator.of(context).pop();
+                            // Add category via BLoC
+                            try {
+                              final bloc = context.read<DepositBloc>();
+                              LoggerUtil.d('✅ BLoC obtained, dispatching AddCategory event');
+                              bloc.add(AddCategory(category: category));
+                              LoggerUtil.i('📤 AddCategory event dispatched');
+                              
+                              if (context.mounted) {
+                                LoggerUtil.d('🚪 Closing bottom sheet');
+                                Navigator.of(context).pop();
+                              }
+                            } catch (e, stackTrace) {
+                              LoggerUtil.e('❌ Error adding category', error: e, stackTrace: stackTrace);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
