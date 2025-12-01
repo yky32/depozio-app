@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 part 'category_model.g.dart';
 
@@ -29,10 +29,7 @@ class CategoryModel extends HiveObject {
   });
 
   // Getter for IconData (not stored directly, reconstructed from codePoint)
-  IconData get icon => IconData(
-        iconCodePoint,
-        fontFamily: 'MaterialIcons',
-      );
+  IconData get icon => IconData(iconCodePoint, fontFamily: 'MaterialIcons');
 
   // Create a copy with updated fields
   CategoryModel copyWith({
@@ -51,4 +48,3 @@ class CategoryModel extends HiveObject {
     );
   }
 }
-

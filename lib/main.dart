@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart' as hive;
 import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/login/bloc/login_bloc.dart';
 import 'package:depozio/core/environment.dart';
@@ -11,20 +11,20 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Hive
-  await Hive.initFlutter();
-  
+
+  // Initialize Hive CE
+  await hive.Hive.initFlutter();
+
   // Initialize CategoryService
   await CategoryService.init();
-  
+
   // Set up error handling
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint('Flutter Error: ${details.exception}');
     debugPrint('Stack trace: ${details.stack}');
   };
-  
+
   // Load environment variables with error handling
   try {
     await Environment.load();
@@ -32,11 +32,9 @@ void main() async {
     // Log error but don't crash - app can work without env vars if needed
     debugPrint('Error loading environment: $e');
   }
-  
+
   // Wrap app in error boundary
-  runApp(
-    const MyApp(),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -46,9 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LoginBloc>(
-          create: (BuildContext context) => LoginBloc(),
-        ),
+        BlocProvider<LoginBloc>(create: (BuildContext context) => LoginBloc()),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
@@ -67,7 +63,11 @@ class MyApp extends StatelessWidget {
         builder: (context, child) {
           // Add error handling widget
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.of(context).textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.0)),
+            data: MediaQuery.of(context).copyWith(
+              textScaler: MediaQuery.of(
+                context,
+              ).textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.0),
+            ),
             child: child ?? const SizedBox.shrink(),
           );
         },

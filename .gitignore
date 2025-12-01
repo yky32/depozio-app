@@ -33,6 +33,11 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Generated files
+*.g.dart
+*.freezed.dart
+*.config.dart
+
 # Symbolication related
 app.*.symbols
 
@@ -58,3 +63,6 @@ ios/fastlane/test_output
 **/private_keys/
 **/*.p8
 **/*.p12
+**/*.mobileprovision
+**/*.cer
+**/*.certSigningRequest

@@ -1,9 +1,9 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart' as hive;
 import '../models/category_model.dart';
 
 class CategoryService {
   static const String _boxName = 'categories';
-  static Box<CategoryModel>? _box;
+  static hive.Box<CategoryModel>? _box;
   static bool _initialized = false;
 
   /// Initialize the Hive box for categories (singleton pattern)
@@ -11,15 +11,15 @@ class CategoryService {
     if (_initialized && _box != null) {
       return;
     }
-    if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(CategoryModelAdapter());
+    if (!hive.Hive.isAdapterRegistered(0)) {
+      hive.Hive.registerAdapter(CategoryModelAdapter());
     }
-    _box = await Hive.openBox<CategoryModel>(_boxName);
+    _box = await hive.Hive.openBox<CategoryModel>(_boxName);
     _initialized = true;
   }
 
   /// Get the box instance
-  Box<CategoryModel>? get box => _box;
+  hive.Box<CategoryModel>? get box => _box;
 
   /// Get all categories
   List<CategoryModel> getAllCategories() {
@@ -70,7 +70,7 @@ class CategoryService {
   }
 
   /// Watch categories (for reactive updates)
-  Stream<BoxEvent> watchCategories() {
+  Stream<hive.BoxEvent> watchCategories() {
     if (_box == null) {
       return const Stream.empty();
     }
@@ -85,4 +85,3 @@ class CategoryService {
     return _box!.watch().map((event) => getAllCategories());
   }
 }
-
