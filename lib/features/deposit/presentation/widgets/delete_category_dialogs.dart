@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
-import 'package:depozio/features/deposit/data/services/category_service.dart';
 
 /// Shows a confirmation dialog for deleting a category
 /// Returns true if the user confirmed the deletion, false otherwise
@@ -32,28 +31,13 @@ Future<bool> showDeleteCategoryDialog(
   return confirmed ?? false;
 }
 
-/// Handles the deletion of a category with confirmation dialog
-/// Returns true if deletion was successful, false otherwise
-Future<bool> deleteCategoryWithConfirmation(
-  BuildContext context,
-  CategoryModel category,
-  CategoryService categoryService,
-) async {
-  final confirmed = await showDeleteCategoryDialog(context, category);
-
-  if (confirmed && context.mounted) {
-    await categoryService.deleteCategory(category.id);
-    return true;
-  }
-  return false;
-}
 
 /// Shows an undo SnackBar after category deletion
 void showUndoSnackBar(
   BuildContext context,
-  CategoryModel deletedCategory,
-  CategoryService categoryService,
-) {
+  CategoryModel deletedCategory, {
+  required VoidCallback onCategoryRestored,
+}) {
   final theme = Theme.of(context);
   final colorScheme = theme.colorScheme;
 
@@ -74,9 +58,9 @@ void showUndoSnackBar(
       action: SnackBarAction(
         label: 'UNDO',
         textColor: colorScheme.primary,
-        onPressed: () async {
-          // Restore the category
-          await categoryService.addCategory(deletedCategory);
+        onPressed: () {
+          // Trigger callback to restore via BLoC
+          onCategoryRestored();
         },
       ),
     ),

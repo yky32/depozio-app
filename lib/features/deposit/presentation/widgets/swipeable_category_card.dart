@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
-import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
+import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 
 /// A swipeable card widget for category items with delete functionality
 class SwipeableCategoryCard extends StatefulWidget {
@@ -11,14 +12,12 @@ class SwipeableCategoryCard extends StatefulWidget {
     required this.theme,
     required this.colorScheme,
     required this.l10n,
-    required this.categoryService,
   });
 
   final CategoryModel category;
   final ThemeData theme;
   final ColorScheme colorScheme;
   final dynamic l10n; // AppLocalizations
-  final CategoryService categoryService;
 
   @override
   State<SwipeableCategoryCard> createState() => _SwipeableCategoryCardState();
@@ -64,12 +63,23 @@ class _SwipeableCategoryCardState extends State<SwipeableCategoryCard>
   }
 
   Future<void> _handleDelete() async {
-    await deleteCategoryWithConfirmation(
-      context,
-      widget.category,
-      widget.categoryService,
-    );
-    if (mounted) {
+    final deletedCategory = widget.category;
+    final confirmed = await showDeleteCategoryDialog(context, widget.category);
+    
+    if (confirmed && mounted) {
+      // Delete via BLoC
+      context.read<DepositBloc>().add(DeleteCategory(categoryId: widget.category.id));
+      
+      // Show undo SnackBar
+      showUndoSnackBar(
+        context,
+        deletedCategory,
+        onCategoryRestored: () {
+          // Restore via BLoC
+          context.read<DepositBloc>().add(RestoreCategory(category: deletedCategory));
+        },
+      );
+      
       _resetPosition();
     }
   }

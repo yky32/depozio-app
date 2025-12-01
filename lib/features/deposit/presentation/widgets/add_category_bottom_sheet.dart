@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
-import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 
 /// Bottom sheet for adding category that covers the navigation bar
 /// This widget is specific to the deposit page
 class AddCategoryBottomSheet extends StatelessWidget {
-  const AddCategoryBottomSheet({super.key, this.maxHeightPercentage = 0.9});
+  const AddCategoryBottomSheet({
+    super.key,
+    this.maxHeightPercentage = 0.9,
+  });
 
   /// Maximum height as a percentage of screen height (0.0 to 1.0)
   /// Default is 0.9 (90%)
@@ -112,7 +116,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
   late final FocusNode _nameFocusNode;
   late final ValueNotifier<IconData?> _selectedIconNotifier;
   late final ValueNotifier<String?> _selectedTypeNotifier;
-  late final CategoryService _categoryService;
 
   @override
   void initState() {
@@ -121,7 +124,6 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
     _nameFocusNode = FocusNode();
     _selectedIconNotifier = ValueNotifier<IconData?>(null);
     _selectedTypeNotifier = ValueNotifier<String?>(null);
-    _categoryService = CategoryService();
   }
 
   @override
@@ -357,21 +359,13 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               createdAt: DateTime.now(),
                             );
 
-                            try {
-                              await _categoryService.addCategory(category);
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Failed to save category: $e',
-                                    ),
-                                  ),
+                            // Add category via BLoC
+                            context.read<DepositBloc>().add(
+                                  AddCategory(category: category),
                                 );
-                              }
+                            
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
                             }
                           },
                           style: ElevatedButton.styleFrom(

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
-import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
+import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 
 /// A professional slidable card widget for category items
 /// Swipe left = Edit + Archive
@@ -15,27 +16,48 @@ class SlidableCategoryCard extends StatelessWidget {
     required this.theme,
     required this.colorScheme,
     required this.l10n,
-    required this.categoryService,
-    this.onCategoryDeleted,
   });
 
   final CategoryModel category;
   final ThemeData theme;
   final ColorScheme colorScheme;
   final dynamic l10n; // AppLocalizations
-  final CategoryService categoryService;
-  final Function(CategoryModel)? onCategoryDeleted;
 
   Future<void> _handleDelete(BuildContext context) async {
+    // Get BLoC reference before showing dialog to avoid context issues
+    final bloc = context.read<DepositBloc>();
     final deletedCategory = category;
-    final deleted = await deleteCategoryWithConfirmation(
-      context,
-      category,
-      categoryService,
-    );
-    // Show undo SnackBar if deletion was successful
-    if (deleted && context.mounted) {
-      showUndoSnackBar(context, deletedCategory, categoryService);
+    
+    // Show confirmation dialog
+    final confirmed = await showDeleteCategoryDialog(context, category);
+    
+    if (!confirmed) {
+      return;
+    }
+    
+    try {
+      // Delete via BLoC
+      bloc.add(DeleteCategory(categoryId: category.id));
+      
+      // Show undo SnackBar
+      if (context.mounted) {
+        showUndoSnackBar(
+          context,
+          deletedCategory,
+          onCategoryRestored: () {
+            bloc.add(RestoreCategory(category: deletedCategory));
+          },
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting category: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
