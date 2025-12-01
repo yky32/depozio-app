@@ -15,9 +15,13 @@ class DepositPage extends StatelessWidget {
       isDismissible: true,
       enableDrag: true,
       useRootNavigator: true,
-      builder: (context) => const AddCategoryBottomSheet(
-        maxHeightPercentage: 0.9,
-      ),
+      builder:
+          (context) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const AddCategoryBottomSheet(maxHeightPercentage: 0.9),
+          ),
     );
   }
 
@@ -77,14 +81,18 @@ class DepositPage extends StatelessWidget {
                           Text(
                             'No categories yet',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Tap the + button to add a category',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -131,7 +139,9 @@ class DepositPage extends StatelessWidget {
                                 ? l10n.add_category_type_deposits
                                 : l10n.add_category_type_expenses,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                           ),
                           trailing: Container(
@@ -140,9 +150,10 @@ class DepositPage extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: category.type == 'deposits'
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.red.withValues(alpha: 0.1),
+                              color:
+                                  category.type == 'deposits'
+                                      ? Colors.green.withValues(alpha: 0.1)
+                                      : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -150,9 +161,10 @@ class DepositPage extends StatelessWidget {
                                   ? 'Deposit'
                                   : 'Expense',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: category.type == 'deposits'
-                                    ? Colors.green
-                                    : Colors.red,
+                                color:
+                                    category.type == 'deposits'
+                                        ? Colors.green
+                                        : Colors.red,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

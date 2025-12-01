@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
+import 'category_icon_helper.dart';
 
 part 'category_model.g.dart';
 
@@ -12,7 +13,7 @@ class CategoryModel extends HiveObject {
   final String name;
 
   @HiveField(2)
-  final int iconCodePoint;
+  final int iconIndex; // Changed from iconCodePoint to iconIndex
 
   @HiveField(3)
   final String type; // 'deposits' or 'expenses'
@@ -23,26 +24,26 @@ class CategoryModel extends HiveObject {
   CategoryModel({
     required this.id,
     required this.name,
-    required this.iconCodePoint,
+    required this.iconIndex,
     required this.type,
     required this.createdAt,
   });
 
-  // Getter for IconData (not stored directly, reconstructed from codePoint)
-  IconData get icon => IconData(iconCodePoint, fontFamily: 'MaterialIcons');
+  // Getter for IconData (uses constant IconData for tree-shaking compatibility)
+  IconData get icon => CategoryIconHelper.getIconByIndex(iconIndex);
 
   // Create a copy with updated fields
   CategoryModel copyWith({
     String? id,
     String? name,
-    int? iconCodePoint,
+    int? iconIndex,
     String? type,
     DateTime? createdAt,
   }) {
     return CategoryModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      iconCodePoint: iconCodePoint ?? this.iconCodePoint,
+      iconIndex: iconIndex ?? this.iconIndex,
       type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
     );
