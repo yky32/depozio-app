@@ -4,9 +4,9 @@
 app_identifier("com.depozio") # The bundle identifier of your app
 apple_id(ENV["FASTLANE_USER"] || "wayneyu.dev@gmail.com") # Your Apple email address
 
-# Specify team ID
+# Specify team ID (for code signing)
 team_id("3G34999H3A")
 
-# Uncomment the following line if you want to specify a team name
-# team_name("YOUR_TEAM_NAME")
+# Specify App Store Connect team ID (for App Store operations)
+itc_team_id("128328295") # "KAI YIN YU"
 
