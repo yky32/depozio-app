@@ -6,6 +6,8 @@ import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/select_category_bottom_sheet.dart';
 import 'package:depozio/features/transaction/presentation/bloc/transaction_bloc.dart';
 import 'package:depozio/features/transaction/data/currency_helper.dart';
+import 'package:depozio/features/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/transaction/data/models/transaction_entity.dart';
 
 /// Bottom sheet that appears when the nav bar action button is clicked
 /// Used for recording transactions (amount + category)
@@ -584,27 +586,49 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           return;
                         }
 
-                        // TODO: Save transaction to database
-                        // For now, just show a success message
-                        if (context.mounted) {
-                          final currencySymbol = CurrencyHelper.getSymbol(
-                            currentState.currencyCode,
+                        // Save transaction to Hive
+                        try {
+                          await TransactionService.init();
+                          final transaction = TransactionModel(
+                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            amount: amount,
+                            currencyCode: currentState.currencyCode,
+                            categoryId: currentState.selectedCategory!.id,
+                            createdAt: DateTime.now(),
                           );
-                          final amountText =
-                              '$currencySymbol${amount.toStringAsFixed(2)}';
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.transaction_recorded(
-                                  amountText,
-                                  currentState.selectedCategory!.name,
+                          await TransactionService().addTransaction(transaction);
+
+                          if (context.mounted) {
+                            final currencySymbol = CurrencyHelper.getSymbol(
+                              currentState.currencyCode,
+                            );
+                            final amountText =
+                                '$currencySymbol${amount.toStringAsFixed(2)}';
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.transaction_recorded(
+                                    amountText,
+                                    currentState.selectedCategory!.name,
+                                  ),
                                 ),
+                                backgroundColor: Colors.green,
                               ),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          bloc.add(const ResetTransaction());
-                          Navigator.of(context).pop();
+                            );
+                            bloc.add(const ResetTransaction());
+                            Navigator.of(context).pop();
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Error saving transaction: ${e.toString()}',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

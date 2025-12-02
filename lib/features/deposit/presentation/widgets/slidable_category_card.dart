@@ -5,6 +5,7 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
+import 'package:depozio/features/transaction/presentation/pages/transactions_list_page.dart';
 import 'package:depozio/core/network/logger.dart';
 
 /// A professional slidable card widget for category items
@@ -177,7 +178,18 @@ class SlidableCategoryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             clipBehavior: Clip.antiAlias,
-            child: ListTile(
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => TransactionsListPage(
+                      category: category,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 12,
@@ -232,6 +244,7 @@ class SlidableCategoryCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ),

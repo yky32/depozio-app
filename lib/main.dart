@@ -7,6 +7,7 @@ import 'package:depozio/core/environment.dart';
 import 'package:depozio/router/app_router.dart';
 import 'package:depozio/core/theme/theme.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/features/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/services/locale_service.dart';
 import 'package:depozio/core/bloc/app_core_bloc.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -22,6 +23,9 @@ void main() async {
 
   // Initialize CategoryService
   await CategoryService.init();
+
+  // Initialize TransactionService
+  await TransactionService.init();
 
   // Set up error handling
   FlutterError.onError = (FlutterErrorDetails details) {
