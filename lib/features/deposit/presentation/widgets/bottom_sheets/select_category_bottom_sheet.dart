@@ -3,6 +3,7 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 
 /// Bottom sheet for selecting a category from a list
+/// Common reusable widget - used across multiple features
 class SelectCategoryBottomSheet extends StatelessWidget {
   const SelectCategoryBottomSheet({
     super.key,

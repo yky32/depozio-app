@@ -12,6 +12,35 @@ v2
 - Forms with [`flutter_form_builder`](https://pub.dev/packages/flutter_form_builder) and [`form_builder_validators`](https://pub.dev/packages/form_builder_validators)
 - Toggle environment variables with a single argument (`--dart-define=ENV=dev`, `--dart-define=ENV=stag`, `--dart-define=ENV=prod`)
 
+## 🎨 Design Practices
+
+### Common Reusable Widgets Naming Convention
+
+All common reusable widgets that are shared across multiple features or used in different parts of the application should be placed in the `lib/widgets/` directory and documented with comments indicating their shared usage.
+
+**Examples:**
+- `SelectCurrencyBottomSheet` - Currency selector used across multiple features (located in `lib/widgets/bottom_sheets/`)
+- `SelectCategoryBottomSheet` - Category selector used in transaction forms (located in `lib/widgets/` or feature-specific location)
+
+**Guidelines:**
+- Place common reusable widgets in `lib/widgets/` directory
+- Add documentation comments indicating the widget is shared/common
+- Use clear, descriptive names without special prefixes
+- Feature-specific widgets should be placed in their respective feature directories
+
+**When a widget is considered "common/reusable":**
+- ✅ Widget is located in `lib/widgets/` (shared widgets directory)
+- ✅ Widget is used in 2+ different features or unrelated parts of the app
+- ✅ Widget provides generic functionality that can be reused
+- ✅ Widget has documentation indicating it's a shared component
+
+**When a widget is feature-specific:**
+- ❌ Widget is only used within one feature (place in feature directory)
+- ❌ Widget is a private implementation detail (use single `_` for private, library-scoped)
+- ❌ Widget is a one-off component with no reuse potential
+
+**Note:** Dart's privacy rules mean that `_` prefix makes classes library-private (only accessible within the same file). For cross-file reusable widgets, use public class names without special prefixes and rely on directory structure and documentation to indicate their shared nature.
+
 ## 📋 Prerequisites
 
 Before setting up the project, ensure you have the following installed:

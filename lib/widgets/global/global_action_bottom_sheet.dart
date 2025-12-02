@@ -4,6 +4,7 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/select_category_bottom_sheet.dart';
+import 'package:depozio/widgets/bottom_sheets/select_currency_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/presentation/bloc/transaction_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
@@ -131,132 +132,14 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
-          decoration: BoxDecoration(
-            color: widget.theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Container(
-                  width: 80,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: widget.colorScheme.onSurface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                child: Text(
-                  context.l10n.transaction_select_currency,
-                  style: widget.theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  itemCount: CurrencyHelper.currencies.length,
-                  itemBuilder: (context, index) {
-                    final currencyCode = CurrencyHelper.currencies.keys
-                        .elementAt(index);
-                    final flag = CurrencyHelper.getFlag(currencyCode);
-                    final symbol = CurrencyHelper.getSymbol(currencyCode);
-                    final currencyName = CurrencyHelper.getName(
-                      currencyCode,
-                      context.l10n,
-                    );
-                    final isSelected = currentCurrency == currencyCode;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: GestureDetector(
-                        onTap: () {
-                          bloc.add(SelectCurrency(currencyCode: currencyCode));
-                          Navigator.of(context).pop(currencyCode);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? widget.colorScheme.primary.withValues(
-                                      alpha: 0.1,
-                                    )
-                                    : widget.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color:
-                                  isSelected
-                                      ? widget.colorScheme.primary
-                                      : widget.colorScheme.outline.withValues(
-                                        alpha: 0.2,
-                                      ),
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(flag, style: const TextStyle(fontSize: 24)),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      currencyName,
-                                      style: widget.theme.textTheme.bodyLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '$currencyCode • $symbol',
-                                      style: widget.theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: widget.colorScheme.onSurface
-                                                .withValues(alpha: 0.6),
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(
-                                  Icons.check_circle,
-                                  color: widget.colorScheme.primary,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
+      builder: (BuildContext context) {
+        return SelectCurrencyBottomSheet(currentCurrency: currentCurrency);
       },
-    );
+    ).then((selectedCurrency) {
+      if (selectedCurrency != null) {
+        bloc.add(SelectCurrency(currencyCode: selectedCurrency));
+      }
+    });
   }
 
   Future<void> _showCategorySelection(BuildContext context) async {
@@ -285,11 +168,12 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      builder:
-          (context) => SelectCategoryBottomSheet(
-            categories: categories,
-            maxHeightPercentage: 0.7,
-          ),
+      builder: (BuildContext context) {
+        return SelectCategoryBottomSheet(
+          categories: categories,
+          maxHeightPercentage: 0.7,
+        );
+      },
     );
 
     if (selectedCategory != null) {
