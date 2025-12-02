@@ -19,12 +19,14 @@ class SlidableCategoryCard extends StatelessWidget {
     required this.theme,
     required this.colorScheme,
     required this.l10n,
+    this.transactionCount = 0,
   });
 
   final CategoryModel category;
   final ThemeData theme;
   final ColorScheme colorScheme;
   final dynamic l10n; // AppLocalizations
+  final int transactionCount;
 
   Future<void> _handleDelete(BuildContext context) async {
     LoggerUtil.d(
@@ -221,28 +223,54 @@ class SlidableCategoryCard extends StatelessWidget {
                   color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color:
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Transaction count badge
+                  if (transactionCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$transactionCount',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  if (transactionCount > 0) const SizedBox(width: 8),
+                  // Type badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          category.type == 'deposits'
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
                       category.type == 'deposits'
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  category.type == 'deposits'
-                      ? l10n.slidable_category_type_deposit
-                      : l10n.slidable_category_type_expense,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color:
-                        category.type == 'deposits' ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.w500,
+                          ? l10n.slidable_category_type_deposit
+                          : l10n.slidable_category_type_expense,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color:
+                            category.type == 'deposits' ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
             ),

@@ -5,6 +5,7 @@ import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
+import 'package:depozio/features/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
 
 class DepositPage extends StatelessWidget {
@@ -278,6 +279,10 @@ class DepositPage extends StatelessWidget {
                               LoggerUtil.d(
                                 '📜 Building ListView with ${categories.length} items',
                               );
+                              // Initialize TransactionService to get counts
+                              TransactionService.init();
+                              final transactionService = TransactionService();
+                              
                               return ListView.builder(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
@@ -285,11 +290,14 @@ class DepositPage extends StatelessWidget {
                                 itemCount: categories.length,
                                 itemBuilder: (context, index) {
                                   final category = categories[index];
+                                  final transactionCount = transactionService
+                                      .getTransactionCountByCategoryId(category.id);
                                   return SlidableCategoryCard(
                                     category: category,
                                     theme: theme,
                                     colorScheme: colorScheme,
                                     l10n: l10n,
+                                    transactionCount: transactionCount,
                                   );
                                 },
                               );

@@ -40,6 +40,16 @@ class TransactionService {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
+  /// Get transaction count by category ID
+  int getTransactionCountByCategoryId(String categoryId) {
+    if (_box == null) {
+      return 0;
+    }
+    return _box!.values
+        .where((transaction) => transaction.categoryId == categoryId)
+        .length;
+  }
+
   /// Add a new transaction
   Future<void> addTransaction(TransactionModel transaction) async {
     if (_box == null) {
