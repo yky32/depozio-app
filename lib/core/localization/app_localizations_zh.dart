@@ -73,6 +73,74 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get add_category_type_expenses => '支出';
+
+  @override
+  String get transaction_record_title => '記錄交易';
+
+  @override
+  String get transaction_amount => '金額';
+
+  @override
+  String get transaction_category => '類別';
+
+  @override
+  String get transaction_select_currency => '選擇貨幣';
+
+  @override
+  String get transaction_select_category => '選擇類別';
+
+  @override
+  String get transaction_select_category_placeholder => '選擇一個類別';
+
+  @override
+  String get transaction_please_select_category => '請選擇一個類別';
+
+  @override
+  String get transaction_please_enter_amount => '請輸入金額';
+
+  @override
+  String get transaction_please_enter_valid_amount => '請輸入有效的金額';
+
+  @override
+  String transaction_recorded(String amount, String category) {
+    return '交易已記錄：$amount - $category';
+  }
+
+  @override
+  String get transaction_no_categories_available => '沒有可用的類別。請先創建一個類別。';
+
+  @override
+  String get currency_usd => '美元';
+
+  @override
+  String get currency_eur => '歐元';
+
+  @override
+  String get currency_gbp => '英鎊';
+
+  @override
+  String get currency_jpy => '日元';
+
+  @override
+  String get currency_cny => '人民幣';
+
+  @override
+  String get currency_hkd => '港幣';
+
+  @override
+  String get currency_sgd => '新加坡元';
+
+  @override
+  String get currency_thb => '泰銖';
+
+  @override
+  String get currency_krw => '韓元';
+
+  @override
+  String get currency_aud => '澳元';
+
+  @override
+  String get currency_cad => '加元';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -144,4 +212,72 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get add_category_type_expenses => '支出';
+
+  @override
+  String get transaction_record_title => '記錄交易';
+
+  @override
+  String get transaction_amount => '金額';
+
+  @override
+  String get transaction_category => '類別';
+
+  @override
+  String get transaction_select_currency => '選擇貨幣';
+
+  @override
+  String get transaction_select_category => '選擇類別';
+
+  @override
+  String get transaction_select_category_placeholder => '選擇一個類別';
+
+  @override
+  String get transaction_please_select_category => '請選擇一個類別';
+
+  @override
+  String get transaction_please_enter_amount => '請輸入金額';
+
+  @override
+  String get transaction_please_enter_valid_amount => '請輸入有效的金額';
+
+  @override
+  String transaction_recorded(String amount, String category) {
+    return '交易已記錄：$amount - $category';
+  }
+
+  @override
+  String get transaction_no_categories_available => '沒有可用的類別。請先建立一個類別。';
+
+  @override
+  String get currency_usd => '美元';
+
+  @override
+  String get currency_eur => '歐元';
+
+  @override
+  String get currency_gbp => '英鎊';
+
+  @override
+  String get currency_jpy => '日圓';
+
+  @override
+  String get currency_cny => '人民幣';
+
+  @override
+  String get currency_hkd => '港幣';
+
+  @override
+  String get currency_sgd => '新加坡幣';
+
+  @override
+  String get currency_thb => '泰銖';
+
+  @override
+  String get currency_krw => '韓元';
+
+  @override
+  String get currency_aud => '澳幣';
+
+  @override
+  String get currency_cad => '加幣';
 }

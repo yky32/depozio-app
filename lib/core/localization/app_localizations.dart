@@ -230,6 +230,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expenses'**
   String get add_category_type_expenses;
+
+  /// No description provided for @transaction_record_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Transaction'**
+  String get transaction_record_title;
+
+  /// No description provided for @transaction_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transaction_amount;
+
+  /// No description provided for @transaction_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get transaction_category;
+
+  /// No description provided for @transaction_select_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Currency'**
+  String get transaction_select_currency;
+
+  /// No description provided for @transaction_select_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category'**
+  String get transaction_select_category;
+
+  /// No description provided for @transaction_select_category_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category'**
+  String get transaction_select_category_placeholder;
+
+  /// No description provided for @transaction_please_select_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get transaction_please_select_category;
+
+  /// No description provided for @transaction_please_enter_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount'**
+  String get transaction_please_enter_amount;
+
+  /// No description provided for @transaction_please_enter_valid_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid amount'**
+  String get transaction_please_enter_valid_amount;
+
+  /// No description provided for @transaction_recorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction recorded: {amount} - {category}'**
+  String transaction_recorded(String amount, String category);
+
+  /// No description provided for @transaction_no_categories_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories available. Please create a category first.'**
+  String get transaction_no_categories_available;
+
+  /// No description provided for @currency_usd.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get currency_usd;
+
+  /// No description provided for @currency_eur.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get currency_eur;
+
+  /// No description provided for @currency_gbp.
+  ///
+  /// In en, this message translates to:
+  /// **'British Pound'**
+  String get currency_gbp;
+
+  /// No description provided for @currency_jpy.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Yen'**
+  String get currency_jpy;
+
+  /// No description provided for @currency_cny.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese Yuan'**
+  String get currency_cny;
+
+  /// No description provided for @currency_hkd.
+  ///
+  /// In en, this message translates to:
+  /// **'Hong Kong Dollar'**
+  String get currency_hkd;
+
+  /// No description provided for @currency_sgd.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore Dollar'**
+  String get currency_sgd;
+
+  /// No description provided for @currency_thb.
+  ///
+  /// In en, this message translates to:
+  /// **'Thai Baht'**
+  String get currency_thb;
+
+  /// No description provided for @currency_krw.
+  ///
+  /// In en, this message translates to:
+  /// **'South Korean Won'**
+  String get currency_krw;
+
+  /// No description provided for @currency_aud.
+  ///
+  /// In en, this message translates to:
+  /// **'Australian Dollar'**
+  String get currency_aud;
+
+  /// No description provided for @currency_cad.
+  ///
+  /// In en, this message translates to:
+  /// **'Canadian Dollar'**
+  String get currency_cad;
 }
 
 class _AppLocalizationsDelegate

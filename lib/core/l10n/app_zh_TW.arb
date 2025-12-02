@@ -20,6 +20,38 @@
   "add_category_icon": "圖標",
   "add_category_type": "類型",
   "add_category_type_deposits": "存款",
-  "add_category_type_expenses": "支出"
+  "add_category_type_expenses": "支出",
+  "transaction_record_title": "記錄交易",
+  "transaction_amount": "金額",
+  "transaction_category": "類別",
+  "transaction_select_currency": "選擇貨幣",
+  "transaction_select_category": "選擇類別",
+  "transaction_select_category_placeholder": "選擇一個類別",
+  "transaction_please_select_category": "請選擇一個類別",
+  "transaction_please_enter_amount": "請輸入金額",
+  "transaction_please_enter_valid_amount": "請輸入有效的金額",
+  "transaction_recorded": "交易已記錄：{amount} - {category}",
+  "@transaction_recorded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_no_categories_available": "沒有可用的類別。請先建立一個類別。",
+  "currency_usd": "美元",
+  "currency_eur": "歐元",
+  "currency_gbp": "英鎊",
+  "currency_jpy": "日圓",
+  "currency_cny": "人民幣",
+  "currency_hkd": "港幣",
+  "currency_sgd": "新加坡幣",
+  "currency_thb": "泰銖",
+  "currency_krw": "韓元",
+  "currency_aud": "澳幣",
+  "currency_cad": "加幣"
 }
 

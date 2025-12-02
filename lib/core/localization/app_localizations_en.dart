@@ -73,4 +73,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get add_category_type_expenses => 'Expenses';
+
+  @override
+  String get transaction_record_title => 'Record Transaction';
+
+  @override
+  String get transaction_amount => 'Amount';
+
+  @override
+  String get transaction_category => 'Category';
+
+  @override
+  String get transaction_select_currency => 'Select Currency';
+
+  @override
+  String get transaction_select_category => 'Select Category';
+
+  @override
+  String get transaction_select_category_placeholder => 'Select a category';
+
+  @override
+  String get transaction_please_select_category => 'Please select a category';
+
+  @override
+  String get transaction_please_enter_amount => 'Please enter an amount';
+
+  @override
+  String get transaction_please_enter_valid_amount =>
+      'Please enter a valid amount';
+
+  @override
+  String transaction_recorded(String amount, String category) {
+    return 'Transaction recorded: $amount - $category';
+  }
+
+  @override
+  String get transaction_no_categories_available =>
+      'No categories available. Please create a category first.';
+
+  @override
+  String get currency_usd => 'US Dollar';
+
+  @override
+  String get currency_eur => 'Euro';
+
+  @override
+  String get currency_gbp => 'British Pound';
+
+  @override
+  String get currency_jpy => 'Japanese Yen';
+
+  @override
+  String get currency_cny => 'Chinese Yuan';
+
+  @override
+  String get currency_hkd => 'Hong Kong Dollar';
+
+  @override
+  String get currency_sgd => 'Singapore Dollar';
+
+  @override
+  String get currency_thb => 'Thai Baht';
+
+  @override
+  String get currency_krw => 'South Korean Won';
+
+  @override
+  String get currency_aud => 'Australian Dollar';
+
+  @override
+  String get currency_cad => 'Canadian Dollar';
 }

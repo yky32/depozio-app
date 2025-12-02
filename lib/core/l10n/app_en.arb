@@ -20,5 +20,37 @@
   "add_category_icon": "Icon",
   "add_category_type": "Type",
   "add_category_type_deposits": "Deposits",
-  "add_category_type_expenses": "Expenses"
+  "add_category_type_expenses": "Expenses",
+  "transaction_record_title": "Record Transaction",
+  "transaction_amount": "Amount",
+  "transaction_category": "Category",
+  "transaction_select_currency": "Select Currency",
+  "transaction_select_category": "Select Category",
+  "transaction_select_category_placeholder": "Select a category",
+  "transaction_please_select_category": "Please select a category",
+  "transaction_please_enter_amount": "Please enter an amount",
+  "transaction_please_enter_valid_amount": "Please enter a valid amount",
+  "transaction_recorded": "Transaction recorded: {amount} - {category}",
+  "@transaction_recorded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_no_categories_available": "No categories available. Please create a category first.",
+  "currency_usd": "US Dollar",
+  "currency_eur": "Euro",
+  "currency_gbp": "British Pound",
+  "currency_jpy": "Japanese Yen",
+  "currency_cny": "Chinese Yuan",
+  "currency_hkd": "Hong Kong Dollar",
+  "currency_sgd": "Singapore Dollar",
+  "currency_thb": "Thai Baht",
+  "currency_krw": "South Korean Won",
+  "currency_aud": "Australian Dollar",
+  "currency_cad": "Canadian Dollar"
 }

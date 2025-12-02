@@ -67,7 +67,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             child: Text(
-              'Select Category',
+              context.l10n.transaction_select_category,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -91,7 +91,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'No categories available',
+                              context.l10n.transaction_no_categories_available,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 color: colorScheme.onSurface.withValues(
                                   alpha: 0.6,
