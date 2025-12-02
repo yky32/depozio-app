@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:depozio/core/services/locale_service.dart';
+import 'package:depozio/core/bloc/app_core_bloc.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -458,12 +460,10 @@ class SettingPage extends StatelessWidget {
     );
 
     if (selectedLocale != null && selectedLocale != currentLocale) {
-      // Save locale first
-      await LocaleService.saveLocale(selectedLocale);
-      // Wait a moment for the bottom sheet to fully close, then trigger locale change
-      await Future.delayed(const Duration(milliseconds: 200));
-      // Trigger locale change notification
-      LocaleService.notifyLocaleChanged();
+      // Dispatch locale change event to AppCoreBloc
+      if (context.mounted) {
+        context.read<AppCoreBloc>().add(ChangeLocale(locale: selectedLocale));
+      }
     }
   }
 

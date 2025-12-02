@@ -8,6 +8,7 @@ import 'package:depozio/router/app_router.dart';
 import 'package:depozio/core/theme/theme.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/core/services/locale_service.dart';
+import 'package:depozio/core/bloc/app_core_bloc.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {
@@ -49,31 +50,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Locale? _locale;
-  late VoidCallback _localeChangeListener;
+  late final AppCoreBloc _appCoreBloc;
 
   @override
   void initState() {
     super.initState();
-    _locale = LocaleService.getSavedLocale();
-    debugPrint('🌍 Initial locale: $_locale');
-    // Create a stable listener reference
-    _localeChangeListener = () {
-      if (mounted) {
-        final newLocale = LocaleService.getSavedLocale();
-        debugPrint('🌍 Locale changed to: $newLocale');
-        setState(() {
-          _locale = newLocale;
-        });
-      }
-    };
-    // Listen for locale changes
-    LocaleService.addListener(_localeChangeListener);
+    _appCoreBloc = AppCoreBloc();
+    // Load initial locale
+    _appCoreBloc.add(const LoadLocale());
   }
 
   @override
   void dispose() {
-    LocaleService.removeListener(_localeChangeListener);
+    _appCoreBloc.close();
     super.dispose();
   }
 
@@ -82,29 +71,41 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<LoginBloc>(create: (BuildContext context) => LoginBloc()),
+        BlocProvider<AppCoreBloc>.value(value: _appCoreBloc),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'Depozio App',
-        theme: CustomTheme.lightThemeData(),
-        darkTheme: CustomTheme.darkThemeData(),
-        themeMode: ThemeMode.dark,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: _locale,
-        routerConfig: AppRouter.router,
-        localizationsDelegates: [
-          ...AppLocalizations.localizationsDelegates,
-          FormBuilderLocalizations.delegate,
-        ],
-        builder: (context, child) {
-          // Add error handling widget
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: MediaQuery.of(
-                context,
-              ).textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.0),
-            ),
-            child: child ?? const SizedBox.shrink(),
+      child: BlocBuilder<AppCoreBloc, AppCoreState>(
+        bloc: _appCoreBloc,
+        builder: (context, appCoreState) {
+          // Extract locale from state
+          Locale? locale;
+          if (appCoreState is AppCoreLocaleLoaded) {
+            locale = appCoreState.locale;
+          }
+
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Depozio App',
+            theme: CustomTheme.lightThemeData(),
+            darkTheme: CustomTheme.darkThemeData(),
+            themeMode: ThemeMode.dark,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: locale,
+            routerConfig: AppRouter.router,
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              FormBuilderLocalizations.delegate,
+            ],
+            builder: (context, child) {
+              // Add error handling widget
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: MediaQuery.of(
+                    context,
+                  ).textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.0),
+                ),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
           );
         },
       ),
