@@ -333,7 +333,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               return;
                             }
 
-                            final category = CategoryModel(
+                            final category = CategoryEntity(
                               id:
                                   DateTime.now().millisecondsSinceEpoch
                                       .toString(),

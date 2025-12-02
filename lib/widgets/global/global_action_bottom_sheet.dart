@@ -160,7 +160,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     }
 
     // Show category selection bottom sheet
-    final selectedCategory = await showModalBottomSheet<CategoryModel>(
+    final selectedCategory = await showModalBottomSheet<CategoryEntity>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -453,7 +453,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                         // Save transaction to Hive
                         try {
                           await TransactionService.init();
-                          final transaction = TransactionModel(
+                          final transaction = TransactionEntity(
                             id:
                                 DateTime.now().millisecondsSinceEpoch
                                     .toString(),

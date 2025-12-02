@@ -48,7 +48,7 @@ class TransactionsListPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: FutureBuilder<List<TransactionModel>>(
+      body: FutureBuilder<List<TransactionEntity>>(
         future: Future(() {
           TransactionService.init();
           return TransactionService().getTransactionsByCategoryId(categoryId);

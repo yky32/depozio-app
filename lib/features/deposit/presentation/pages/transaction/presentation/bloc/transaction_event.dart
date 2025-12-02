@@ -17,7 +17,7 @@ class UpdateAmount extends TransactionEvent {
 }
 
 class SelectCategory extends TransactionEvent {
-  final CategoryModel category;
+  final CategoryEntity category;
 
   const SelectCategory({required this.category});
 

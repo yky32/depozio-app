@@ -22,7 +22,7 @@ class DepositLoading extends DepositState {
 }
 
 class DepositRefreshing extends DepositState {
-  final List<CategoryModel> categories;
+  final List<CategoryEntity> categories;
 
   const DepositRefreshing({required this.categories});
 
@@ -31,7 +31,7 @@ class DepositRefreshing extends DepositState {
 }
 
 class DepositLoaded extends DepositState {
-  final List<CategoryModel> categories;
+  final List<CategoryEntity> categories;
   final DateTime refreshTimestamp;
 
   DepositLoaded({

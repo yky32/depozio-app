@@ -6,7 +6,7 @@ import 'package:depozio/features/deposit/data/models/category_entity.dart';
 /// Returns true if the user confirmed the deletion, false otherwise
 Future<bool> showDeleteCategoryDialog(
   BuildContext context,
-  CategoryModel category,
+  CategoryEntity category,
 ) async {
   final l10n = context.l10n;
   final confirmed = await showDialog<bool>(
@@ -36,7 +36,7 @@ Future<bool> showDeleteCategoryDialog(
 /// Note: Flash toast removed - category deletion happens silently
 void showUndoSnackBar(
   BuildContext context,
-  CategoryModel deletedCategory, {
+  CategoryEntity deletedCategory, {
   required VoidCallback onCategoryRestored,
 }) {
   // Flash toast removed - category deletion happens silently

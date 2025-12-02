@@ -16,7 +16,7 @@ class TransactionInitial extends TransactionState {
 
 class TransactionFormState extends TransactionState {
   final String amount;
-  final CategoryModel? selectedCategory;
+  final CategoryEntity? selectedCategory;
   final String currencyCode;
 
   TransactionFormState({
@@ -27,7 +27,7 @@ class TransactionFormState extends TransactionState {
 
   TransactionFormState copyWith({
     String? amount,
-    CategoryModel? selectedCategory,
+    CategoryEntity? selectedCategory,
     String? currencyCode,
   }) {
     return TransactionFormState(

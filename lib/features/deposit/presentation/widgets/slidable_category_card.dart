@@ -21,7 +21,7 @@ class SlidableCategoryCard extends StatelessWidget {
     this.transactionCount = 0,
   });
 
-  final CategoryModel category;
+  final CategoryEntity category;
   final ThemeData theme;
   final ColorScheme colorScheme;
   final dynamic l10n; // AppLocalizations

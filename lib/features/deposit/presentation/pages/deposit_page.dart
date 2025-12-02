@@ -55,7 +55,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
   StreamSubscription? _transactionSubscription;
 
   // Helper method to compare lists by IDs (order-independent)
-  bool _listsEqual(List<CategoryModel> list1, List<CategoryModel> list2) {
+  bool _listsEqual(List<CategoryEntity> list1, List<CategoryEntity> list2) {
     if (list1.length != list2.length) return false;
     final ids1 = list1.map((c) => c.id).toSet();
     final ids2 = list2.map((c) => c.id).toSet();
@@ -364,7 +364,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
           itemCount: 5, // Show 5 skeleton cards
           itemBuilder: (context, index) {
             // Create a dummy category for skeleton
-            final dummyCategory = CategoryModel(
+            final dummyCategory = CategoryEntity(
               id: 'skeleton_$index',
               name: 'Loading Category Name',
               iconIndex: 0, // Default icon index
@@ -384,14 +384,14 @@ class _DepositPageContentState extends State<_DepositPageContent> {
     );
   }
 
-  Widget _buildRefreshingList(List<CategoryModel> categories) {
+  Widget _buildRefreshingList(List<CategoryEntity> categories) {
     return Skeletonizer(
       enabled: true,
       child: _buildCategoriesList(categories, isLoading: true),
     );
   }
 
-  Widget _buildCategoriesList(List<CategoryModel> categories, {bool isLoading = false}) {
+  Widget _buildCategoriesList(List<CategoryEntity> categories, {bool isLoading = false}) {
     // Initialize TransactionService to get counts
     TransactionService.init();
     final transactionService = TransactionService();

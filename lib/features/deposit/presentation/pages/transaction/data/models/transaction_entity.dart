@@ -3,7 +3,7 @@ import 'package:hive_ce/hive.dart';
 part 'transaction_entity.g.dart';
 
 @HiveType(typeId: 1)
-class TransactionModel extends HiveObject {
+class TransactionEntity extends HiveObject {
   @HiveField(0)
   final String id;
 
@@ -22,7 +22,7 @@ class TransactionModel extends HiveObject {
   @HiveField(5)
   final String? notes;
 
-  TransactionModel({
+  TransactionEntity({
     required this.id,
     required this.amount,
     required this.currencyCode,
@@ -32,7 +32,7 @@ class TransactionModel extends HiveObject {
   });
 
   // Create a copy with updated fields
-  TransactionModel copyWith({
+  TransactionEntity copyWith({
     String? id,
     double? amount,
     String? currencyCode,
@@ -40,7 +40,7 @@ class TransactionModel extends HiveObject {
     DateTime? createdAt,
     String? notes,
   }) {
-    return TransactionModel(
+    return TransactionEntity(
       id: id ?? this.id,
       amount: amount ?? this.amount,
       currencyCode: currencyCode ?? this.currencyCode,

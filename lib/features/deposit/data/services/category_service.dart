@@ -3,7 +3,7 @@ import '../models/category_entity.dart';
 
 class CategoryService {
   static const String _boxName = 'categories';
-  static hive.Box<CategoryModel>? _box;
+  static hive.Box<CategoryEntity>? _box;
   static bool _initialized = false;
 
   /// Initialize the Hive box for categories (singleton pattern)
@@ -12,17 +12,17 @@ class CategoryService {
       return;
     }
     if (!hive.Hive.isAdapterRegistered(0)) {
-      hive.Hive.registerAdapter(CategoryModelAdapter());
+      hive.Hive.registerAdapter(CategoryEntityAdapter());
     }
-    _box = await hive.Hive.openBox<CategoryModel>(_boxName);
+    _box = await hive.Hive.openBox<CategoryEntity>(_boxName);
     _initialized = true;
   }
 
   /// Get the box instance
-  hive.Box<CategoryModel>? get box => _box;
+  hive.Box<CategoryEntity>? get box => _box;
 
   /// Get all categories
-  List<CategoryModel> getAllCategories() {
+  List<CategoryEntity> getAllCategories() {
     if (_box == null) {
       return [];
     }
@@ -30,7 +30,7 @@ class CategoryService {
   }
 
   /// Get categories by type
-  List<CategoryModel> getCategoriesByType(String type) {
+  List<CategoryEntity> getCategoriesByType(String type) {
     if (_box == null) {
       return [];
     }
@@ -38,7 +38,7 @@ class CategoryService {
   }
 
   /// Add a new category
-  Future<void> addCategory(CategoryModel category) async {
+  Future<void> addCategory(CategoryEntity category) async {
     if (_box == null) {
       await init();
     }
@@ -62,7 +62,7 @@ class CategoryService {
   }
 
   /// Get a category by ID
-  CategoryModel? getCategoryById(String categoryId) {
+  CategoryEntity? getCategoryById(String categoryId) {
     if (_box == null) {
       return null;
     }
@@ -78,7 +78,7 @@ class CategoryService {
   }
 
   /// Get a stream of all categories (reactive)
-  Stream<List<CategoryModel>> watchAllCategories() {
+  Stream<List<CategoryEntity>> watchAllCategories() {
     if (_box == null) {
       return Stream.value([]);
     }

@@ -5,7 +5,7 @@ import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
 part 'category_entity.g.dart';
 
 @HiveType(typeId: 0)
-class CategoryModel extends HiveObject {
+class CategoryEntity extends HiveObject {
   @HiveField(0)
   final String id;
 
@@ -21,7 +21,7 @@ class CategoryModel extends HiveObject {
   @HiveField(4)
   final DateTime createdAt;
 
-  CategoryModel({
+  CategoryEntity({
     required this.id,
     required this.name,
     required this.iconIndex,
@@ -33,14 +33,14 @@ class CategoryModel extends HiveObject {
   IconData get icon => CategoryIconHelper.getIconByIndex(iconIndex);
 
   // Create a copy with updated fields
-  CategoryModel copyWith({
+  CategoryEntity copyWith({
     String? id,
     String? name,
     int? iconIndex,
     String? type,
     DateTime? createdAt,
   }) {
-    return CategoryModel(
+    return CategoryEntity(
       id: id ?? this.id,
       name: name ?? this.name,
       iconIndex: iconIndex ?? this.iconIndex,

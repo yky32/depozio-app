@@ -3,7 +3,7 @@ import '../models/transaction_entity.dart';
 
 class TransactionService {
   static const String _boxName = 'transactions';
-  static hive.Box<TransactionModel>? _box;
+  static hive.Box<TransactionEntity>? _box;
   static bool _initialized = false;
 
   /// Initialize the Hive box for transactions (singleton pattern)
@@ -12,17 +12,17 @@ class TransactionService {
       return;
     }
     if (!hive.Hive.isAdapterRegistered(1)) {
-      hive.Hive.registerAdapter(TransactionModelAdapter());
+      hive.Hive.registerAdapter(TransactionEntityAdapter());
     }
-    _box = await hive.Hive.openBox<TransactionModel>(_boxName);
+    _box = await hive.Hive.openBox<TransactionEntity>(_boxName);
     _initialized = true;
   }
 
   /// Get the box instance
-  hive.Box<TransactionModel>? get box => _box;
+  hive.Box<TransactionEntity>? get box => _box;
 
   /// Get all transactions
-  List<TransactionModel> getAllTransactions() {
+  List<TransactionEntity> getAllTransactions() {
     if (_box == null) {
       return [];
     }
@@ -30,7 +30,7 @@ class TransactionService {
   }
 
   /// Get transactions by category ID
-  List<TransactionModel> getTransactionsByCategoryId(String categoryId) {
+  List<TransactionEntity> getTransactionsByCategoryId(String categoryId) {
     if (_box == null) {
       return [];
     }
@@ -51,7 +51,7 @@ class TransactionService {
   }
 
   /// Add a new transaction
-  Future<void> addTransaction(TransactionModel transaction) async {
+  Future<void> addTransaction(TransactionEntity transaction) async {
     if (_box == null) {
       await init();
     }
@@ -75,7 +75,7 @@ class TransactionService {
   }
 
   /// Get a transaction by ID
-  TransactionModel? getTransactionById(String transactionId) {
+  TransactionEntity? getTransactionById(String transactionId) {
     if (_box == null) {
       return null;
     }
@@ -91,7 +91,7 @@ class TransactionService {
   }
 
   /// Get a stream of all transactions (reactive)
-  Stream<List<TransactionModel>> watchAllTransactions() {
+  Stream<List<TransactionEntity>> watchAllTransactions() {
     if (_box == null) {
       return Stream.value([]);
     }
@@ -99,7 +99,7 @@ class TransactionService {
   }
 
   /// Get a stream of transactions by category (reactive)
-  Stream<List<TransactionModel>> watchTransactionsByCategoryId(String categoryId) {
+  Stream<List<TransactionEntity>> watchTransactionsByCategoryId(String categoryId) {
     if (_box == null) {
       return Stream.value([]);
     }

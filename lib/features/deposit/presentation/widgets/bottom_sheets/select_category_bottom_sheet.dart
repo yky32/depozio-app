@@ -11,7 +11,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
     this.maxHeightPercentage = 0.7,
   });
 
-  final List<CategoryModel> categories;
+  final List<CategoryEntity> categories;
   final double maxHeightPercentage;
 
   @override
