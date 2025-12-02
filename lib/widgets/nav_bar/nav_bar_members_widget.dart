@@ -1,6 +1,6 @@
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/buttons/nav_bar_action_button.dart';
-import 'package:depozio/widgets/bottom_sheets/action_bottom_sheet.dart';
+import 'package:depozio/widgets/global/global_action_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class NavBarMembersWidget extends StatelessWidget {

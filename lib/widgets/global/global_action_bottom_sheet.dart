@@ -91,7 +91,7 @@ class ActionBottomSheet extends StatelessWidget {
 }
 
 /// Internal widget that maintains transaction form state using BLoC
-class _TransactionFormContent extends StatelessWidget {
+class _TransactionFormContent extends StatefulWidget {
   const _TransactionFormContent({
     required this.theme,
     required this.colorScheme,
@@ -99,6 +99,29 @@ class _TransactionFormContent extends StatelessWidget {
 
   final ThemeData theme;
   final ColorScheme colorScheme;
+
+  @override
+  State<_TransactionFormContent> createState() =>
+      _TransactionFormContentState();
+}
+
+class _TransactionFormContentState extends State<_TransactionFormContent> {
+  late final TextEditingController _amountController;
+  late final FocusNode _amountFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController();
+    _amountFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _amountFocusNode.dispose();
+    super.dispose();
+  }
 
   void _showCurrencySelector(BuildContext context, String currentCurrency) {
     final bloc = context.read<TransactionBloc>();
@@ -111,7 +134,7 @@ class _TransactionFormContent extends StatelessWidget {
             maxHeight: MediaQuery.of(context).size.height * 0.5,
           ),
           decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
+            color: widget.theme.scaffoldBackgroundColor,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -126,7 +149,7 @@ class _TransactionFormContent extends StatelessWidget {
                   width: 80,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withValues(alpha: 0.3),
+                    color: widget.colorScheme.onSurface.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -135,7 +158,7 @@ class _TransactionFormContent extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                 child: Text(
                   context.l10n.transaction_select_currency,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: widget.theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -171,14 +194,16 @@ class _TransactionFormContent extends StatelessWidget {
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? colorScheme.primary.withValues(alpha: 0.1)
-                                    : colorScheme.surface,
+                                    ? widget.colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    )
+                                    : widget.colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color:
                                   isSelected
-                                      ? colorScheme.primary
-                                      : colorScheme.outline.withValues(
+                                      ? widget.colorScheme.primary
+                                      : widget.colorScheme.outline.withValues(
                                         alpha: 0.2,
                                       ),
                               width: isSelected ? 2 : 1,
@@ -194,7 +219,7 @@ class _TransactionFormContent extends StatelessWidget {
                                   children: [
                                     Text(
                                       currencyName,
-                                      style: theme.textTheme.bodyLarge
+                                      style: widget.theme.textTheme.bodyLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -202,9 +227,9 @@ class _TransactionFormContent extends StatelessWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       '$currencyCode • $symbol',
-                                      style: theme.textTheme.bodySmall
+                                      style: widget.theme.textTheme.bodySmall
                                           ?.copyWith(
-                                            color: colorScheme.onSurface
+                                            color: widget.colorScheme.onSurface
                                                 .withValues(alpha: 0.6),
                                           ),
                                     ),
@@ -214,7 +239,7 @@ class _TransactionFormContent extends StatelessWidget {
                               if (isSelected)
                                 Icon(
                                   Icons.check_circle,
-                                  color: colorScheme.primary,
+                                  color: widget.colorScheme.primary,
                                 ),
                             ],
                           ),
@@ -273,8 +298,6 @@ class _TransactionFormContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final l10n = context.l10n;
-    final amountController = TextEditingController();
-    final amountFocusNode = FocusNode();
 
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
@@ -288,8 +311,8 @@ class _TransactionFormContent extends StatelessWidget {
         final flag = CurrencyHelper.getFlag(currencyCode);
 
         // Sync controller with state
-        if (amountController.text != formState.amount) {
-          amountController.text = formState.amount;
+        if (_amountController.text != formState.amount) {
+          _amountController.text = formState.amount;
         }
 
         return SingleChildScrollView(
@@ -302,7 +325,7 @@ class _TransactionFormContent extends StatelessWidget {
               // Amount title
               Text(
                 l10n.transaction_amount,
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: widget.theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -314,11 +337,14 @@ class _TransactionFormContent extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: GestureDetector(
-                      onTap: () => _showCurrencySelector(context, currencyCode),
+                      onTap: () {
+                        _amountFocusNode.unfocus();
+                        _showCurrencySelector(context, currencyCode);
+                      },
                       child: Container(
                         height: 60,
                         decoration: BoxDecoration(
-                          color: colorScheme.surface,
+                          color: widget.colorScheme.surface,
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(16),
                             bottomLeft: Radius.circular(16),
@@ -339,25 +365,25 @@ class _TransactionFormContent extends StatelessWidget {
                     child: SizedBox(
                       height: 60,
                       child: TextField(
-                        controller: amountController,
-                        focusNode: amountFocusNode,
+                        controller: _amountController,
+                        focusNode: _amountFocusNode,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: false,
                         ),
                         textInputAction: TextInputAction.next,
-                        onTapOutside: (event) => amountFocusNode.unfocus(),
+                        onTapOutside: (event) => _amountFocusNode.unfocus(),
                         onChanged: (value) {
                           context.read<TransactionBloc>().add(
                             UpdateAmount(amount: value),
                           );
                         },
-                        style: theme.textTheme.bodyLarge,
+                        style: widget.theme.textTheme.bodyLarge,
                         decoration: InputDecoration(
                           hintText: '0.00',
                           prefixText: '$currencySymbol ',
                           filled: true,
-                          fillColor: colorScheme.surface,
+                          fillColor: widget.colorScheme.surface,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 20,
@@ -375,7 +401,7 @@ class _TransactionFormContent extends StatelessWidget {
                               bottomRight: Radius.circular(16),
                             ),
                             borderSide: BorderSide(
-                              color: colorScheme.primary,
+                              color: widget.colorScheme.primary,
                               width: 2,
                             ),
                           ),
@@ -389,26 +415,31 @@ class _TransactionFormContent extends StatelessWidget {
               // Category selection
               Text(
                 l10n.transaction_category,
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: widget.theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 16),
               GestureDetector(
-                onTap: () => _showCategorySelection(context),
+                onTap: () {
+                  _amountFocusNode.unfocus();
+                  _showCategorySelection(context);
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 20,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.surface,
+                    color: widget.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color:
                           selectedCategory != null
-                              ? colorScheme.primary
-                              : colorScheme.outline.withValues(alpha: 0.3),
+                              ? widget.colorScheme.primary
+                              : widget.colorScheme.outline.withValues(
+                                alpha: 0.3,
+                              ),
                       width: selectedCategory != null ? 2 : 1,
                     ),
                   ),
@@ -419,12 +450,14 @@ class _TransactionFormContent extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            color: widget.colorScheme.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             selectedCategory.icon,
-                            color: colorScheme.primary,
+                            color: widget.colorScheme.primary,
                             size: 24,
                           ),
                         ),
@@ -435,20 +468,19 @@ class _TransactionFormContent extends StatelessWidget {
                             children: [
                               Text(
                                 selectedCategory.name,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: widget.theme.textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 selectedCategory.type == 'deposits'
                                     ? l10n.add_category_type_deposits
                                     : l10n.add_category_type_expenses,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                ),
+                                style: widget.theme.textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: widget.colorScheme.onSurface
+                                          .withValues(alpha: 0.6),
+                                    ),
                               ),
                             ],
                           ),
@@ -457,8 +489,8 @@ class _TransactionFormContent extends StatelessWidget {
                         Expanded(
                           child: Text(
                             l10n.transaction_select_category_placeholder,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurface.withValues(
+                            style: widget.theme.textTheme.bodyLarge?.copyWith(
+                              color: widget.colorScheme.onSurface.withValues(
                                 alpha: 0.5,
                               ),
                             ),
@@ -466,7 +498,9 @@ class _TransactionFormContent extends StatelessWidget {
                         ),
                       Icon(
                         Icons.chevron_right,
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: widget.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -477,7 +511,7 @@ class _TransactionFormContent extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     l10n.transaction_please_select_category,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: widget.theme.textTheme.bodySmall?.copyWith(
                       color: Colors.red.withValues(alpha: 0.7),
                     ),
                   ),
@@ -521,7 +555,7 @@ class _TransactionFormContent extends StatelessWidget {
                               ),
                             ),
                           );
-                          amountFocusNode.requestFocus();
+                          _amountFocusNode.requestFocus();
                           return;
                         }
 
@@ -534,7 +568,7 @@ class _TransactionFormContent extends StatelessWidget {
                               ),
                             ),
                           );
-                          amountFocusNode.requestFocus();
+                          _amountFocusNode.requestFocus();
                           return;
                         }
 
