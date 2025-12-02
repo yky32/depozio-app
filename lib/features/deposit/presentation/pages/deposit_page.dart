@@ -156,14 +156,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
         },
         listener: (context, state) {
           if (state is DepositError) {
-            LoggerUtil.e('❌ Showing error snackbar: ${state.error}');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(widget.l10n.deposit_page_error_message(state.error)),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            LoggerUtil.e('❌ Deposit error: ${state.error}');
           }
         },
         child: Builder(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
@@ -75,42 +74,16 @@ class SlidableCategoryCard extends StatelessWidget {
         error: e,
         stackTrace: stackTrace,
       );
-      if (context.mounted) {
-        final l10n = context.l10n;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.delete_category_error(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // Error handled silently
     }
   }
 
   Future<void> _handleEdit(BuildContext context) async {
     // TODO: Implement edit functionality
-    // For now, show a placeholder
-    final l10n = context.l10n;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.slidable_category_edit_coming_soon(category.name)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   Future<void> _handleArchive(BuildContext context) async {
     // TODO: Implement archive functionality
-    // For now, show a placeholder
-    final l10n = context.l10n;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          l10n.slidable_category_archive_coming_soon(category.name),
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   @override

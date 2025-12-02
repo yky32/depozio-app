@@ -8,16 +8,18 @@ part 'transaction_event.dart';
 part 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
-  TransactionBloc() : super(TransactionInitial()) {
+  TransactionBloc() : super(_getInitialState()) {
     LoggerUtil.i('TransactionBloc initialized');
-    // Initialize with default currency
-    AppSettingService.init();
-    final defaultCurrency = AppSettingService.getDefaultCurrency();
-    emit(TransactionFormState(currencyCode: defaultCurrency));
     on<UpdateAmount>(_handleUpdateAmount);
     on<SelectCategory>(_handleSelectCategory);
     on<SelectCurrency>(_handleSelectCurrency);
     on<ResetTransaction>(_handleResetTransaction);
+  }
+
+  static TransactionState _getInitialState() {
+    AppSettingService.init();
+    final defaultCurrency = AppSettingService.getDefaultCurrency();
+    return TransactionFormState(currencyCode: defaultCurrency);
   }
 
   void _handleUpdateAmount(

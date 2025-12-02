@@ -422,7 +422,6 @@ class SettingPage extends StatelessWidget {
   Future<void> _showCurrencySelector(BuildContext context) async {
     AppSettingService.init();
     final currentCurrency = AppSettingService.getDefaultCurrency();
-    final l10n = context.l10n;
     final bloc = context.read<AppCoreBloc>();
 
     final selectedCurrency = await showModalBottomSheet<String>(
@@ -444,17 +443,6 @@ class SettingPage extends StatelessWidget {
     if (selectedCurrency != null && selectedCurrency != currentCurrency) {
       // Dispatch ChangeCurrency event to AppCoreBloc
       bloc.add(ChangeCurrency(currencyCode: selectedCurrency));
-      
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Default currency set to ${CurrencyHelper.getName(selectedCurrency, l10n)}',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     }
   }
 

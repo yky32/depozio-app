@@ -156,13 +156,6 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     final categories = CategoryService().getAllCategories();
 
     if (categories.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.transaction_no_categories_available),
-          ),
-        );
-      }
       return;
     }
 
@@ -442,39 +435,18 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                         // Validate amount
                         final amountText = currentState.amount.trim();
                         if (amountText.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.transaction_please_enter_amount,
-                              ),
-                            ),
-                          );
                           _amountFocusNode.requestFocus();
                           return;
                         }
 
                         final amount = double.tryParse(amountText);
                         if (amount == null || amount <= 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.transaction_please_enter_valid_amount,
-                              ),
-                            ),
-                          );
                           _amountFocusNode.requestFocus();
                           return;
                         }
 
                         // Validate category
                         if (currentState.selectedCategory == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.transaction_please_select_category,
-                              ),
-                            ),
-                          );
                           return;
                         }
 
@@ -495,23 +467,6 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           );
 
                           if (context.mounted) {
-                            final currencySymbol = CurrencyHelper.getSymbol(
-                              currentState.currencyCode,
-                            );
-                            final amountText =
-                                '$currencySymbol${amount.toStringAsFixed(2)}';
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  l10n.transaction_recorded(
-                                    amountText,
-                                    currentState.selectedCategory!.name,
-                                  ),
-                                ),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-
                             // Transaction saved - the deposit page will automatically refresh
                             // via the transaction watcher in _DepositPageContent
 
@@ -519,16 +474,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             Navigator.of(context).pop();
                           }
                         } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Error saving transaction: ${e.toString()}',
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
+                          // Error saving transaction - silently fail
                         }
                       },
                       style: ElevatedButton.styleFrom(

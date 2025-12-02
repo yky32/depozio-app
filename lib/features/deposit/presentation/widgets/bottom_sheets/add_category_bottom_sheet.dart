@@ -325,27 +325,11 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (_nameController.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    widget.l10n.add_category_please_enter_name,
-                                  ),
-                                ),
-                              );
                               _nameFocusNode.requestFocus();
                               return;
                             }
 
                             if (selectedIcon == null || selectedType == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    widget
-                                        .l10n
-                                        .add_category_please_select_icon_and_type,
-                                  ),
-                                ),
-                              );
                               return;
                             }
 
@@ -384,18 +368,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                                 error: e,
                                 stackTrace: stackTrace,
                               );
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      widget.l10n.add_category_error(
-                                        e.toString(),
-                                      ),
-                                    ),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
+                              // Error handled silently
                             }
                           },
                           style: ElevatedButton.styleFrom(

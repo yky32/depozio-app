@@ -37,9 +37,7 @@ class LoginPage extends StatelessWidget {
                 context.go(AppPage.home.path);
               }
               if (state is LoginFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.login_page_error)),
-                );
+                // Login error handled silently
               }
             },
             builder: (BuildContext context, LoginState loginState) {

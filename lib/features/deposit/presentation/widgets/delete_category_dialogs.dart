@@ -32,32 +32,13 @@ Future<bool> showDeleteCategoryDialog(
   return confirmed ?? false;
 }
 
-/// Shows an undo SnackBar after category deletion
+/// Shows an undo Flash toast after category deletion
+/// Note: Flash toast removed - category deletion happens silently
 void showUndoSnackBar(
   BuildContext context,
   CategoryModel deletedCategory, {
   required VoidCallback onCategoryRestored,
 }) {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-
-  final l10n = context.l10n;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(l10n.delete_category_snackbar(deletedCategory.name)),
-      duration: const Duration(seconds: 4),
-      backgroundColor: colorScheme.surfaceContainerHighest,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      action: SnackBarAction(
-        label: l10n.delete_category_undo,
-        textColor: colorScheme.primary,
-        onPressed: () {
-          // Trigger callback to restore via BLoC
-          onCategoryRestored();
-        },
-      ),
-    ),
-  );
+  // Flash toast removed - category deletion happens silently
+  // The undo functionality can be restored if needed in the future
 }

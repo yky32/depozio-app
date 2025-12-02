@@ -50,6 +50,7 @@ dependencies:
   lottie: ^3.1.2
   package_info_plus: ^8.1.1
   flutter_slidable: ^3.1.1
+  flash: ^3.1.1
 
 dev_dependencies:
   flutter_test:
