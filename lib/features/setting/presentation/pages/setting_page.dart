@@ -326,68 +326,96 @@ class SettingPage extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    AppSettingService.init();
-    final currentCurrency = AppSettingService.getDefaultCurrency();
-    final currencyName = CurrencyHelper.getName(currentCurrency, context.l10n);
-    final currencySymbol = CurrencyHelper.getSymbol(currentCurrency);
-    final flag = CurrencyHelper.getFlag(currentCurrency);
+    return BlocBuilder<AppCoreBloc, AppCoreState>(
+      buildWhen: (previous, current) {
+        // Rebuild when currency changes in settings state
+        if (previous is AppCoreSettingsLoaded && current is AppCoreSettingsLoaded) {
+          return previous.currencyCode != current.currencyCode;
+        }
+        // Rebuild when transitioning to settings loaded state
+        return current is AppCoreSettingsLoaded;
+      },
+      builder: (context, state) {
+        // Load currency if not already loaded
+        if (state is! AppCoreSettingsLoaded && state is! AppCoreCurrencyLoaded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AppCoreBloc>().add(const LoadCurrency());
+          });
+        }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showCurrencySelector(context),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.currency_exchange,
-                  color: colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Default Currency',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+        // Get current currency from state or fallback to service
+        String currentCurrency;
+        if (state is AppCoreSettingsLoaded) {
+          currentCurrency = state.currencyCode;
+        } else if (state is AppCoreCurrencyLoaded) {
+          currentCurrency = state.currencyCode;
+        } else {
+          AppSettingService.init();
+          currentCurrency = AppSettingService.getDefaultCurrency();
+        }
+
+        final currencyName = CurrencyHelper.getName(currentCurrency, context.l10n);
+        final currencySymbol = CurrencyHelper.getSymbol(currentCurrency);
+        final flag = CurrencyHelper.getFlag(currentCurrency);
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showCurrencySelector(context),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 2),
-                    Row(
+                    child: Icon(
+                      Icons.currency_exchange,
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          flag,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$currencySymbol $currencyName',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          'Default Currency',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Text(
+                              flag,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '$currencySymbol $currencyName',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -395,6 +423,7 @@ class SettingPage extends StatelessWidget {
     AppSettingService.init();
     final currentCurrency = AppSettingService.getDefaultCurrency();
     final l10n = context.l10n;
+    final bloc = context.read<AppCoreBloc>();
 
     final selectedCurrency = await showModalBottomSheet<String>(
       context: context,
@@ -413,7 +442,9 @@ class SettingPage extends StatelessWidget {
     );
 
     if (selectedCurrency != null && selectedCurrency != currentCurrency) {
-      await AppSettingService.saveDefaultCurrency(selectedCurrency);
+      // Dispatch ChangeCurrency event to AppCoreBloc
+      bloc.add(ChangeCurrency(currencyCode: selectedCurrency));
+      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

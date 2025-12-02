@@ -36,6 +36,44 @@ class AppCoreLocaleError extends AppCoreState {
   List<Object?> get props => [error];
 }
 
+// ==================== Currency States ====================
+
+class AppCoreCurrencyLoading extends AppCoreState {
+  const AppCoreCurrencyLoading();
+}
+
+class AppCoreCurrencyLoaded extends AppCoreState {
+  final String currencyCode;
+  const AppCoreCurrencyLoaded({required this.currencyCode});
+
+  @override
+  List<Object?> get props => [currencyCode];
+}
+
+class AppCoreCurrencyError extends AppCoreState {
+  final String error;
+  const AppCoreCurrencyError({required this.error});
+
+  @override
+  List<Object?> get props => [error];
+}
+
+// ==================== Combined Settings State ====================
+
+/// Combined state that holds both locale and currency
+/// This prevents one state from replacing the other
+class AppCoreSettingsLoaded extends AppCoreState {
+  final Locale? locale;
+  final String currencyCode;
+  const AppCoreSettingsLoaded({
+    required this.locale,
+    required this.currencyCode,
+  });
+
+  @override
+  List<Object?> get props => [locale, currencyCode];
+}
+
 // ==================== Future States (Examples) ====================
 // Uncomment and implement as needed:
 //

@@ -60,8 +60,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _appCoreBloc = AppCoreBloc();
-    // Load initial locale
+    // Load initial locale and currency
     _appCoreBloc.add(const LoadLocale());
+    _appCoreBloc.add(const LoadCurrency());
   }
 
   @override
@@ -82,7 +83,9 @@ class _MyAppState extends State<MyApp> {
         builder: (context, appCoreState) {
           // Extract locale from state
           Locale? locale;
-          if (appCoreState is AppCoreLocaleLoaded) {
+          if (appCoreState is AppCoreSettingsLoaded) {
+            locale = appCoreState.locale;
+          } else if (appCoreState is AppCoreLocaleLoaded) {
             locale = appCoreState.locale;
           }
 

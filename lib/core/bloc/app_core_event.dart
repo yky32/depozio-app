@@ -24,6 +24,22 @@ class ChangeLocale extends AppCoreEvent {
   List<Object?> get props => [locale];
 }
 
+// ==================== Currency Events ====================
+
+/// Load the saved default currency from storage
+class LoadCurrency extends AppCoreEvent {
+  const LoadCurrency();
+}
+
+/// Change the default currency
+class ChangeCurrency extends AppCoreEvent {
+  final String currencyCode;
+  const ChangeCurrency({required this.currencyCode});
+
+  @override
+  List<Object?> get props => [currencyCode];
+}
+
 // ==================== Future Events (Examples) ====================
 // Uncomment and implement as needed:
 //

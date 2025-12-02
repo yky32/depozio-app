@@ -350,22 +350,22 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                                 },
                                 color: widget.colorScheme.primary,
                                 child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  itemCount: categories.length,
-                                  itemBuilder: (context, index) {
-                                    final category = categories[index];
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                itemCount: categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = categories[index];
                                     final transactionCount = transactionService
                                         .getTransactionCountByCategoryId(category.id);
-                                    return SlidableCategoryCard(
-                                      category: category,
+                                  return SlidableCategoryCard(
+                                    category: category,
                                       theme: widget.theme,
                                       colorScheme: widget.colorScheme,
                                       l10n: widget.l10n,
                                       transactionCount: transactionCount,
-                                    );
-                                  },
+                                  );
+                                },
                                 ),
                               );
                             }
@@ -380,10 +380,10 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                         ),
                       ),
                     ],
-                  ),
                 ),
               ),
         ),
+      ),
     );
   }
 }

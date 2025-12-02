@@ -10,6 +10,7 @@ part 'app_core_state.dart';
 /// Centralized BLoC for managing app-wide core state
 /// Currently manages:
 /// - Locale/Language preferences
+/// - Currency preferences
 /// Can be extended for:
 /// - Theme mode (light/dark)
 /// - App version info
@@ -22,6 +23,10 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     // Locale events
     on<LoadLocale>(_handleLoadLocale);
     on<ChangeLocale>(_handleChangeLocale);
+    
+    // Currency events
+    on<LoadCurrency>(_handleLoadCurrency);
+    on<ChangeCurrency>(_handleChangeCurrency);
   }
 
   // ==================== Locale Handlers ====================
@@ -32,7 +37,8 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       final locale = AppSettingService.getSavedLocale();
-      emit(AppCoreLocaleLoaded(locale: locale));
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: currencyCode));
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
     }
@@ -45,11 +51,48 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       emit(const AppCoreLocaleLoading());
       await AppSettingService.saveLocale(event.locale);
-      emit(AppCoreLocaleLoaded(locale: event.locale));
+      // Preserve currency when changing locale
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      emit(AppCoreSettingsLoaded(locale: event.locale, currencyCode: currencyCode));
       LoggerUtil.d('🌍 Locale changed to: ${event.locale}');
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
       LoggerUtil.e('❌ Error changing locale: $e');
+    }
+  }
+
+  // ==================== Currency Handlers ====================
+
+  Future<void> _handleLoadCurrency(
+    LoadCurrency event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      // Preserve locale when loading currency
+      final locale = AppSettingService.getSavedLocale();
+      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: currencyCode));
+      LoggerUtil.d('💰 Currency loaded: $currencyCode');
+    } catch (e) {
+      emit(AppCoreCurrencyError(error: e.toString()));
+      LoggerUtil.e('❌ Error loading currency: $e');
+    }
+  }
+
+  Future<void> _handleChangeCurrency(
+    ChangeCurrency event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      emit(const AppCoreCurrencyLoading());
+      await AppSettingService.saveDefaultCurrency(event.currencyCode);
+      // Preserve locale when changing currency
+      final locale = AppSettingService.getSavedLocale();
+      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: event.currencyCode));
+      LoggerUtil.d('💰 Currency changed to: ${event.currencyCode}');
+    } catch (e) {
+      emit(AppCoreCurrencyError(error: e.toString()));
+      LoggerUtil.e('❌ Error changing currency: $e');
     }
   }
 }
