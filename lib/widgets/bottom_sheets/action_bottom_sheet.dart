@@ -336,45 +336,48 @@ class _TransactionFormContent extends StatelessWidget {
                   // Amount input (80%)
                   Expanded(
                     flex: 8,
-                    child: TextField(
-                      controller: amountController,
-                      focusNode: amountFocusNode,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: false,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onTapOutside: (event) => amountFocusNode.unfocus(),
-                      onChanged: (value) {
-                        context.read<TransactionBloc>().add(
-                          UpdateAmount(amount: value),
-                        );
-                      },
-                      style: theme.textTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        hintText: '0.00',
-                        prefixText: '$currencySymbol ',
-                        filled: true,
-                        fillColor: colorScheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20,
+                    child: SizedBox(
+                      height: 60,
+                      child: TextField(
+                        controller: amountController,
+                        focusNode: amountFocusNode,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: false,
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16),
+                        textInputAction: TextInputAction.next,
+                        onTapOutside: (event) => amountFocusNode.unfocus(),
+                        onChanged: (value) {
+                          context.read<TransactionBloc>().add(
+                            UpdateAmount(amount: value),
+                          );
+                        },
+                        style: theme.textTheme.bodyLarge,
+                        decoration: InputDecoration(
+                          hintText: '0.00',
+                          prefixText: '$currencySymbol ',
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 20,
                           ),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16),
+                          border: OutlineInputBorder(
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
+                            borderSide: BorderSide.none,
                           ),
-                          borderSide: BorderSide(
-                            color: colorScheme.primary,
-                            width: 2,
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
+                            borderSide: BorderSide(
+                              color: colorScheme.primary,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
