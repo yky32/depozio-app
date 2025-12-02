@@ -158,7 +158,7 @@ class SlidableCategoryCard extends StatelessWidget {
                 context.push('/transactions/${category.id}');
               },
               borderRadius: BorderRadius.circular(16),
-              child: ListTile(
+            child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 12,
@@ -214,31 +214,31 @@ class SlidableCategoryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   // Type badge
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          category.type == 'deposits'
-                              ? Colors.green.withValues(alpha: 0.1)
-                              : Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color:
                       category.type == 'deposits'
-                          ? l10n.slidable_category_type_deposit
-                          : l10n.slidable_category_type_expense,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                            category.type == 'deposits' ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  category.type == 'deposits'
+                      ? l10n.slidable_category_type_deposit
+                      : l10n.slidable_category_type_expense,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color:
+                        category.type == 'deposits' ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
                     ),
                   ),
                 ],
+                ),
               ),
-            ),
             ),
           ),
         ),

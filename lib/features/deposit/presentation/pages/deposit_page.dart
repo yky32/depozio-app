@@ -146,7 +146,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<DepositBloc, DepositState>(
-      listenWhen: (previous, current) {
+        listenWhen: (previous, current) {
           // Only listen to errors that occur after initial load
           // This prevents showing snackbar for initial load errors
           if (current is DepositError && previous is! DepositInitial) {
@@ -154,44 +154,44 @@ class _DepositPageContentState extends State<_DepositPageContent> {
             return true;
           }
           return false;
-      },
-      listener: (context, state) {
-        if (state is DepositError) {
+        },
+        listener: (context, state) {
+          if (state is DepositError) {
           LoggerUtil.e('❌ Deposit error: ${state.error}');
-        }
-      },
-      child: Builder(
+          }
+        },
+        child: Builder(
         builder: (blocContext) => Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                body: SafeArea(
+                  child: Column(
                     children: [
-                      Text(
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
                         widget.l10n.deposit_page_title,
                         style: widget.theme.textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.add_circle_outline,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.add_circle_outline,
                           color: widget.colorScheme.primary,
-                        ),
+                              ),
                         onPressed: () => _showAddCategoryBottomSheet(blocContext),
                         tooltip: widget.l10n.deposit_page_add_category,
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                // Categories list with BlocBuilder
-                Expanded(
-                  child: BlocBuilder<DepositBloc, DepositState>(
-                    buildWhen: (previous, current) {
+                      // Categories list with BlocBuilder
+                      Expanded(
+                        child: BlocBuilder<DepositBloc, DepositState>(
+                          buildWhen: (previous, current) {
                             // Always rebuild on state type changes
                             if (previous.runtimeType != current.runtimeType) {
                               LoggerUtil.d(
@@ -226,8 +226,8 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               return lengthChanged || contentChanged || refreshChanged;
                             }
                             return false;
-                    },
-                    builder: (context, state) {
+                          },
+                          builder: (context, state) {
                             LoggerUtil.d(
                               '🎨 BlocBuilder building with state: ${state.runtimeType}',
                             );
@@ -338,14 +338,14 @@ class _DepositPageContentState extends State<_DepositPageContent> {
 
                             // Default fallback
                             return const SizedBox.shrink();
-                    },
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
         ),
-      ),
     );
   }
 
