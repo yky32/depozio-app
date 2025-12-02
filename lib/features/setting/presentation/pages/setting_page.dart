@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart' as widgets;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -13,6 +15,7 @@ class SettingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       body: SafeArea(
@@ -22,14 +25,14 @@ class SettingPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Settings',
+                l10n.setting_page_title,
                 style: theme.textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 32),
               // Profile Section
-              _buildProfileSection(theme, colorScheme),
+              _buildProfileSection(context, theme, colorScheme),
               const SizedBox(height: 32),
               // Testing Section
               _buildTestingSection(context, theme, colorScheme),
@@ -43,7 +46,11 @@ class SettingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileSection(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildProfileSection(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -73,12 +80,15 @@ class SettingPage extends StatelessWidget {
             // "Coming Soon" text (70%)
             Expanded(
               flex: 7,
-              child: Text(
-                'Coming Soon',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              child: Builder(
+                builder:
+                    (context) => Text(
+                      context.l10n.setting_page_coming_soon,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
               ),
             ),
           ],
@@ -92,13 +102,14 @@ class SettingPage extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final l10n = context.l10n;
     return _buildSettingsSection(
-      'Testing',
+      l10n.setting_page_testing,
       [
         _buildSettingsTile(
           icon: AppPage.fontTest.icon,
-          title: 'Font Test',
-          subtitle: 'Verify Satoshi font is applied correctly',
+          title: l10n.setting_page_font_test,
+          subtitle: l10n.setting_page_font_test_subtitle,
           onTap: () => context.go(AppPage.fontTest.path),
         ),
       ],
@@ -128,20 +139,21 @@ class SettingPage extends StatelessWidget {
         final buildNumber = packageInfo.buildNumber;
         final appName = packageInfo.appName;
 
+        final l10n = context.l10n;
         return _buildSettingsSection(
-          'App Information',
+          l10n.setting_page_app_information,
           [
             _buildLanguageTile(context, theme, colorScheme),
             _buildInfoTile(
               icon: Icons.info_outline,
-              title: 'App Version',
+              title: l10n.setting_page_app_version,
               subtitle: '$version ($buildNumber)',
               theme: theme,
               colorScheme: colorScheme,
             ),
             _buildInfoTile(
               icon: Icons.phone_android,
-              title: 'App Name',
+              title: l10n.setting_page_app_name,
               subtitle: appName,
               theme: theme,
               colorScheme: colorScheme,
@@ -243,7 +255,7 @@ class SettingPage extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    final currentLocale = Localizations.localeOf(context);
+    final currentLocale = widgets.Localizations.localeOf(context);
     final currentLanguage = _getLanguageDisplayName(currentLocale);
 
     return Material(
@@ -273,7 +285,7 @@ class SettingPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Language',
+                      context.l10n.setting_page_language,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -307,7 +319,7 @@ class SettingPage extends StatelessWidget {
   }
 
   Future<void> _showLanguageSelector(BuildContext context) async {
-    final currentLocale = Localizations.localeOf(context);
+    final currentLocale = widgets.Localizations.localeOf(context);
     final supportedLocales = LocaleService.getSupportedLocales();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -369,7 +381,7 @@ class SettingPage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                       child: Text(
-                        'Select Language',
+                        context.l10n.setting_page_select_language,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

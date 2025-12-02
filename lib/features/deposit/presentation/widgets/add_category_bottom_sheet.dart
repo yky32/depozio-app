@@ -10,10 +10,7 @@ import 'package:depozio/core/network/logger.dart';
 /// Bottom sheet for adding category that covers the navigation bar
 /// This widget is specific to the deposit page
 class AddCategoryBottomSheet extends StatelessWidget {
-  const AddCategoryBottomSheet({
-    super.key,
-    this.maxHeightPercentage = 0.9,
-  });
+  const AddCategoryBottomSheet({super.key, this.maxHeightPercentage = 0.9});
 
   /// Maximum height as a percentage of screen height (0.0 to 1.0)
   /// Default is 0.9 (90%)
@@ -215,7 +212,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        'Please select a type',
+                        widget.l10n.add_category_please_select_type,
                         style: widget.theme.textTheme.bodySmall?.copyWith(
                           color: Colors.red.withValues(alpha: 0.7),
                         ),
@@ -302,7 +299,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        'Please select an icon',
+                        widget.l10n.add_category_please_select_icon,
                         style: widget.theme.textTheme.bodySmall?.copyWith(
                           color: Colors.red.withValues(alpha: 0.7),
                         ),
@@ -329,8 +326,10 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                           onPressed: () async {
                             if (_nameController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please enter a category name'),
+                                SnackBar(
+                                  content: Text(
+                                    widget.l10n.add_category_please_enter_name,
+                                  ),
                                 ),
                               );
                               _nameFocusNode.requestFocus();
@@ -339,9 +338,11 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
 
                             if (selectedIcon == null || selectedType == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
-                                    'Please select an icon and type',
+                                    widget
+                                        .l10n
+                                        .add_category_please_select_icon_and_type,
                                   ),
                                 ),
                               );
@@ -360,25 +361,37 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               createdAt: DateTime.now(),
                             );
 
-                            LoggerUtil.d('➕ Creating category: ${category.name} (type: ${category.type}, id: ${category.id})');
-                            
+                            LoggerUtil.d(
+                              '➕ Creating category: ${category.name} (type: ${category.type}, id: ${category.id})',
+                            );
+
                             // Add category via BLoC
                             try {
                               final bloc = context.read<DepositBloc>();
-                              LoggerUtil.d('✅ BLoC obtained, dispatching AddCategory event');
+                              LoggerUtil.d(
+                                '✅ BLoC obtained, dispatching AddCategory event',
+                              );
                               bloc.add(AddCategory(category: category));
                               LoggerUtil.i('📤 AddCategory event dispatched');
-                              
+
                               if (context.mounted) {
                                 LoggerUtil.d('🚪 Closing bottom sheet');
                                 Navigator.of(context).pop();
                               }
                             } catch (e, stackTrace) {
-                              LoggerUtil.e('❌ Error adding category', error: e, stackTrace: stackTrace);
+                              LoggerUtil.e(
+                                '❌ Error adding category',
+                                error: e,
+                                stackTrace: stackTrace,
+                              );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Error: $e'),
+                                    content: Text(
+                                      widget.l10n.add_category_error(
+                                        e.toString(),
+                                      ),
+                                    ),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

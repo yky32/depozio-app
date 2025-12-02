@@ -23,7 +23,7 @@ class DepositPage extends StatelessWidget {
     // Get the BLoC instance from the current context
     final depositBloc = context.read<DepositBloc>();
     LoggerUtil.d('✅ BLoC obtained for bottom sheet');
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -81,13 +81,13 @@ class DepositPage extends StatelessWidget {
     final l10n = context.l10n;
 
     LoggerUtil.i('🏗️ Building DepositPage');
-    
+
     return BlocProvider(
       create: (context) {
         LoggerUtil.d('🔧 Creating DepositBloc instance');
         return DepositBloc()..add(LoadDeposits());
       },
-        child: BlocListener<DepositBloc, DepositState>(
+      child: BlocListener<DepositBloc, DepositState>(
         listenWhen: (previous, current) {
           // Only listen to errors that occur after initial load
           // This prevents showing snackbar for initial load errors
@@ -102,7 +102,7 @@ class DepositPage extends StatelessWidget {
             LoggerUtil.e('❌ Showing error snackbar: ${state.error}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.error}'),
+                content: Text(l10n.deposit_page_error_message(state.error)),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -110,176 +110,204 @@ class DepositPage extends StatelessWidget {
           }
         },
         child: Builder(
-          builder: (blocContext) => Scaffold(
-            body: SafeArea(
-              child: Column(
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.deposit_page_title,
-                          style: theme.textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.add_circle_outline,
-                            color: colorScheme.primary,
-                          ),
-                          onPressed: () => _showAddCategoryBottomSheet(blocContext),
-                          tooltip: l10n.deposit_page_add_category,
-                        ),
-                      ],
-                    ),
-                  ),
-                // Categories list with BlocBuilder
-                Expanded(
-                  child: BlocBuilder<DepositBloc, DepositState>(
-                  buildWhen: (previous, current) {
-                    // Always rebuild on state type changes
-                    if (previous.runtimeType != current.runtimeType) {
-                      LoggerUtil.d('🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}');
-                      return true;
-                    }
-                    // For DepositLoaded states, rebuild when list changes
-                    if (previous is DepositLoaded && current is DepositLoaded) {
-                      final lengthChanged = previous.categories.length != current.categories.length;
-                      final contentChanged = !_listsEqual(previous.categories, current.categories);
-                      if (lengthChanged || contentChanged) {
-                        LoggerUtil.d('🔄 List changed: ${previous.categories.length} -> ${current.categories.length} items');
-                      }
-                      return lengthChanged || contentChanged;
-                    }
-                    return false;
-                  },
-                  builder: (context, state) {
-                    LoggerUtil.d('🎨 BlocBuilder building with state: ${state.runtimeType}');
-                    
-                    // Show loading indicator
-                    if (state is DepositLoading) {
-                      LoggerUtil.d('⏳ Showing loading indicator');
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: colorScheme.primary,
-                        ),
-                      );
-                    }
-
-                    // Show error state
-                    if (state is DepositError) {
-                      LoggerUtil.w('⚠️ Showing error state: ${state.error}');
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+          builder:
+              (blocContext) => Scaffold(
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.red.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 16),
                             Text(
-                              'Error loading categories',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.6,
-                                ),
+                              l10n.deposit_page_title,
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              state.error,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.5,
-                                ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.add_circle_outline,
+                                color: colorScheme.primary,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                context.read<DepositBloc>().add(LoadDeposits());
-                              },
-                              child: const Text('Retry'),
+                              onPressed:
+                                  () =>
+                                      _showAddCategoryBottomSheet(blocContext),
+                              tooltip: l10n.deposit_page_add_category,
                             ),
                           ],
                         ),
-                      );
-                    }
-
-                    if (state is DepositLoaded) {
-                      final categories = state.categories;
-                      LoggerUtil.d('📋 Rendering ${categories.length} categories');
-
-                      if (categories.isEmpty) {
-                        LoggerUtil.d('📭 Showing empty state');
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.category_outlined,
-                                size: 64,
-                                color: colorScheme.onSurface.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No categories yet',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tap the + button to add a category',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      LoggerUtil.d('📜 Building ListView with ${categories.length} items');
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          final category = categories[index];
-                          return SlidableCategoryCard(
-                            category: category,
-                            theme: theme,
-                            colorScheme: colorScheme,
-                            l10n: l10n,
-                          );
-                        },
-                      );
-                    }
-
-                    // Initial state - show loading while data loads
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: colorScheme.primary,
                       ),
-                    );
-                  },
+                      // Categories list with BlocBuilder
+                      Expanded(
+                        child: BlocBuilder<DepositBloc, DepositState>(
+                          buildWhen: (previous, current) {
+                            // Always rebuild on state type changes
+                            if (previous.runtimeType != current.runtimeType) {
+                              LoggerUtil.d(
+                                '🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}',
+                              );
+                              return true;
+                            }
+                            // For DepositLoaded states, rebuild when list changes
+                            if (previous is DepositLoaded &&
+                                current is DepositLoaded) {
+                              final lengthChanged =
+                                  previous.categories.length !=
+                                  current.categories.length;
+                              final contentChanged =
+                                  !_listsEqual(
+                                    previous.categories,
+                                    current.categories,
+                                  );
+                              if (lengthChanged || contentChanged) {
+                                LoggerUtil.d(
+                                  '🔄 List changed: ${previous.categories.length} -> ${current.categories.length} items',
+                                );
+                              }
+                              return lengthChanged || contentChanged;
+                            }
+                            return false;
+                          },
+                          builder: (context, state) {
+                            LoggerUtil.d(
+                              '🎨 BlocBuilder building with state: ${state.runtimeType}',
+                            );
+
+                            // Show loading indicator
+                            if (state is DepositLoading) {
+                              LoggerUtil.d('⏳ Showing loading indicator');
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.primary,
+                                ),
+                              );
+                            }
+
+                            // Show error state
+                            if (state is DepositError) {
+                              LoggerUtil.w(
+                                '⚠️ Showing error state: ${state.error}',
+                              );
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      size: 64,
+                                      color: Colors.red.withValues(alpha: 0.5),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      l10n.deposit_page_error_loading,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      state.error,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: colorScheme.onSurface
+                                                .withValues(alpha: 0.5),
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        context.read<DepositBloc>().add(
+                                          LoadDeposits(),
+                                        );
+                                      },
+                                      child: Text(l10n.deposit_page_retry),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (state is DepositLoaded) {
+                              final categories = state.categories;
+                              LoggerUtil.d(
+                                '📋 Rendering ${categories.length} categories',
+                              );
+
+                              if (categories.isEmpty) {
+                                LoggerUtil.d('📭 Showing empty state');
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.category_outlined,
+                                        size: 64,
+                                        color: colorScheme.onSurface.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        l10n.deposit_page_no_categories,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface
+                                                  .withValues(alpha: 0.6),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        l10n.deposit_page_add_category_hint,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface
+                                                  .withValues(alpha: 0.5),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              LoggerUtil.d(
+                                '📜 Building ListView with ${categories.length} items',
+                              );
+                              return ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                itemCount: categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = categories[index];
+                                  return SlidableCategoryCard(
+                                    category: category,
+                                    theme: theme,
+                                    colorScheme: colorScheme,
+                                    l10n: l10n,
+                                  );
+                                },
+                              );
+                            }
+
+                            // Initial state - show loading while data loads
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: colorScheme.primary,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              ),
         ),
       ),
     );

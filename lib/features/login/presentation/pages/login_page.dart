@@ -17,11 +17,11 @@ class LoginPage extends StatelessWidget {
     void handleSubmit() {
       if (formKey.currentState!.saveAndValidate()) {
         context.read<LoginBloc>().add(
-              LoginRequest(
-                email: formKey.currentState!.value['email'],
-                credentials: formKey.currentState!.value['credentials'],
-              ),
-            );
+          LoginRequest(
+            email: formKey.currentState!.value['email'],
+            credentials: formKey.currentState!.value['credentials'],
+          ),
+        );
       }
     }
 
@@ -30,9 +30,7 @@ class LoginPage extends StatelessWidget {
         key: formKey,
         autovalidateMode: AutovalidateMode.onUnfocus,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: BlocConsumer<LoginBloc, LoginState>(
             listener: (context, state) {
               if (state is LoginSuccess) {
@@ -40,9 +38,7 @@ class LoginPage extends StatelessWidget {
               }
               if (state is LoginFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Email or password is incorrect."),
-                  ),
+                  SnackBar(content: Text(context.l10n.login_page_error)),
                 );
               }
             },
@@ -55,16 +51,14 @@ class LoginPage extends StatelessWidget {
                     name: 'email',
                     decoration: InputDecoration(
                       labelText: context.l10n.login_page_email,
-                      hintText: 'example@example.com',
+                      hintText: context.l10n.login_page_email_hint,
                     ),
                     validator: FormBuilderValidators.compose([
                       FormBuilderValidators.required(),
                       FormBuilderValidators.email(),
                     ]),
                   ),
-                  const SizedBox(
-                    height: 10.0,
-                  ),
+                  const SizedBox(height: 10.0),
                   FormBuilderTextField(
                     name: 'credentials',
                     decoration: InputDecoration(
@@ -74,9 +68,7 @@ class LoginPage extends StatelessWidget {
                     validator: FormBuilderValidators.required(),
                     obscureText: true,
                   ),
-                  const SizedBox(
-                    height: 10.0,
-                  ),
+                  const SizedBox(height: 10.0),
                   TextButton(
                     onPressed:
                         loginState is! LoginLoading ? handleSubmit : null,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
@@ -25,28 +26,30 @@ class SlidableCategoryCard extends StatelessWidget {
   final dynamic l10n; // AppLocalizations
 
   Future<void> _handleDelete(BuildContext context) async {
-    LoggerUtil.d('🗑️ Delete action triggered for category: ${category.name} (id: ${category.id})');
-    
+    LoggerUtil.d(
+      '🗑️ Delete action triggered for category: ${category.name} (id: ${category.id})',
+    );
+
     // Get BLoC reference before showing dialog to avoid context issues
     final bloc = context.read<DepositBloc>();
     LoggerUtil.d('✅ BLoC obtained for delete operation');
     final deletedCategory = category;
-    
+
     // Show confirmation dialog
     LoggerUtil.d('💬 Showing delete confirmation dialog');
     final confirmed = await showDeleteCategoryDialog(context, category);
-    
+
     if (!confirmed) {
       LoggerUtil.d('❌ Delete cancelled by user');
       return;
     }
-    
+
     LoggerUtil.i('✅ Delete confirmed, dispatching DeleteCategory event');
     try {
       // Delete via BLoC
       bloc.add(DeleteCategory(categoryId: category.id));
       LoggerUtil.d('📤 DeleteCategory event dispatched');
-      
+
       // Show undo SnackBar
       if (context.mounted) {
         LoggerUtil.d('📢 Showing undo snackbar');
@@ -54,7 +57,9 @@ class SlidableCategoryCard extends StatelessWidget {
           context,
           deletedCategory,
           onCategoryRestored: () {
-            LoggerUtil.i('↩️ Undo clicked, restoring category: ${deletedCategory.name}');
+            LoggerUtil.i(
+              '↩️ Undo clicked, restoring category: ${deletedCategory.name}',
+            );
             bloc.add(RestoreCategory(category: deletedCategory));
           },
         );
@@ -62,11 +67,16 @@ class SlidableCategoryCard extends StatelessWidget {
         LoggerUtil.w('⚠️ Context not mounted, skipping snackbar');
       }
     } catch (e, stackTrace) {
-      LoggerUtil.e('❌ Error in delete handler', error: e, stackTrace: stackTrace);
+      LoggerUtil.e(
+        '❌ Error in delete handler',
+        error: e,
+        stackTrace: stackTrace,
+      );
       if (context.mounted) {
+        final l10n = context.l10n;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting category: $e'),
+            content: Text(l10n.delete_category_error(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -77,9 +87,10 @@ class SlidableCategoryCard extends StatelessWidget {
   Future<void> _handleEdit(BuildContext context) async {
     // TODO: Implement edit functionality
     // For now, show a placeholder
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Edit "${category.name}" - Coming soon'),
+        content: Text(l10n.slidable_category_edit_coming_soon(category.name)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -88,9 +99,12 @@ class SlidableCategoryCard extends StatelessWidget {
   Future<void> _handleArchive(BuildContext context) async {
     // TODO: Implement archive functionality
     // For now, show a placeholder
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Archive "${category.name}" - Coming soon'),
+        content: Text(
+          l10n.slidable_category_archive_coming_soon(category.name),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -208,7 +222,9 @@ class SlidableCategoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  category.type == 'deposits' ? 'Deposit' : 'Expense',
+                  category.type == 'deposits'
+                      ? l10n.slidable_category_type_deposit
+                      : l10n.slidable_category_type_expense,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color:
                         category.type == 'deposits' ? Colors.green : Colors.red,

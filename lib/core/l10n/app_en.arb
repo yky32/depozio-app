@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "action_cancel": "Cancel",
   "action_confirm": "Confirm",
   "login_page_email": "Email",
@@ -52,5 +53,87 @@
   "currency_thb": "Thai Baht",
   "currency_krw": "South Korean Won",
   "currency_aud": "Australian Dollar",
-  "currency_cad": "Canadian Dollar"
+  "currency_cad": "Canadian Dollar",
+  "deposit_page_error_loading": "Error loading categories",
+  "deposit_page_error_message": "Error: {error}",
+  "@deposit_page_error_message": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deposit_page_retry": "Retry",
+  "deposit_page_no_categories": "No categories yet",
+  "deposit_page_add_category_hint": "Tap the + button to add a category",
+  "add_category_please_select_type": "Please select a type",
+  "add_category_please_select_icon": "Please select an icon",
+  "add_category_please_enter_name": "Please enter a category name",
+  "add_category_please_select_icon_and_type": "Please select an icon and type",
+  "add_category_error": "Error: {error}",
+  "@add_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_dialog_title": "Delete Category",
+  "delete_category_dialog_message": "Are you sure you want to delete \"{name}\"?",
+  "@delete_category_dialog_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_action": "Delete",
+  "delete_category_snackbar": "Category \"{name}\" deleted",
+  "@delete_category_snackbar": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_undo": "UNDO",
+  "delete_category_error": "Error deleting category: {error}",
+  "@delete_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_edit_coming_soon": "Edit \"{name}\" - Coming soon",
+  "@slidable_category_edit_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_archive_coming_soon": "Archive \"{name}\" - Coming soon",
+  "@slidable_category_archive_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_type_deposit": "Deposit",
+  "slidable_category_type_expense": "Expense",
+  "analytics_page_coming_soon": "Coming Soon",
+  "setting_page_title": "Settings",
+  "setting_page_coming_soon": "Coming Soon",
+  "setting_page_testing": "Testing",
+  "setting_page_font_test": "Font Test",
+  "setting_page_font_test_subtitle": "Verify Satoshi font is applied correctly",
+  "setting_page_app_information": "App Information",
+  "setting_page_language": "Language",
+  "setting_page_select_language": "Select Language",
+  "setting_page_app_version": "App Version",
+  "setting_page_app_name": "App Name",
+  "login_page_error": "Email or password is incorrect.",
+  "login_page_email_hint": "example@example.com"
 }

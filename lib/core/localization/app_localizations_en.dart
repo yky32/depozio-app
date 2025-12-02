@@ -143,4 +143,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currency_cad => 'Canadian Dollar';
+
+  @override
+  String get deposit_page_error_loading => 'Error loading categories';
+
+  @override
+  String deposit_page_error_message(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get deposit_page_retry => 'Retry';
+
+  @override
+  String get deposit_page_no_categories => 'No categories yet';
+
+  @override
+  String get deposit_page_add_category_hint =>
+      'Tap the + button to add a category';
+
+  @override
+  String get add_category_please_select_type => 'Please select a type';
+
+  @override
+  String get add_category_please_select_icon => 'Please select an icon';
+
+  @override
+  String get add_category_please_enter_name => 'Please enter a category name';
+
+  @override
+  String get add_category_please_select_icon_and_type =>
+      'Please select an icon and type';
+
+  @override
+  String add_category_error(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get delete_category_dialog_title => 'Delete Category';
+
+  @override
+  String delete_category_dialog_message(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get delete_category_action => 'Delete';
+
+  @override
+  String delete_category_snackbar(String name) {
+    return 'Category \"$name\" deleted';
+  }
+
+  @override
+  String get delete_category_undo => 'UNDO';
+
+  @override
+  String delete_category_error(String error) {
+    return 'Error deleting category: $error';
+  }
+
+  @override
+  String slidable_category_edit_coming_soon(String name) {
+    return 'Edit \"$name\" - Coming soon';
+  }
+
+  @override
+  String slidable_category_archive_coming_soon(String name) {
+    return 'Archive \"$name\" - Coming soon';
+  }
+
+  @override
+  String get slidable_category_type_deposit => 'Deposit';
+
+  @override
+  String get slidable_category_type_expense => 'Expense';
+
+  @override
+  String get analytics_page_coming_soon => 'Coming Soon';
+
+  @override
+  String get setting_page_title => 'Settings';
+
+  @override
+  String get setting_page_coming_soon => 'Coming Soon';
+
+  @override
+  String get setting_page_testing => 'Testing';
+
+  @override
+  String get setting_page_font_test => 'Font Test';
+
+  @override
+  String get setting_page_font_test_subtitle =>
+      'Verify Satoshi font is applied correctly';
+
+  @override
+  String get setting_page_app_information => 'App Information';
+
+  @override
+  String get setting_page_language => 'Language';
+
+  @override
+  String get setting_page_select_language => 'Select Language';
+
+  @override
+  String get setting_page_app_version => 'App Version';
+
+  @override
+  String get setting_page_app_name => 'App Name';
+
+  @override
+  String get login_page_error => 'Email or password is incorrect.';
+
+  @override
+  String get login_page_email_hint => 'example@example.com';
 }

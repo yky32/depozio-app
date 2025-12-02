@@ -1,4 +1,5 @@
 {
+  "@@locale": "zh",
   "action_cancel": "取消",
   "action_confirm": "確認",
   "login_page_email": "電子郵件",
@@ -52,6 +53,88 @@
   "currency_thb": "泰銖",
   "currency_krw": "韓元",
   "currency_aud": "澳元",
-  "currency_cad": "加元"
+  "currency_cad": "加元",
+  "deposit_page_error_loading": "加载类别时出错",
+  "deposit_page_error_message": "错误：{error}",
+  "@deposit_page_error_message": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deposit_page_retry": "重试",
+  "deposit_page_no_categories": "还没有类别",
+  "deposit_page_add_category_hint": "点击 + 按钮添加类别",
+  "add_category_please_select_type": "请选择类型",
+  "add_category_please_select_icon": "请选择图标",
+  "add_category_please_enter_name": "请输入类别名称",
+  "add_category_please_select_icon_and_type": "请选择图标和类型",
+  "add_category_error": "错误：{error}",
+  "@add_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_dialog_title": "删除类别",
+  "delete_category_dialog_message": "您确定要删除 \"{name}\" 吗？",
+  "@delete_category_dialog_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_action": "删除",
+  "delete_category_snackbar": "类别 \"{name}\" 已删除",
+  "@delete_category_snackbar": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_undo": "撤销",
+  "delete_category_error": "删除类别时出错：{error}",
+  "@delete_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_edit_coming_soon": "编辑 \"{name}\" - 即将推出",
+  "@slidable_category_edit_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_archive_coming_soon": "归档 \"{name}\" - 即将推出",
+  "@slidable_category_archive_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_type_deposit": "存款",
+  "slidable_category_type_expense": "支出",
+  "analytics_page_coming_soon": "即将推出",
+  "setting_page_title": "设置",
+  "setting_page_coming_soon": "即将推出",
+  "setting_page_testing": "测试",
+  "setting_page_font_test": "字体测试",
+  "setting_page_font_test_subtitle": "验证 Satoshi 字体是否正确应用",
+  "setting_page_app_information": "应用信息",
+  "setting_page_language": "语言",
+  "setting_page_select_language": "选择语言",
+  "setting_page_app_version": "应用版本",
+  "setting_page_app_name": "应用名称",
+  "login_page_error": "电子邮件或密码不正确。",
+  "login_page_email_hint": "example@example.com"
 }
 

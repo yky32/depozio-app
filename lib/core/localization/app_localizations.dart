@@ -362,6 +362,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Canadian Dollar'**
   String get currency_cad;
+
+  /// No description provided for @deposit_page_error_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading categories'**
+  String get deposit_page_error_loading;
+
+  /// No description provided for @deposit_page_error_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String deposit_page_error_message(String error);
+
+  /// No description provided for @deposit_page_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get deposit_page_retry;
+
+  /// No description provided for @deposit_page_no_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get deposit_page_no_categories;
+
+  /// No description provided for @deposit_page_add_category_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add a category'**
+  String get deposit_page_add_category_hint;
+
+  /// No description provided for @add_category_please_select_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a type'**
+  String get add_category_please_select_type;
+
+  /// No description provided for @add_category_please_select_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an icon'**
+  String get add_category_please_select_icon;
+
+  /// No description provided for @add_category_please_enter_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a category name'**
+  String get add_category_please_enter_name;
+
+  /// No description provided for @add_category_please_select_icon_and_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an icon and type'**
+  String get add_category_please_select_icon_and_type;
+
+  /// No description provided for @add_category_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String add_category_error(String error);
+
+  /// No description provided for @delete_category_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get delete_category_dialog_title;
+
+  /// No description provided for @delete_category_dialog_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String delete_category_dialog_message(String name);
+
+  /// No description provided for @delete_category_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete_category_action;
+
+  /// No description provided for @delete_category_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Category \"{name}\" deleted'**
+  String delete_category_snackbar(String name);
+
+  /// No description provided for @delete_category_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'UNDO'**
+  String get delete_category_undo;
+
+  /// No description provided for @delete_category_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting category: {error}'**
+  String delete_category_error(String error);
+
+  /// No description provided for @slidable_category_edit_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit \"{name}\" - Coming soon'**
+  String slidable_category_edit_coming_soon(String name);
+
+  /// No description provided for @slidable_category_archive_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive \"{name}\" - Coming soon'**
+  String slidable_category_archive_coming_soon(String name);
+
+  /// No description provided for @slidable_category_type_deposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get slidable_category_type_deposit;
+
+  /// No description provided for @slidable_category_type_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get slidable_category_type_expense;
+
+  /// No description provided for @analytics_page_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get analytics_page_coming_soon;
+
+  /// No description provided for @setting_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get setting_page_title;
+
+  /// No description provided for @setting_page_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get setting_page_coming_soon;
+
+  /// No description provided for @setting_page_testing.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing'**
+  String get setting_page_testing;
+
+  /// No description provided for @setting_page_font_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Test'**
+  String get setting_page_font_test;
+
+  /// No description provided for @setting_page_font_test_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Satoshi font is applied correctly'**
+  String get setting_page_font_test_subtitle;
+
+  /// No description provided for @setting_page_app_information.
+  ///
+  /// In en, this message translates to:
+  /// **'App Information'**
+  String get setting_page_app_information;
+
+  /// No description provided for @setting_page_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get setting_page_language;
+
+  /// No description provided for @setting_page_select_language.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get setting_page_select_language;
+
+  /// No description provided for @setting_page_app_version.
+  ///
+  /// In en, this message translates to:
+  /// **'App Version'**
+  String get setting_page_app_version;
+
+  /// No description provided for @setting_page_app_name.
+  ///
+  /// In en, this message translates to:
+  /// **'App Name'**
+  String get setting_page_app_name;
+
+  /// No description provided for @login_page_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password is incorrect.'**
+  String get login_page_error;
+
+  /// No description provided for @login_page_email_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'example@example.com'**
+  String get login_page_email_hint;
 }
 
 class _AppLocalizationsDelegate
