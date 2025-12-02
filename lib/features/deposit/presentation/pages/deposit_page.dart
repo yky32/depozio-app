@@ -9,6 +9,7 @@ import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -198,6 +199,10 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               );
                               return true;
                             }
+                            // Rebuild when transitioning to/from refreshing state
+                            if (previous is DepositRefreshing || current is DepositRefreshing) {
+                              return true;
+                            }
                             // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
                             // This ensures transaction counts are recalculated even when categories are the same
                             if (previous is DepositLoaded &&
@@ -227,12 +232,16 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               '🎨 BlocBuilder building with state: ${state.runtimeType}',
                             );
 
-                            // Show loading state
+                            // Show loading state with skeleton
                             if (state is DepositLoading) {
-                              LoggerUtil.d('⏳ Showing loading state');
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
+                              LoggerUtil.d('⏳ Showing skeleton loading state');
+                              return _buildSkeletonList();
+                            }
+
+                            // Show refreshing state with skeleton overlay
+                            if (state is DepositRefreshing) {
+                              LoggerUtil.d('🔄 Showing skeleton refreshing state');
+                              return _buildRefreshingList(state.categories);
                             }
 
                             // Show error state
@@ -324,7 +333,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                                 );
                               }
 
-                              return _buildCategoriesList(categories);
+                              return _buildCategoriesList(categories, isLoading: false);
                             }
 
                             // Default fallback
@@ -340,7 +349,49 @@ class _DepositPageContentState extends State<_DepositPageContent> {
     );
   }
 
-  Widget _buildCategoriesList(List<CategoryModel> categories) {
+  Widget _buildSkeletonList() {
+    return Skeletonizer(
+      enabled: true,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          LoggerUtil.d('🔄 Pull to refresh triggered (skeleton)');
+          context.read<DepositBloc>().add(RefreshDeposits());
+          await Future.delayed(const Duration(milliseconds: 300));
+        },
+        color: widget.colorScheme.primary,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: 5, // Show 5 skeleton cards
+          itemBuilder: (context, index) {
+            // Create a dummy category for skeleton
+            final dummyCategory = CategoryModel(
+              id: 'skeleton_$index',
+              name: 'Loading Category Name',
+              iconIndex: 0, // Default icon index
+              type: 'deposits',
+              createdAt: DateTime.now(),
+            );
+            return SlidableCategoryCard(
+              category: dummyCategory,
+              theme: widget.theme,
+              colorScheme: widget.colorScheme,
+              l10n: widget.l10n,
+              transactionCount: 0,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRefreshingList(List<CategoryModel> categories) {
+    return Skeletonizer(
+      enabled: true,
+      child: _buildCategoriesList(categories, isLoading: true),
+    );
+  }
+
+  Widget _buildCategoriesList(List<CategoryModel> categories, {bool isLoading = false}) {
     // Initialize TransactionService to get counts
     TransactionService.init();
     final transactionService = TransactionService();
