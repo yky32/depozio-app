@@ -7,6 +7,7 @@ import 'package:depozio/core/environment.dart';
 import 'package:depozio/router/app_router.dart';
 import 'package:depozio/core/theme/theme.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/core/services/locale_service.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 void main() async {
@@ -14,6 +15,9 @@ void main() async {
 
   // Initialize Hive CE
   await hive.Hive.initFlutter();
+
+  // Initialize LocaleService
+  await LocaleService.init();
 
   // Initialize CategoryService
   await CategoryService.init();
@@ -37,8 +41,41 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+  late VoidCallback _localeChangeListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = LocaleService.getSavedLocale();
+    debugPrint('🌍 Initial locale: $_locale');
+    // Create a stable listener reference
+    _localeChangeListener = () {
+      if (mounted) {
+        final newLocale = LocaleService.getSavedLocale();
+        debugPrint('🌍 Locale changed to: $newLocale');
+        setState(() {
+          _locale = newLocale;
+        });
+      }
+    };
+    // Listen for locale changes
+    LocaleService.addListener(_localeChangeListener);
+  }
+
+  @override
+  void dispose() {
+    LocaleService.removeListener(_localeChangeListener);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +90,7 @@ class MyApp extends StatelessWidget {
         darkTheme: CustomTheme.darkThemeData(),
         themeMode: ThemeMode.dark,
         supportedLocales: AppLocalizations.supportedLocales,
-        // TODO: setup locale state
-        // locale: state.locale,
+        locale: _locale,
         routerConfig: AppRouter.router,
         localizationsDelegates: [
           ...AppLocalizations.localizationsDelegates,
