@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
-import 'package:depozio/features/deposit/presentation/widgets/add_category_bottom_sheet.dart';
+import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
