@@ -9,6 +9,7 @@ import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/widgets/skeleton/category_card_skeleton.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -145,7 +146,7 @@ class _DepositPageContentState extends State<_DepositPageContent> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<DepositBloc, DepositState>(
-        listenWhen: (previous, current) {
+      listenWhen: (previous, current) {
           // Only listen to errors that occur after initial load
           // This prevents showing snackbar for initial load errors
           if (current is DepositError && previous is! DepositInitial) {
@@ -153,50 +154,53 @@ class _DepositPageContentState extends State<_DepositPageContent> {
             return true;
           }
           return false;
-        },
-        listener: (context, state) {
-          if (state is DepositError) {
-            LoggerUtil.e('❌ Deposit error: ${state.error}');
-          }
-        },
-        child: Builder(
-          builder:
-              (blocContext) => Scaffold(
-                body: SafeArea(
-                  child: Column(
+      },
+      listener: (context, state) {
+        if (state is DepositError) {
+          LoggerUtil.e('❌ Deposit error: ${state.error}');
+        }
+      },
+      child: Builder(
+        builder: (blocContext) => Scaffold(
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              widget.l10n.deposit_page_title,
-                              style: widget.theme.textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.add_circle_outline,
-                                color: widget.colorScheme.primary,
-                              ),
-                              onPressed: () => _showAddCategoryBottomSheet(blocContext),
-                              tooltip: widget.l10n.deposit_page_add_category,
-                            ),
-                          ],
+                      Text(
+                        widget.l10n.deposit_page_title,
+                        style: widget.theme.textTheme.displayMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Categories list with BlocBuilder
-                      Expanded(
-                        child: BlocBuilder<DepositBloc, DepositState>(
-                          buildWhen: (previous, current) {
+                      IconButton(
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          color: widget.colorScheme.primary,
+                        ),
+                        onPressed: () => _showAddCategoryBottomSheet(blocContext),
+                        tooltip: widget.l10n.deposit_page_add_category,
+                      ),
+                    ],
+                  ),
+                ),
+                // Categories list with BlocBuilder
+                Expanded(
+                  child: BlocBuilder<DepositBloc, DepositState>(
+                    buildWhen: (previous, current) {
                             // Always rebuild on state type changes
                             if (previous.runtimeType != current.runtimeType) {
                               LoggerUtil.d(
                                 '🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}',
                               );
+                              return true;
+                            }
+                            // Rebuild when transitioning to/from refreshing state
+                            if (previous is DepositRefreshing || current is DepositRefreshing) {
                               return true;
                             }
                             // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
@@ -222,19 +226,53 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               return lengthChanged || contentChanged || refreshChanged;
                             }
                             return false;
-                          },
-                          builder: (context, state) {
+                    },
+                    builder: (context, state) {
                             LoggerUtil.d(
                               '🎨 BlocBuilder building with state: ${state.runtimeType}',
                             );
 
-                            // Show loading indicator
+                            // Show skeleton loading for initial load
                             if (state is DepositLoading) {
-                              LoggerUtil.d('⏳ Showing loading indicator');
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: widget.colorScheme.primary,
-                                ),
+                              LoggerUtil.d('⏳ Showing skeleton loading');
+                              return ListView.builder(
+                                padding: const EdgeInsets.all(20),
+                                itemCount: 5, // Show 5 skeleton cards
+                                itemBuilder: (context, index) {
+                                  return const Shimmer(
+                                    child: CategoryCardSkeleton(),
+                                  );
+                                },
+                              );
+                            }
+
+                            // Show skeleton overlay when refreshing
+                            if (state is DepositRefreshing) {
+                              LoggerUtil.d('🔄 Showing refreshing skeleton');
+                              final categories = state.categories;
+                              return Stack(
+                                children: [
+                                  // Show existing data with reduced opacity
+                                  Opacity(
+                                    opacity: 0.3,
+                                    child: _buildCategoriesList(categories),
+                                  ),
+                                  // Show skeleton overlay
+                                  Positioned.fill(
+                                    child: Container(
+                                      color: widget.colorScheme.surface.withValues(alpha: 0.7),
+                                      child: ListView.builder(
+                                        padding: const EdgeInsets.all(20),
+                                        itemCount: categories.isNotEmpty ? categories.length : 5,
+                                        itemBuilder: (context, index) {
+                                          return const Shimmer(
+                                            child: CategoryCardSkeleton(),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               );
                             }
 
@@ -327,55 +365,52 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                                 );
                               }
 
-                              LoggerUtil.d(
-                                '📜 Building ListView with ${categories.length} items',
-                              );
-                              // Initialize TransactionService to get counts
-                              TransactionService.init();
-                              final transactionService = TransactionService();
-                              
-                              return RefreshIndicator(
-                                onRefresh: () async {
-                                  LoggerUtil.d('🔄 Pull to refresh triggered');
-                                  context.read<DepositBloc>().add(RefreshDeposits());
-                                  // Wait a bit for the refresh to complete
-                                  await Future.delayed(const Duration(milliseconds: 300));
-                                },
-                                color: widget.colorScheme.primary,
-                                child: ListView.builder(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                itemCount: categories.length,
-                                itemBuilder: (context, index) {
-                                  final category = categories[index];
-                                    final transactionCount = transactionService
-                                        .getTransactionCountByCategoryId(category.id);
-                                  return SlidableCategoryCard(
-                                    category: category,
-                                      theme: widget.theme,
-                                      colorScheme: widget.colorScheme,
-                                      l10n: widget.l10n,
-                                      transactionCount: transactionCount,
-                                  );
-                                },
-                                ),
-                              );
+                              return _buildCategoriesList(categories);
                             }
 
-                            // Initial state - show loading while data loads
-                            return Center(
-                              child: CircularProgressIndicator(
-                                color: widget.colorScheme.primary,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                            // Default fallback
+                            return const SizedBox.shrink();
+                    },
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesList(List<CategoryModel> categories) {
+    // Initialize TransactionService to get counts
+    TransactionService.init();
+    final transactionService = TransactionService();
+    
+    return RefreshIndicator(
+      onRefresh: () async {
+        LoggerUtil.d('🔄 Pull to refresh triggered');
+        context.read<DepositBloc>().add(RefreshDeposits());
+        // Wait a bit for the refresh to complete
+        await Future.delayed(const Duration(milliseconds: 300));
+      },
+      color: widget.colorScheme.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final transactionCount = transactionService
+              .getTransactionCountByCategoryId(category.id);
+          return SlidableCategoryCard(
+            category: category,
+            theme: widget.theme,
+            colorScheme: widget.colorScheme,
+            l10n: widget.l10n,
+            transactionCount: transactionCount,
+          );
+        },
       ),
     );
   }

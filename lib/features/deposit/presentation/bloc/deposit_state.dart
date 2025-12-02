@@ -21,6 +21,15 @@ class DepositLoading extends DepositState {
   List<Object?> get props => [];
 }
 
+class DepositRefreshing extends DepositState {
+  final List<CategoryModel> categories;
+
+  const DepositRefreshing({required this.categories});
+
+  @override
+  List<Object?> get props => [categories];
+}
+
 class DepositLoaded extends DepositState {
   final List<CategoryModel> categories;
   final DateTime refreshTimestamp;
