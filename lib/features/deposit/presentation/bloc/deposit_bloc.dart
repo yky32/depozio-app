@@ -65,34 +65,7 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       '🔄 RefreshDeposits event received, current state: ${state.runtimeType}',
     );
 
-    // If already loaded, show refreshing state and then refresh data
     if (state is DepositLoaded) {
-      final currentCategories = (state as DepositLoaded).categories;
-      // Emit refreshing state to show skeleton
-      emit(DepositRefreshing(categories: currentCategories));
-      
-      try {
-        // Small delay to show skeleton effect
-        await Future.delayed(const Duration(milliseconds: 300));
-        
-        LoggerUtil.d('📖 Refreshing categories from Hive...');
-        final categories = _categoryService.getAllCategories();
-        LoggerUtil.i('🔄 Refreshed ${categories.length} categories');
-        emit(DepositLoaded(
-          categories: [...categories],
-          refreshTimestamp: DateTime.now(),
-        ));
-        LoggerUtil.d('📤 State emitted: DepositLoaded (refreshed)');
-      } catch (e, stackTrace) {
-        LoggerUtil.e(
-          '❌ Error refreshing deposits',
-          error: e,
-          stackTrace: stackTrace,
-        );
-        emit(DepositError(error: e.toString()));
-      }
-    } else if (state is DepositRefreshing) {
-      // Already refreshing, just update the data
       try {
         LoggerUtil.d('📖 Refreshing categories from Hive...');
         final categories = _categoryService.getAllCategories();

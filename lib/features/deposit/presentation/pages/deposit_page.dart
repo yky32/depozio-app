@@ -9,7 +9,6 @@ import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
-import 'package:depozio/widgets/skeleton/category_card_skeleton.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -199,10 +198,6 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               );
                               return true;
                             }
-                            // Rebuild when transitioning to/from refreshing state
-                            if (previous is DepositRefreshing || current is DepositRefreshing) {
-                              return true;
-                            }
                             // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
                             // This ensures transaction counts are recalculated even when categories are the same
                             if (previous is DepositLoaded &&
@@ -232,47 +227,11 @@ class _DepositPageContentState extends State<_DepositPageContent> {
                               '🎨 BlocBuilder building with state: ${state.runtimeType}',
                             );
 
-                            // Show skeleton loading for initial load
+                            // Show loading state
                             if (state is DepositLoading) {
-                              LoggerUtil.d('⏳ Showing skeleton loading');
-                              return ListView.builder(
-                                padding: const EdgeInsets.all(20),
-                                itemCount: 5, // Show 5 skeleton cards
-                                itemBuilder: (context, index) {
-                                  return const Shimmer(
-                                    child: CategoryCardSkeleton(),
-                                  );
-                                },
-                              );
-                            }
-
-                            // Show skeleton overlay when refreshing
-                            if (state is DepositRefreshing) {
-                              LoggerUtil.d('🔄 Showing refreshing skeleton');
-                              final categories = state.categories;
-                              return Stack(
-                                children: [
-                                  // Show existing data with reduced opacity
-                                  Opacity(
-                                    opacity: 0.3,
-                                    child: _buildCategoriesList(categories),
-                                  ),
-                                  // Show skeleton overlay
-                                  Positioned.fill(
-                                    child: Container(
-                                      color: widget.colorScheme.surface.withValues(alpha: 0.7),
-                                      child: ListView.builder(
-                                        padding: const EdgeInsets.all(20),
-                                        itemCount: categories.isNotEmpty ? categories.length : 5,
-                                        itemBuilder: (context, index) {
-                                          return const Shimmer(
-                                            child: CategoryCardSkeleton(),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              LoggerUtil.d('⏳ Showing loading state');
+                              return const Center(
+                                child: CircularProgressIndicator(),
                               );
                             }
 
