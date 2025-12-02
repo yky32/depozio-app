@@ -5,7 +5,7 @@ import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
-import 'package:depozio/features/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
 
 class DepositPage extends StatelessWidget {

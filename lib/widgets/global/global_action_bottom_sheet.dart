@@ -4,10 +4,10 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/select_category_bottom_sheet.dart';
-import 'package:depozio/features/transaction/presentation/bloc/transaction_bloc.dart';
-import 'package:depozio/features/transaction/data/currency_helper.dart';
-import 'package:depozio/features/transaction/data/services/transaction_service.dart';
-import 'package:depozio/features/transaction/data/models/transaction_entity.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/presentation/bloc/transaction_bloc.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/models/transaction_entity.dart';
 
 /// Bottom sheet that appears when the nav bar action button is clicked
 /// Used for recording transactions (amount + category)

@@ -3,6 +3,7 @@ import 'package:depozio/features/deposit/presentation/pages/deposit_page.dart';
 import 'package:depozio/features/analytics/presentation/pages/analytics_page.dart';
 import 'package:depozio/features/login/presentation/pages/login_page.dart';
 import 'package:depozio/features/setting/presentation/pages/setting_page.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/presentation/pages/transactions_list_page.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/global/scaffold_with_nav_bar.dart';
 import 'package:depozio/widgets/global/splash_screen.dart';
@@ -77,6 +78,16 @@ class AppRouter {
       ),
       // Standalone routes (non-navigation pages)
       ..._standaloneRoutes,
+
+      // Transactions list route (with category ID parameter)
+      GoRoute(
+        name: 'transactions',
+        path: '/transactions/:categoryId',
+        builder: (context, state) {
+          final categoryId = state.pathParameters['categoryId'] ?? '';
+          return TransactionsListPage(categoryId: categoryId);
+        },
+      ),
 
       // Navigation shell route
       StatefulShellRoute.indexedStack(

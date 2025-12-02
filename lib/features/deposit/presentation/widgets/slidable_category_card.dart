@@ -5,8 +5,8 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/delete_category_dialogs.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
-import 'package:depozio/features/transaction/presentation/pages/transactions_list_page.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:go_router/go_router.dart';
 
 /// A professional slidable card widget for category items
 /// Swipe left = Edit + Archive
@@ -182,13 +182,7 @@ class SlidableCategoryCard extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => TransactionsListPage(
-                      category: category,
-                    ),
-                  ),
-                );
+                context.push('/transactions/${category.id}');
               },
               borderRadius: BorderRadius.circular(16),
               child: ListTile(
@@ -226,26 +220,25 @@ class SlidableCategoryCard extends StatelessWidget {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Transaction count badge
-                  if (transactionCount > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$transactionCount',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  // Transaction count badge (always shown)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$transactionCount',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  if (transactionCount > 0) const SizedBox(width: 8),
+                  ),
+                  const SizedBox(width: 8),
                   // Type badge
                   Container(
                     padding: const EdgeInsets.symmetric(

@@ -1,41 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:depozio/features/transaction/data/models/transaction_entity.dart';
-import 'package:depozio/features/transaction/data/services/transaction_service.dart';
-import 'package:depozio/features/deposit/data/models/category_entity.dart';
-import 'package:depozio/features/transaction/data/currency_helper.dart';
+import 'package:go_router/go_router.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/models/transaction_entity.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 
 class TransactionsListPage extends StatelessWidget {
-  final CategoryModel category;
+  final String categoryId;
 
-  const TransactionsListPage({
-    super.key,
-    required this.category,
-  });
+  const TransactionsListPage({super.key, required this.categoryId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Load category from service
+    CategoryService.init();
+    final categoryService = CategoryService();
+    final category = categoryService.getCategoryById(categoryId);
+
+    if (category == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Transactions'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: Center(
+          child: Text(
+            'Category not found',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(category.name),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
       ),
       body: FutureBuilder<List<TransactionModel>>(
         future: Future(() {
           TransactionService.init();
-          return TransactionService().getTransactionsByCategoryId(category.id);
+          return TransactionService().getTransactionsByCategoryId(categoryId);
         }),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(
-                color: colorScheme.primary,
-              ),
+              child: CircularProgressIndicator(color: colorScheme.primary),
             );
           }
 
@@ -97,7 +118,9 @@ class TransactionsListPage extends StatelessWidget {
             itemCount: transactions.length,
             itemBuilder: (context, index) {
               final transaction = transactions[index];
-              final currencySymbol = CurrencyHelper.getSymbol(transaction.currencyCode);
+              final currencySymbol = CurrencyHelper.getSymbol(
+                transaction.currencyCode,
+              );
               final flag = CurrencyHelper.getFlag(transaction.currencyCode);
 
               return Card(
@@ -118,10 +141,7 @@ class TransactionsListPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
-                      child: Text(
-                        flag,
-                        style: const TextStyle(fontSize: 24),
-                      ),
+                      child: Text(flag, style: const TextStyle(fontSize: 24)),
                     ),
                   ),
                   title: Text(
@@ -140,13 +160,16 @@ class TransactionsListPage extends StatelessWidget {
                           color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
-                      if (transaction.notes != null && transaction.notes!.isNotEmpty)
+                      if (transaction.notes != null &&
+                          transaction.notes!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             transaction.notes!,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                         ),
@@ -186,4 +209,3 @@ class TransactionsListPage extends StatelessWidget {
     }
   }
 }
-
