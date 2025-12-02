@@ -205,8 +205,38 @@ echo ""
 
 # Execute the selected lane
 bundle exec fastlane $selected_lane
-
 exit_code=$?
+
+# Check if the command failed and if it's option 5 (upload_testflight)
+# Automatically fix CocoaPods and retry for option 5
+if [ $exit_code -ne 0 ] && [ "$choice" -eq 5 ]; then
+    echo ""
+    echo -e "${YELLOW}⚠️  Build failed. Attempting to fix CocoaPods issue...${NC}"
+    echo ""
+    
+    # Run pod install to fix CocoaPods
+    echo -e "${CYAN}Running pod install...${NC}"
+    cd "$IOS_DIR" || exit 1
+    pod install --repo-update
+    
+    pod_exit_code=$?
+    
+    if [ $pod_exit_code -eq 0 ]; then
+        echo ""
+        echo -e "${GREEN}✅ CocoaPods fixed successfully!${NC}"
+        echo -e "${YELLOW}🔄 Retrying fastlane command...${NC}"
+        echo -e "${CYAN}────────────────────────────────────────────────────────────${NC}"
+        echo ""
+        
+        # Retry the fastlane command
+        bundle exec fastlane $selected_lane
+        exit_code=$?
+    else
+        echo ""
+        echo -e "${RED}❌ Failed to fix CocoaPods. Please fix manually.${NC}"
+        echo -e "${YELLOW}Try running: cd ios && pod install --repo-update${NC}"
+    fi
+fi
 
 echo ""
 echo -e "${CYAN}────────────────────────────────────────────────────────────${NC}"
