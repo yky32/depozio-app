@@ -39,7 +39,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       LoggerUtil.i('📦 Loaded ${allCategories.length} categories from Hive');
 
       // Emit the loaded state with all categories
-      emit(DepositLoaded(categories: [...allCategories]));
+      emit(DepositLoaded(
+        categories: [...allCategories],
+        refreshTimestamp: DateTime.now(),
+      ));
       LoggerUtil.d(
         '📤 State emitted: DepositLoaded with ${allCategories.length} categories',
       );
@@ -68,7 +71,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
         LoggerUtil.d('📖 Refreshing categories from Hive...');
         final categories = _categoryService.getAllCategories();
         LoggerUtil.i('🔄 Refreshed ${categories.length} categories');
-        emit(DepositLoaded(categories: [...categories]));
+        emit(DepositLoaded(
+          categories: [...categories],
+          refreshTimestamp: DateTime.now(),
+        ));
         LoggerUtil.d('📤 State emitted: DepositLoaded (refreshed)');
       } catch (e, stackTrace) {
         LoggerUtil.e(
@@ -105,7 +111,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       // Refresh the list after adding
       final categories = _categoryService.getAllCategories();
       LoggerUtil.d('📊 Total categories after add: ${categories.length}');
-      emit(DepositLoaded(categories: [...categories]));
+      emit(DepositLoaded(
+        categories: [...categories],
+        refreshTimestamp: DateTime.now(),
+      ));
       LoggerUtil.d(
         '📤 State emitted: DepositLoaded with ${categories.length} categories',
       );
@@ -138,7 +147,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       LoggerUtil.d('📊 Total categories after delete: ${categories.length}');
 
       // Emit new state with updated list
-      emit(DepositLoaded(categories: List.from(categories)));
+      emit(DepositLoaded(
+        categories: List.from(categories),
+        refreshTimestamp: DateTime.now(),
+      ));
       LoggerUtil.d(
         '📤 State emitted: DepositLoaded with ${categories.length} categories',
       );
@@ -170,7 +182,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       // Refresh the list after updating
       final categories = _categoryService.getAllCategories();
       LoggerUtil.d('📊 Total categories after update: ${categories.length}');
-      emit(DepositLoaded(categories: [...categories]));
+      emit(DepositLoaded(
+        categories: [...categories],
+        refreshTimestamp: DateTime.now(),
+      ));
       LoggerUtil.d('📤 State emitted: DepositLoaded');
     } catch (e, stackTrace) {
       LoggerUtil.e(
@@ -199,7 +214,10 @@ class DepositBloc extends Bloc<DepositEvent, DepositState> {
       // Refresh the list after restoring
       final categories = _categoryService.getAllCategories();
       LoggerUtil.d('📊 Total categories after restore: ${categories.length}');
-      emit(DepositLoaded(categories: [...categories]));
+      emit(DepositLoaded(
+        categories: [...categories],
+        refreshTimestamp: DateTime.now(),
+      ));
       LoggerUtil.d('📤 State emitted: DepositLoaded');
     } catch (e, stackTrace) {
       LoggerUtil.e(

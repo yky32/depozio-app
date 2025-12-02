@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
+import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
@@ -10,6 +12,46 @@ import 'package:depozio/core/network/logger.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    LoggerUtil.i('🏗️ Building DepositPage');
+
+    return BlocProvider(
+      create: (context) {
+        LoggerUtil.d('🔧 Creating DepositBloc instance');
+        return DepositBloc()..add(LoadDeposits());
+      },
+      child: _DepositPageContent(
+        theme: theme,
+        colorScheme: colorScheme,
+        l10n: l10n,
+      ),
+    );
+  }
+}
+
+class _DepositPageContent extends StatefulWidget {
+  const _DepositPageContent({
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+  });
+
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
+
+  @override
+  State<_DepositPageContent> createState() => _DepositPageContentState();
+}
+
+class _DepositPageContentState extends State<_DepositPageContent> {
+  StreamSubscription? _transactionSubscription;
 
   // Helper method to compare lists by IDs (order-independent)
   bool _listsEqual(List<CategoryModel> list1, List<CategoryModel> list2) {
@@ -76,19 +118,33 @@ class DepositPage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Listen to transaction changes and refresh DepositBloc
+    _startTransactionWatcher();
+  }
+
+  void _startTransactionWatcher() {
+    TransactionService.init().then((_) {
+      final transactionService = TransactionService();
+      _transactionSubscription = transactionService.watchTransactions().listen((_) {
+        // Transaction changed, refresh DepositBloc to update counts
+        if (mounted) {
+          context.read<DepositBloc>().add(RefreshDeposits());
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _transactionSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final l10n = context.l10n;
-
-    LoggerUtil.i('🏗️ Building DepositPage');
-
-    return BlocProvider(
-      create: (context) {
-        LoggerUtil.d('🔧 Creating DepositBloc instance');
-        return DepositBloc()..add(LoadDeposits());
-      },
-      child: BlocListener<DepositBloc, DepositState>(
+    return BlocListener<DepositBloc, DepositState>(
         listenWhen: (previous, current) {
           // Only listen to errors that occur after initial load
           // This prevents showing snackbar for initial load errors
@@ -103,7 +159,7 @@ class DepositPage extends StatelessWidget {
             LoggerUtil.e('❌ Showing error snackbar: ${state.error}');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n.deposit_page_error_message(state.error)),
+                content: Text(widget.l10n.deposit_page_error_message(state.error)),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -123,20 +179,18 @@ class DepositPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              l10n.deposit_page_title,
-                              style: theme.textTheme.displayMedium?.copyWith(
+                              widget.l10n.deposit_page_title,
+                              style: widget.theme.textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             IconButton(
                               icon: Icon(
                                 Icons.add_circle_outline,
-                                color: colorScheme.primary,
+                                color: widget.colorScheme.primary,
                               ),
-                              onPressed:
-                                  () =>
-                                      _showAddCategoryBottomSheet(blocContext),
-                              tooltip: l10n.deposit_page_add_category,
+                              onPressed: () => _showAddCategoryBottomSheet(blocContext),
+                              tooltip: widget.l10n.deposit_page_add_category,
                             ),
                           ],
                         ),
@@ -152,7 +206,8 @@ class DepositPage extends StatelessWidget {
                               );
                               return true;
                             }
-                            // For DepositLoaded states, rebuild when list changes
+                            // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
+                            // This ensures transaction counts are recalculated even when categories are the same
                             if (previous is DepositLoaded &&
                                 current is DepositLoaded) {
                               final lengthChanged =
@@ -163,12 +218,15 @@ class DepositPage extends StatelessWidget {
                                     previous.categories,
                                     current.categories,
                                   );
-                              if (lengthChanged || contentChanged) {
+                              final refreshChanged =
+                                  previous.refreshTimestamp !=
+                                  current.refreshTimestamp;
+                              if (lengthChanged || contentChanged || refreshChanged) {
                                 LoggerUtil.d(
-                                  '🔄 List changed: ${previous.categories.length} -> ${current.categories.length} items',
+                                  '🔄 List or refresh changed: ${previous.categories.length} -> ${current.categories.length} items, refresh: $refreshChanged',
                                 );
                               }
-                              return lengthChanged || contentChanged;
+                              return lengthChanged || contentChanged || refreshChanged;
                             }
                             return false;
                           },
@@ -182,7 +240,7 @@ class DepositPage extends StatelessWidget {
                               LoggerUtil.d('⏳ Showing loading indicator');
                               return Center(
                                 child: CircularProgressIndicator(
-                                  color: colorScheme.primary,
+                                  color: widget.colorScheme.primary,
                                 ),
                               );
                             }
@@ -203,19 +261,19 @@ class DepositPage extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      l10n.deposit_page_error_loading,
-                                      style: theme.textTheme.titleMedium
+                                      widget.l10n.deposit_page_error_loading,
+                                      style: widget.theme.textTheme.titleMedium
                                           ?.copyWith(
-                                            color: colorScheme.onSurface
+                                            color: widget.colorScheme.onSurface
                                                 .withValues(alpha: 0.6),
                                           ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       state.error,
-                                      style: theme.textTheme.bodyMedium
+                                      style: widget.theme.textTheme.bodyMedium
                                           ?.copyWith(
-                                            color: colorScheme.onSurface
+                                            color: widget.colorScheme.onSurface
                                                 .withValues(alpha: 0.5),
                                           ),
                                       textAlign: TextAlign.center,
@@ -227,7 +285,7 @@ class DepositPage extends StatelessWidget {
                                           LoadDeposits(),
                                         );
                                       },
-                                      child: Text(l10n.deposit_page_retry),
+                                      child: Text(widget.l10n.deposit_page_retry),
                                     ),
                                   ],
                                 ),
@@ -249,25 +307,25 @@ class DepositPage extends StatelessWidget {
                                       Icon(
                                         Icons.category_outlined,
                                         size: 64,
-                                        color: colorScheme.onSurface.withValues(
+                                        color: widget.colorScheme.onSurface.withValues(
                                           alpha: 0.3,
                                         ),
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
-                                        l10n.deposit_page_no_categories,
-                                        style: theme.textTheme.titleMedium
+                                        widget.l10n.deposit_page_no_categories,
+                                        style: widget.theme.textTheme.titleMedium
                                             ?.copyWith(
-                                              color: colorScheme.onSurface
+                                              color: widget.colorScheme.onSurface
                                                   .withValues(alpha: 0.6),
                                             ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        l10n.deposit_page_add_category_hint,
-                                        style: theme.textTheme.bodyMedium
+                                        widget.l10n.deposit_page_add_category_hint,
+                                        style: widget.theme.textTheme.bodyMedium
                                             ?.copyWith(
-                                              color: colorScheme.onSurface
+                                              color: widget.colorScheme.onSurface
                                                   .withValues(alpha: 0.5),
                                             ),
                                       ),
@@ -283,30 +341,39 @@ class DepositPage extends StatelessWidget {
                               TransactionService.init();
                               final transactionService = TransactionService();
                               
-                              return ListView.builder(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                itemCount: categories.length,
-                                itemBuilder: (context, index) {
-                                  final category = categories[index];
-                                  final transactionCount = transactionService
-                                      .getTransactionCountByCategoryId(category.id);
-                                  return SlidableCategoryCard(
-                                    category: category,
-                                    theme: theme,
-                                    colorScheme: colorScheme,
-                                    l10n: l10n,
-                                    transactionCount: transactionCount,
-                                  );
+                              return RefreshIndicator(
+                                onRefresh: () async {
+                                  LoggerUtil.d('🔄 Pull to refresh triggered');
+                                  context.read<DepositBloc>().add(RefreshDeposits());
+                                  // Wait a bit for the refresh to complete
+                                  await Future.delayed(const Duration(milliseconds: 300));
                                 },
+                                color: widget.colorScheme.primary,
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  itemCount: categories.length,
+                                  itemBuilder: (context, index) {
+                                    final category = categories[index];
+                                    final transactionCount = transactionService
+                                        .getTransactionCountByCategoryId(category.id);
+                                    return SlidableCategoryCard(
+                                      category: category,
+                                      theme: widget.theme,
+                                      colorScheme: widget.colorScheme,
+                                      l10n: widget.l10n,
+                                      transactionCount: transactionCount,
+                                    );
+                                  },
+                                ),
                               );
                             }
 
                             // Initial state - show loading while data loads
                             return Center(
                               child: CircularProgressIndicator(
-                                color: colorScheme.primary,
+                                color: widget.colorScheme.primary,
                               ),
                             );
                           },
@@ -317,7 +384,6 @@ class DepositPage extends StatelessWidget {
                 ),
               ),
         ),
-      ),
     );
   }
 }

@@ -23,11 +23,15 @@ class DepositLoading extends DepositState {
 
 class DepositLoaded extends DepositState {
   final List<CategoryModel> categories;
+  final DateTime refreshTimestamp;
 
-  DepositLoaded({required this.categories});
+  DepositLoaded({
+    required this.categories,
+    DateTime? refreshTimestamp,
+  }) : refreshTimestamp = refreshTimestamp ?? DateTime.now();
 
   @override
-  List<Object?> get props => [categories];
+  List<Object?> get props => [categories, refreshTimestamp];
 }
 
 class DepositError extends DepositState {

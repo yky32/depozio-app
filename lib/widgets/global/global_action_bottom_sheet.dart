@@ -511,6 +511,10 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                 backgroundColor: Colors.green,
                               ),
                             );
+
+                            // Transaction saved - the deposit page will automatically refresh
+                            // via the transaction watcher in _DepositPageContent
+
                             bloc.add(const ResetTransaction());
                             Navigator.of(context).pop();
                           }
