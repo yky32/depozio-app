@@ -2,13 +2,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 
 part 'transaction_event.dart';
 part 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
-  TransactionBloc() : super(const TransactionInitial()) {
+  TransactionBloc() : super(TransactionInitial()) {
     LoggerUtil.i('TransactionBloc initialized');
+    // Initialize with default currency
+    AppSettingService.init();
+    final defaultCurrency = AppSettingService.getDefaultCurrency();
+    emit(TransactionFormState(currencyCode: defaultCurrency));
     on<UpdateAmount>(_handleUpdateAmount);
     on<SelectCategory>(_handleSelectCategory);
     on<SelectCurrency>(_handleSelectCurrency);
@@ -28,10 +33,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         ),
       );
     } else {
+      AppSettingService.init();
+      final defaultCurrency = AppSettingService.getDefaultCurrency();
       emit(
         TransactionFormState(
           amount: event.amount,
-          currencyCode: 'USD',
+          currencyCode: defaultCurrency,
         ),
       );
     }
@@ -50,10 +57,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         ),
       );
     } else {
+      AppSettingService.init();
+      final defaultCurrency = AppSettingService.getDefaultCurrency();
       emit(
         TransactionFormState(
           selectedCategory: event.category,
-          currencyCode: 'USD',
+          currencyCode: defaultCurrency,
         ),
       );
     }
@@ -85,7 +94,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) {
     LoggerUtil.d('🔄 ResetTransaction event received');
-    emit(const TransactionInitial());
+    AppSettingService.init();
+    final defaultCurrency = AppSettingService.getDefaultCurrency();
+    emit(TransactionFormState(currencyCode: defaultCurrency));
   }
 }
 

@@ -2,12 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart' as hive;
 
-class LocaleService {
+/// Centralized service for managing app settings (locale, currency, etc.)
+class AppSettingService {
   static const String _boxName = 'app_settings';
   static const String _localeKey = 'locale';
+  static const String _defaultCurrencyKey = 'default_currency';
+  static const String _defaultCurrency = 'HKD'; // Default fallback (Hong Kong Dollar)
+  
   static hive.Box? _box;
   static bool _initialized = false;
-  static final List<VoidCallback> _listeners = [];
+  static final List<VoidCallback> _localeListeners = [];
 
   /// Initialize the Hive box for app settings
   static Future<void> init() async {
@@ -17,6 +21,8 @@ class LocaleService {
     _box = await hive.Hive.openBox(_boxName);
     _initialized = true;
   }
+
+  // ==================== Locale Methods ====================
 
   /// Get saved locale
   static Locale? getSavedLocale() {
@@ -54,20 +60,20 @@ class LocaleService {
 
   /// Notify listeners of locale change
   static void notifyLocaleChanged() {
-    debugPrint('🔔 Notifying ${_listeners.length} listeners of locale change');
-    for (final listener in _listeners) {
+    debugPrint('🔔 Notifying ${_localeListeners.length} listeners of locale change');
+    for (final listener in _localeListeners) {
       listener();
     }
   }
 
   /// Add a listener for locale changes
-  static void addListener(VoidCallback listener) {
-    _listeners.add(listener);
+  static void addLocaleListener(VoidCallback listener) {
+    _localeListeners.add(listener);
   }
 
-  /// Remove a listener
-  static void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
+  /// Remove a locale listener
+  static void removeLocaleListener(VoidCallback listener) {
+    _localeListeners.remove(listener);
   }
 
   /// Get locale display name
@@ -85,4 +91,22 @@ class LocaleService {
   static List<Locale> getSupportedLocales() {
     return [const Locale('en'), const Locale('zh'), const Locale('zh', 'TW')];
   }
+
+  // ==================== Currency Methods ====================
+
+  /// Get saved default currency
+  static String getDefaultCurrency() {
+    if (_box == null) return _defaultCurrency;
+    final currencyCode = _box!.get(_defaultCurrencyKey) as String?;
+    return currencyCode ?? _defaultCurrency;
+  }
+
+  /// Save default currency preference
+  static Future<void> saveDefaultCurrency(String currencyCode) async {
+    if (_box == null) {
+      await init();
+    }
+    await _box!.put(_defaultCurrencyKey, currencyCode);
+  }
 }
+

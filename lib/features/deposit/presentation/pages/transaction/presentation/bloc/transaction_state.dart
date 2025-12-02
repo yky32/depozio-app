@@ -19,10 +19,10 @@ class TransactionFormState extends TransactionState {
   final CategoryModel? selectedCategory;
   final String currencyCode;
 
-  const TransactionFormState({
+  TransactionFormState({
     this.amount = '',
     this.selectedCategory,
-    this.currencyCode = 'USD',
+    required this.currencyCode,
   });
 
   TransactionFormState copyWith({

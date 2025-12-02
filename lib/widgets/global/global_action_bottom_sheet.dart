@@ -8,6 +8,7 @@ import 'package:depozio/features/deposit/presentation/pages/transaction/presenta
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/models/transaction_entity.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 
 /// Bottom sheet that appears when the nav bar action button is clicked
 /// Used for recording transactions (amount + category)
@@ -306,7 +307,9 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
         final formState =
             state is TransactionFormState
                 ? state
-                : const TransactionFormState();
+                : TransactionFormState(
+                  currencyCode: AppSettingService.getDefaultCurrency(),
+                );
         final selectedCategory = formState.selectedCategory;
         final currencyCode = formState.currencyCode;
         final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
@@ -590,13 +593,17 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                         try {
                           await TransactionService.init();
                           final transaction = TransactionModel(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            id:
+                                DateTime.now().millisecondsSinceEpoch
+                                    .toString(),
                             amount: amount,
                             currencyCode: currentState.currencyCode,
                             categoryId: currentState.selectedCategory!.id,
                             createdAt: DateTime.now(),
                           );
-                          await TransactionService().addTransaction(transaction);
+                          await TransactionService().addTransaction(
+                            transaction,
+                          );
 
                           if (context.mounted) {
                             final currencySymbol = CurrencyHelper.getSymbol(

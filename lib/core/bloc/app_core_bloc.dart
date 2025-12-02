@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:depozio/core/services/locale_service.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 import 'package:depozio/core/network/logger.dart';
 
 part 'app_core_event.dart';
@@ -31,7 +31,7 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     Emitter<AppCoreState> emit,
   ) async {
     try {
-      final locale = LocaleService.getSavedLocale();
+      final locale = AppSettingService.getSavedLocale();
       emit(AppCoreLocaleLoaded(locale: locale));
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
@@ -44,7 +44,7 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       emit(const AppCoreLocaleLoading());
-      await LocaleService.saveLocale(event.locale);
+      await AppSettingService.saveLocale(event.locale);
       emit(AppCoreLocaleLoaded(locale: event.locale));
       LoggerUtil.d('🌍 Locale changed to: ${event.locale}');
     } catch (e) {
