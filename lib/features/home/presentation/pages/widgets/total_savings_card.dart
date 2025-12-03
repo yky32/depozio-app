@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
+import 'package:depozio/core/bloc/app_core_bloc.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 import 'package:intl/intl.dart';
 
 class TotalSavingsCard extends StatelessWidget {
@@ -67,15 +70,55 @@ class TotalSavingsCard extends StatelessWidget {
             children: [
               Icon(Icons.savings, color: Colors.white, size: 28),
               const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  l10n.home_page_total_savings,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
+              // Title section (left)
+              Text(
+                l10n.home_page_total_savings,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
+              // Spacer to push flag to center
+              const Spacer(),
+              // Currency flag from AppCoreBloc (centered between title and emoji)
+              BlocBuilder<AppCoreBloc, AppCoreState>(
+                buildWhen: (previous, current) {
+                  // Rebuild when currency changes
+                  if (previous is AppCoreSettingsLoaded &&
+                      current is AppCoreSettingsLoaded) {
+                    return previous.currencyCode != current.currencyCode;
+                  }
+                  // Rebuild when transitioning to settings loaded state
+                  return current is AppCoreSettingsLoaded ||
+                      current is AppCoreCurrencyLoaded;
+                },
+                builder: (context, state) {
+                  // Load currency if not already loaded
+                  if (state is! AppCoreSettingsLoaded &&
+                      state is! AppCoreCurrencyLoaded) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      context.read<AppCoreBloc>().add(const LoadCurrency());
+                    });
+                  }
+
+                  // Get current currency from state or fallback to service
+                  String currentCurrency;
+                  if (state is AppCoreSettingsLoaded) {
+                    currentCurrency = state.currencyCode;
+                  } else if (state is AppCoreCurrencyLoaded) {
+                    currentCurrency = state.currencyCode;
+                  } else {
+                    AppSettingService.init();
+                    currentCurrency = AppSettingService.getDefaultCurrency();
+                  }
+
+                  final flag = CurrencyHelper.getFlag(currentCurrency);
+
+                  return Text(flag, style: const TextStyle(fontSize: 24));
+                },
+              ),
+              // Spacer to balance and push emoji to right
+              const Spacer(),
               // Emoji indicator in top right corner
               Text(
                 _getSavingEmoji(amount),
@@ -84,10 +127,38 @@ class TotalSavingsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Format total savings as currency (using USD as default)
-          Builder(
-            builder: (context) {
-              final currencyCode = 'USD'; // Default currency
+          // Format total savings as currency from AppCoreBloc
+          BlocBuilder<AppCoreBloc, AppCoreState>(
+            buildWhen: (previous, current) {
+              // Rebuild when currency changes
+              if (previous is AppCoreSettingsLoaded &&
+                  current is AppCoreSettingsLoaded) {
+                return previous.currencyCode != current.currencyCode;
+              }
+              // Rebuild when transitioning to settings loaded state
+              return current is AppCoreSettingsLoaded ||
+                  current is AppCoreCurrencyLoaded;
+            },
+            builder: (context, state) {
+              // Load currency if not already loaded
+              if (state is! AppCoreSettingsLoaded &&
+                  state is! AppCoreCurrencyLoaded) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.read<AppCoreBloc>().add(const LoadCurrency());
+                });
+              }
+
+              // Get current currency from state or fallback to service
+              String currencyCode;
+              if (state is AppCoreSettingsLoaded) {
+                currencyCode = state.currencyCode;
+              } else if (state is AppCoreCurrencyLoaded) {
+                currencyCode = state.currencyCode;
+              } else {
+                AppSettingService.init();
+                currencyCode = AppSettingService.getDefaultCurrency();
+              }
+
               final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
               final formattedSavings = NumberFormat.currency(
                 symbol: currencySymbol,
