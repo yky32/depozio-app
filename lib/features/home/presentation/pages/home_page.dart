@@ -118,19 +118,33 @@ class _HomePageContent extends StatelessWidget {
             final isSkeletonEnabled =
                 state is HomeLoading || state is HomeRefreshing;
 
-            return Skeletonizer(
-              enabled: isSkeletonEnabled,
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  LoggerUtil.d('🔄 Pull to refresh triggered');
-                  context.read<HomeBloc>().add(const RefreshHome());
-                  await Future.delayed(const Duration(milliseconds: 300));
-                },
-                color: colorScheme.primary,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  child: _buildHomeContent(context),
+            return RefreshIndicator(
+              onRefresh: () async {
+                LoggerUtil.d('🔄 Pull to refresh triggered');
+                context.read<HomeBloc>().add(const RefreshHome());
+                await Future.delayed(const Duration(milliseconds: 300));
+              },
+              color: colorScheme.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Page title (not skeletonized, stays in position)
+                    Text(
+                      l10n.home_page_title,
+                      style: theme.textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    // Content with Skeletonizer (only content, not title)
+                    Skeletonizer(
+                      enabled: isSkeletonEnabled,
+                      child: _buildHomeContent(context),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -144,13 +158,6 @@ class _HomePageContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.home_page_title,
-          style: theme.textTheme.displayMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 32),
         // Total Savings Card
         _buildTotalSavingsCard(
           context: context,

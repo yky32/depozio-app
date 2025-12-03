@@ -30,40 +30,51 @@ class AppRouter {
 
   // Generate navigation branches dynamically
   static List<StatefulShellBranch> get _navigationBranches {
-    final navigationPages = AppPage.values
-        .where(
-            (page) => page.navBarMemberIndex != 99) // Filter out non-nav pages
-        .toList()
-      ..sort((a, b) => a.navBarMemberIndex
-          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC
+    final navigationPages =
+        AppPage.values
+            .where(
+              (page) => page.navBarMemberIndex != 99,
+            ) // Filter out non-nav pages
+            .toList()
+          ..sort(
+            (a, b) => a.navBarMemberIndex.compareTo(b.navBarMemberIndex),
+          ); // Sort by navBarMemberIndex ASC
 
     return navigationPages
-        .map((page) => StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  name: page.name,
-                  path: page.path,
-                  builder: (context, state) => _appPages[page]!(),
-                ),
-              ],
-            ))
+        .map(
+          (page) => StatefulShellBranch(
+            routes: [
+              GoRoute(
+                name: page.name,
+                path: page.path,
+                builder: (context, state) => _appPages[page]!(),
+              ),
+            ],
+          ),
+        )
         .toList();
   }
 
   // Generate standalone routes dynamically
   static List<GoRoute> get _standaloneRoutes {
-    final standalonePages = AppPage.values
-        .where((page) => page.navBarMemberIndex == 99) // Filter non-nav pages
-        .toList()
-      ..sort((a, b) => a.navBarMemberIndex
-          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC
+    final standalonePages =
+        AppPage.values
+            .where(
+              (page) => page.navBarMemberIndex == 99,
+            ) // Filter non-nav pages
+            .toList()
+          ..sort(
+            (a, b) => a.navBarMemberIndex.compareTo(b.navBarMemberIndex),
+          ); // Sort by navBarMemberIndex ASC
 
     return standalonePages
-        .map((page) => GoRoute(
-              name: page.name,
-              path: page.path,
-              builder: (context, state) => _standaloneAppPages[page]!(),
-            ))
+        .map(
+          (page) => GoRoute(
+            name: page.name,
+            path: page.path,
+            builder: (context, state) => _standaloneAppPages[page]!(),
+          ),
+        )
         .toList();
   }
 
@@ -92,9 +103,7 @@ class AppRouter {
       // Navigation shell route
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return ScaffoldWithNavBar(
-            navigationShell: navigationShell,
-          );
+          return ScaffoldWithNavBar(navigationShell: navigationShell);
         },
         branches: _navigationBranches,
       ),
