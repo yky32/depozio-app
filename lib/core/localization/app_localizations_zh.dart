@@ -84,6 +84,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transaction_category => '類別';
 
   @override
+  String get transaction_description => '描述';
+
+  @override
+  String get transaction_description_placeholder => '新增備註（選填）';
+
+  @override
   String get transaction_select_currency => '選擇貨幣';
 
   @override
@@ -334,6 +340,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get transaction_category => '類別';
+
+  @override
+  String get transaction_description => '描述';
+
+  @override
+  String get transaction_description_placeholder => '新增備註（選填）';
 
   @override
   String get transaction_select_currency => '選擇貨幣';

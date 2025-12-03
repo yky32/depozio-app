@@ -13,6 +13,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<UpdateAmount>(_handleUpdateAmount);
     on<SelectCategory>(_handleSelectCategory);
     on<SelectCurrency>(_handleSelectCurrency);
+    on<UpdateDescription>(_handleUpdateDescription);
     on<ResetTransaction>(_handleResetTransaction);
   }
 
@@ -86,6 +87,30 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       emit(
         TransactionFormState(
           currencyCode: event.currencyCode,
+        ),
+      );
+    }
+  }
+
+  void _handleUpdateDescription(
+    UpdateDescription event,
+    Emitter<TransactionState> emit,
+  ) {
+    LoggerUtil.d('📝 UpdateDescription event received: ${event.description}');
+    final currentState = state;
+    if (currentState is TransactionFormState) {
+      emit(
+        currentState.copyWith(
+          description: event.description,
+        ),
+      );
+    } else {
+      AppSettingService.init();
+      final defaultCurrency = AppSettingService.getDefaultCurrency();
+      emit(
+        TransactionFormState(
+          description: event.description,
+          currencyCode: defaultCurrency,
         ),
       );
     }

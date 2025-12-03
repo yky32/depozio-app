@@ -25,6 +25,8 @@
   "transaction_record_title": "Record Transaction",
   "transaction_amount": "Amount",
   "transaction_category": "Category",
+  "transaction_description": "Description",
+  "transaction_description_placeholder": "Add a note (optional)",
   "transaction_select_currency": "Select Currency",
   "transaction_select_category": "Select Category",
   "transaction_select_category_placeholder": "Select a category",

@@ -34,6 +34,15 @@ class SelectCurrency extends TransactionEvent {
   List<Object?> get props => [currencyCode];
 }
 
+class UpdateDescription extends TransactionEvent {
+  final String description;
+
+  const UpdateDescription({required this.description});
+
+  @override
+  List<Object?> get props => [description];
+}
+
 class ResetTransaction extends TransactionEvent {
   const ResetTransaction();
 }

@@ -84,6 +84,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_category => 'Category';
 
   @override
+  String get transaction_description => 'Description';
+
+  @override
+  String get transaction_description_placeholder => 'Add a note (optional)';
+
+  @override
   String get transaction_select_currency => 'Select Currency';
 
   @override

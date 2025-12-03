@@ -25,6 +25,8 @@
   "transaction_record_title": "記錄交易",
   "transaction_amount": "金額",
   "transaction_category": "類別",
+  "transaction_description": "描述",
+  "transaction_description_placeholder": "新增備註（選填）",
   "transaction_select_currency": "選擇貨幣",
   "transaction_select_category": "選擇類別",
   "transaction_select_category_placeholder": "選擇一個類別",

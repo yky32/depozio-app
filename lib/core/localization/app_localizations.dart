@@ -249,6 +249,18 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get transaction_category;
 
+  /// No description provided for @transaction_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get transaction_description;
+
+  /// No description provided for @transaction_description_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get transaction_description_placeholder;
+
   /// No description provided for @transaction_select_currency.
   ///
   /// In en, this message translates to:

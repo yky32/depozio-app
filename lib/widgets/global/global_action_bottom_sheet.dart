@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
@@ -117,18 +118,24 @@ class _TransactionFormContent extends StatefulWidget {
 class _TransactionFormContentState extends State<_TransactionFormContent> {
   late final TextEditingController _amountController;
   late final FocusNode _amountFocusNode;
+  late final TextEditingController _descriptionController;
+  late final FocusNode _descriptionFocusNode;
 
   @override
   void initState() {
     super.initState();
     _amountController = TextEditingController();
     _amountFocusNode = FocusNode();
+    _descriptionController = TextEditingController();
+    _descriptionFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _amountController.dispose();
     _amountFocusNode.dispose();
+    _descriptionController.dispose();
+    _descriptionFocusNode.dispose();
     super.dispose();
   }
 
@@ -195,9 +202,12 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
         final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
         final flag = CurrencyHelper.getFlag(currencyCode);
 
-        // Sync controller with state
+        // Sync controllers with state
         if (_amountController.text != formState.amount) {
           _amountController.text = formState.amount;
+        }
+        if (_descriptionController.text != formState.description) {
+          _descriptionController.text = formState.description;
         }
 
         return SingleChildScrollView(
@@ -257,6 +267,27 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           signed: false,
                         ),
                         textInputAction: TextInputAction.next,
+                        inputFormatters: [
+                          // Allow only numbers and decimal point
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                          // Ensure only one decimal point
+                          TextInputFormatter.withFunction(
+                            (oldValue, newValue) {
+                              final text = newValue.text;
+                              // Count decimal points
+                              final decimalCount = '.'.allMatches(text).length;
+                              // If more than one decimal point, reject
+                              if (decimalCount > 1) {
+                                return oldValue;
+                              }
+                              // If decimal point is at the start, reject
+                              if (text.startsWith('.')) {
+                                return oldValue;
+                              }
+                              return newValue;
+                            },
+                          ),
+                        ],
                         onTapOutside: (event) => _amountFocusNode.unfocus(),
                         onChanged: (value) {
                           context.read<TransactionBloc>().add(
@@ -295,6 +326,49 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 32),
+              // Description field
+              Text(
+                l10n.transaction_description,
+                style: widget.theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                focusNode: _descriptionFocusNode,
+                textInputAction: TextInputAction.next,
+                maxLines: 3,
+                minLines: 1,
+                onTapOutside: (event) => _descriptionFocusNode.unfocus(),
+                onChanged: (value) {
+                  context.read<TransactionBloc>().add(
+                    UpdateDescription(description: value),
+                  );
+                },
+                style: widget.theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: l10n.transaction_description_placeholder,
+                  filled: true,
+                  fillColor: widget.colorScheme.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: widget.colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 32),
               // Category selection
@@ -459,6 +533,9 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             currencyCode: currentState.currencyCode,
                             categoryId: currentState.selectedCategory!.id,
                             createdAt: DateTime.now(),
+                            notes: currentState.description.trim().isEmpty
+                                ? null
+                                : currentState.description.trim(),
                           );
                           await TransactionService().addTransaction(
                             transaction,
