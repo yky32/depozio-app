@@ -6,6 +6,7 @@ import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/models/category_icon_helper.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/core/enum/category_type.dart';
 
 /// Bottom sheet for adding category that covers the navigation bar
 /// This widget is specific to the deposit page
@@ -113,7 +114,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
   late final TextEditingController _nameController;
   late final FocusNode _nameFocusNode;
   late final ValueNotifier<IconData?> _selectedIconNotifier;
-  late final ValueNotifier<String?> _selectedTypeNotifier;
+  late final ValueNotifier<CategoryType?> _selectedTypeNotifier;
 
   @override
   void initState() {
@@ -121,7 +122,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
     _nameController = TextEditingController();
     _nameFocusNode = FocusNode();
     _selectedIconNotifier = ValueNotifier<IconData?>(null);
-    _selectedTypeNotifier = ValueNotifier<String?>(null);
+    _selectedTypeNotifier = ValueNotifier<CategoryType?>(null);
   }
 
   @override
@@ -143,7 +144,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
       child: ValueListenableBuilder<IconData?>(
         valueListenable: _selectedIconNotifier,
         builder: (context, selectedIcon, _) {
-          return ValueListenableBuilder<String?>(
+          return ValueListenableBuilder<CategoryType?>(
             valueListenable: _selectedTypeNotifier,
             builder: (context, selectedType, _) {
               return Column(
@@ -191,7 +192,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                     children: [
                       Expanded(
                         child: _buildTypeButton(
-                          type: 'deposits',
+                          type: CategoryType.deposits,
                           selectedType: selectedType,
                           icon: Icons.account_balance_wallet,
                           label: widget.l10n.add_category_type_deposits,
@@ -200,7 +201,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildTypeButton(
-                          type: 'expenses',
+                          type: CategoryType.expenses,
                           selectedType: selectedType,
                           icon: Icons.receipt_long,
                           label: widget.l10n.add_category_type_expenses,
@@ -341,7 +342,7 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
                               iconIndex: CategoryIconHelper.getIconIndex(
                                 selectedIcon,
                               ),
-                              type: selectedType,
+                              type: selectedType.value,
                               createdAt: DateTime.now(),
                             );
 
@@ -393,8 +394,8 @@ class _CategoryFormContentState extends State<_CategoryFormContent> {
   }
 
   Widget _buildTypeButton({
-    required String type,
-    required String? selectedType,
+    required CategoryType type,
+    required CategoryType? selectedType,
     required IconData icon,
     required String label,
   }) {

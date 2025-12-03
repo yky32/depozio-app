@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:depozio/core/network/logger.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/core/enum/category_type.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -108,7 +109,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           categoryId: transaction.categoryId,
           categoryName: category?.name ?? 'Unknown',
           categoryIcon: category?.icon ?? Icons.category,
-          categoryType: category?.type ?? 'expenses',
+          categoryType:
+              category?.categoryType.value ?? CategoryType.expenses.value,
           createdAt: transaction.createdAt,
           notes: transaction.notes,
         );
@@ -133,7 +135,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
-        if (category?.type == 'deposits') {
+        if (category?.categoryType == CategoryType.deposits) {
           total += transaction.amount;
         }
       }
@@ -159,7 +161,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
-        if (category?.type == 'expenses') {
+        if (category?.categoryType == CategoryType.expenses) {
           total += transaction.amount;
         }
       }

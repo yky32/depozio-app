@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/core/enum/category_type.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/select_category_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
@@ -558,7 +559,8 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                selectedCategory.type == 'deposits'
+                                selectedCategory.categoryType ==
+                                        CategoryType.deposits
                                     ? l10n.add_category_type_deposits
                                     : l10n.add_category_type_expenses,
                                 style: widget.theme.textTheme.bodySmall

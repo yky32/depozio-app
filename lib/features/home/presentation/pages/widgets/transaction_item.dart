@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
+import 'package:depozio/core/enum/category_type.dart';
 import 'package:intl/intl.dart';
 
 class TransactionItem extends StatelessWidget {
@@ -80,7 +81,8 @@ class TransactionItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Green icon for deposits (money coming in)
-                  if (transaction.categoryType == 'deposits') ...[
+                  if (CategoryType.fromString(transaction.categoryType) ==
+                      CategoryType.deposits) ...[
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -96,7 +98,8 @@ class TransactionItem extends StatelessWidget {
                     const SizedBox(width: 6),
                   ],
                   // Red icon for expenses (money going out)
-                  if (transaction.categoryType == 'expenses') ...[
+                  if (CategoryType.fromString(transaction.categoryType) ==
+                      CategoryType.expenses) ...[
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -120,9 +123,14 @@ class TransactionItem extends StatelessWidget {
                     formattedAmount,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: transaction.categoryType == 'deposits'
-                          ? Colors.green.shade700
-                          : transaction.categoryType == 'expenses'
+                      color:
+                          CategoryType.fromString(transaction.categoryType) ==
+                                  CategoryType.deposits
+                              ? Colors.green.shade700
+                              : CategoryType.fromString(
+                                    transaction.categoryType,
+                                  ) ==
+                                  CategoryType.expenses
                               ? Colors.red.shade700
                               : colorScheme.primary,
                     ),

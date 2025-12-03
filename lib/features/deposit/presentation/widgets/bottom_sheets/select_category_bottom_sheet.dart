@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
+import 'package:depozio/core/enum/category_type.dart';
 
 /// Bottom sheet for selecting a category from a list
 /// Common reusable widget - used across multiple features
@@ -190,15 +191,66 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                                               ),
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          category.type == 'deposits'
-                                              ? l10n.add_category_type_deposits
-                                              : l10n.add_category_type_expenses,
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: colorScheme.onSurface
-                                                    .withValues(alpha: 0.6),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Green icon for deposits
+                                            if (category.categoryType ==
+                                                CategoryType.deposits) ...[
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Icon(
+                                                  Icons.arrow_upward,
+                                                  size: 14,
+                                                  color: Colors.green.shade700,
+                                                ),
                                               ),
+                                              const SizedBox(width: 6),
+                                            ],
+                                            // Red icon for expenses
+                                            if (category.categoryType ==
+                                                CategoryType.expenses) ...[
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red.withValues(
+                                                    alpha: 0.1,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Icon(
+                                                  Icons.arrow_downward,
+                                                  size: 14,
+                                                  color: Colors.red.shade700,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+                                            Text(
+                                              category.categoryType ==
+                                                      CategoryType.deposits
+                                                  ? l10n
+                                                      .add_category_type_deposits
+                                                  : l10n
+                                                      .add_category_type_expenses,
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: colorScheme.onSurface
+                                                        .withValues(alpha: 0.6),
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),

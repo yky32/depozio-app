@@ -3,6 +3,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/core/enum/category_type.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 
@@ -38,7 +39,7 @@ class SkeletonCategoriesList extends StatelessWidget {
               id: 'skeleton_$index',
               name: 'Loading Category Name',
               iconIndex: 0, // Default icon index
-              type: 'deposits',
+              type: CategoryType.deposits.value,
               createdAt: DateTime.now(),
             );
             return SlidableCategoryCard(
