@@ -59,6 +59,7 @@ class TransactionWithCategory extends Equatable {
   final String categoryId;
   final String categoryName;
   final IconData categoryIcon;
+  final String categoryType; // 'deposits' or 'expenses'
   final DateTime createdAt;
   final String? notes;
 
@@ -69,6 +70,7 @@ class TransactionWithCategory extends Equatable {
     required this.categoryId,
     required this.categoryName,
     required this.categoryIcon,
+    required this.categoryType,
     required this.createdAt,
     this.notes,
   });
@@ -81,6 +83,7 @@ class TransactionWithCategory extends Equatable {
     categoryId,
     categoryName,
     categoryIcon,
+    categoryType,
     createdAt,
     notes,
   ];

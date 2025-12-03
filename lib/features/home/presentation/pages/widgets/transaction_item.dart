@@ -79,6 +79,22 @@ class TransactionItem extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Green icon for deposits (money coming in)
+                  if (transaction.categoryType == 'deposits') ...[
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(
+                        Icons.arrow_upward,
+                        size: 14,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   Text(
                     CurrencyHelper.getFlag(transaction.currencyCode),
                     style: const TextStyle(fontSize: 16),
@@ -88,7 +104,9 @@ class TransactionItem extends StatelessWidget {
                     formattedAmount,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
+                      color: transaction.categoryType == 'deposits'
+                          ? Colors.green.shade700
+                          : colorScheme.primary,
                     ),
                   ),
                 ],

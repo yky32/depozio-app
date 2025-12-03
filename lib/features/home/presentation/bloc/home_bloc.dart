@@ -102,6 +102,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           categoryId: transaction.categoryId,
           categoryName: category?.name ?? 'Unknown',
           categoryIcon: category?.icon ?? Icons.category,
+          categoryType: category?.type ?? 'expenses',
           createdAt: transaction.createdAt,
           notes: transaction.notes,
         );
