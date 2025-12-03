@@ -30,6 +30,9 @@ class HomeContent extends StatelessWidget {
     final totalExpenses =
         state is HomeLoaded ? (state as HomeLoaded).totalExpenses : 0.0;
 
+    // Calculate total savings (deposits - expenses)
+    final totalSavings = totalDeposits - totalExpenses;
+
     // Format totals as currency (using USD as default)
     final currencyCode = 'USD'; // Default currency
     final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
@@ -46,7 +49,12 @@ class HomeContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Total Savings Card
-        TotalSavingsCard(theme: theme, colorScheme: colorScheme, l10n: l10n),
+        TotalSavingsCard(
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+          amount: totalSavings,
+        ),
         const SizedBox(height: 24),
         // Grid with 2 columns
         GridView.count(
