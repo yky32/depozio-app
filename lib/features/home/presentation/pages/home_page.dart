@@ -126,6 +126,7 @@ class _HomePageContent extends StatelessWidget {
               },
               color: colorScheme.primary,
               child: SingleChildScrollView(
+                key: const ValueKey('home_scroll_view'),
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
                 child: Column(
