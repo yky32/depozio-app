@@ -6,8 +6,10 @@ class AppSettingService {
   static const String _boxName = 'app_settings';
   static const String _localeKey = 'locale';
   static const String _defaultCurrencyKey = 'default_currency';
-  static const String _defaultCurrency = 'HKD'; // Default fallback (Hong Kong Dollar)
-  
+  static const String _usernameKey = 'username';
+  static const String _defaultCurrency =
+      'HKD'; // Default fallback (Hong Kong Dollar)
+
   static hive.Box? _box;
   static bool _initialized = false;
   static final List<VoidCallback> _localeListeners = [];
@@ -59,7 +61,9 @@ class AppSettingService {
 
   /// Notify listeners of locale change
   static void notifyLocaleChanged() {
-    debugPrint('🔔 Notifying ${_localeListeners.length} listeners of locale change');
+    debugPrint(
+      '🔔 Notifying ${_localeListeners.length} listeners of locale change',
+    );
     for (final listener in _localeListeners) {
       listener();
     }
@@ -107,5 +111,20 @@ class AppSettingService {
     }
     await _box!.put(_defaultCurrencyKey, currencyCode);
   }
-}
 
+  // ==================== Username Methods ====================
+
+  /// Get saved username
+  static String? getUsername() {
+    if (_box == null) return null;
+    return _box!.get(_usernameKey) as String?;
+  }
+
+  /// Save username
+  static Future<void> saveUsername(String username) async {
+    if (_box == null) {
+      await init();
+    }
+    await _box!.put(_usernameKey, username);
+  }
+}

@@ -58,50 +58,138 @@ class SettingPage extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
+    AppSettingService.init();
+    final currentUsername = AppSettingService.getUsername() ?? '';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap:
+            () => _showUsernameDialog(
+              context,
+              theme,
+              colorScheme,
+              currentUsername,
+            ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            // Circle Avatar Icon (30%)
-            Expanded(
-              flex: 3,
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                child: Icon(Icons.person, size: 30, color: colorScheme.primary),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // "Coming Soon" text (70%)
-            Expanded(
-              flex: 7,
-              child: Builder(
-                builder:
-                    (context) => Text(
-                      context.l10n.setting_page_coming_soon,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Circle Avatar Icon (30%)
+                Expanded(
+                  flex: 3,
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                    child: Icon(
+                      Icons.person,
+                      size: 30,
+                      color: colorScheme.primary,
                     ),
-              ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Username or placeholder (70%)
+                Expanded(
+                  flex: 7,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentUsername.isEmpty
+                            ? context.l10n.setting_page_coming_soon
+                            : currentUsername,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color:
+                              currentUsername.isEmpty
+                                  ? colorScheme.onSurface.withValues(alpha: 0.6)
+                                  : colorScheme.onSurface,
+                        ),
+                      ),
+                      if (currentUsername.isEmpty)
+                        Text(
+                          'Tap to set username',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _showUsernameDialog(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+    String currentUsername,
+  ) async {
+    final textController = TextEditingController(text: currentUsername);
+    final l10n = context.l10n;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text('Set Username'),
+            content: TextField(
+              controller: textController,
+              decoration: InputDecoration(
+                hintText: 'Enter your username',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => dialogContext.pop(),
+                child: Text(l10n.action_cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  final username = textController.text.trim();
+                  if (username.isNotEmpty) {
+                    dialogContext.pop(username);
+                  }
+                },
+                child: Text('Save'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty && context.mounted) {
+      await AppSettingService.saveUsername(result);
+      // Refresh the home page if it's available
+      try {
+        context.read<HomeBloc>().add(const RefreshHome());
+      } catch (e) {
+        // HomeBloc might not be available in this context
+      }
+    }
   }
 
   Widget _buildTestingSection(
@@ -328,7 +416,7 @@ class SettingPage extends StatelessWidget {
                 ),
               ),
               if (showChevron)
-              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+                const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
             ],
           ),
         ),

@@ -135,6 +135,12 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get home_page_title;
 
+  /// No description provided for @home_page_greeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, {username}'**
+  String home_page_greeting(String username);
+
   /// No description provided for @home_page_deposits.
   ///
   /// In en, this message translates to:

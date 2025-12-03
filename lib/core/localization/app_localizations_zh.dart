@@ -27,6 +27,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_page_title => '首頁';
 
   @override
+  String home_page_greeting(String username) {
+    return '你好，$username';
+  }
+
+  @override
   String get home_page_deposits => '存款';
 
   @override
@@ -308,6 +313,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get home_page_title => '首頁';
+
+  @override
+  String home_page_greeting(String username) {
+    return '你好，$username';
+  }
 
   @override
   String get home_page_deposits => '存款';

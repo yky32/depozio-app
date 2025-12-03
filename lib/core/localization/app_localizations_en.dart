@@ -27,6 +27,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_page_title => 'Home';
 
   @override
+  String home_page_greeting(String username) {
+    return 'Hi, $username';
+  }
+
+  @override
   String get home_page_deposits => 'Deposits';
 
   @override

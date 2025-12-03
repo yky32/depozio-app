@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/home_content.dart';
 
 class HomePage extends StatelessWidget {
@@ -173,12 +174,23 @@ class _HomePageContent extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Page title (not skeletonized, stays in position)
-                        Text(
-                          l10n.home_page_title,
-                          style: theme.textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        // Page title with username (not skeletonized, stays in position)
+                        Builder(
+                          builder: (context) {
+                            AppSettingService.init();
+                            final username = AppSettingService.getUsername();
+                            final title =
+                                username != null && username.isNotEmpty
+                                    ? l10n.home_page_greeting(username)
+                                    : l10n.home_page_title;
+
+                            return Text(
+                              title,
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 32),
                         // Content with Skeletonizer (only content, not title)
