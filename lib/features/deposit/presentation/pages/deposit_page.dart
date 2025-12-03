@@ -4,12 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
-import 'package:depozio/features/deposit/presentation/widgets/slidable_category_card.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/core/network/logger.dart';
-import 'package:skeletonizer/skeletonizer.dart';
+import 'package:depozio/features/deposit/presentation/pages/widgets/deposit_page_header.dart';
+import 'package:depozio/features/deposit/presentation/pages/widgets/deposit_error_state.dart';
+import 'package:depozio/features/deposit/presentation/pages/widgets/deposit_empty_state.dart';
+import 'package:depozio/features/deposit/presentation/pages/widgets/skeleton_categories_list.dart';
+import 'package:depozio/features/deposit/presentation/pages/widgets/categories_list.dart';
 
 class DepositPage extends StatelessWidget {
   const DepositPage({super.key});
@@ -128,7 +131,9 @@ class _DepositPageContentState extends State<_DepositPageContent> {
   void _startTransactionWatcher() {
     TransactionService.init().then((_) {
       final transactionService = TransactionService();
-      _transactionSubscription = transactionService.watchTransactions().listen((_) {
+      _transactionSubscription = transactionService.watchTransactions().listen((
+        _,
+      ) {
         // Transaction changed, refresh DepositBloc to update counts
         if (mounted) {
           context.read<DepositBloc>().add(RefreshDeposits());
@@ -146,281 +151,153 @@ class _DepositPageContentState extends State<_DepositPageContent> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<DepositBloc, DepositState>(
-        listenWhen: (previous, current) {
-          // Only listen to errors that occur after initial load
-          // This prevents showing snackbar for initial load errors
-          if (current is DepositError && previous is! DepositInitial) {
-            LoggerUtil.w('⚠️ Error state detected: ${current.error}');
-            return true;
-          }
-          return false;
-        },
-        listener: (context, state) {
-          if (state is DepositError) {
+      listenWhen: (previous, current) {
+        // Only listen to errors that occur after initial load
+        // This prevents showing snackbar for initial load errors
+        if (current is DepositError && previous is! DepositInitial) {
+          LoggerUtil.w('⚠️ Error state detected: ${current.error}');
+          return true;
+        }
+        return false;
+      },
+      listener: (context, state) {
+        if (state is DepositError) {
           LoggerUtil.e('❌ Deposit error: ${state.error}');
-          }
-        },
-        child: Builder(
-        builder: (blocContext) => Scaffold(
-                body: SafeArea(
-                  child: Column(
-                    children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                        widget.l10n.deposit_page_title,
-                        style: widget.theme.textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.add_circle_outline,
-                          color: widget.colorScheme.primary,
-                              ),
-                        onPressed: () => _showAddCategoryBottomSheet(blocContext),
-                        tooltip: widget.l10n.deposit_page_add_category,
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Categories list with BlocBuilder
-                      Expanded(
-                        child: BlocBuilder<DepositBloc, DepositState>(
-                          buildWhen: (previous, current) {
-                            // Always rebuild on state type changes
-                            if (previous.runtimeType != current.runtimeType) {
-                              LoggerUtil.d(
-                                '🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}',
-                              );
-                              return true;
-                            }
-                            // Rebuild when transitioning to/from refreshing state
-                            if (previous is DepositRefreshing || current is DepositRefreshing) {
-                              return true;
-                            }
-                            // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
-                            // This ensures transaction counts are recalculated even when categories are the same
-                            if (previous is DepositLoaded &&
-                                current is DepositLoaded) {
-                              final lengthChanged =
-                                  previous.categories.length !=
-                                  current.categories.length;
-                              final contentChanged =
-                                  !_listsEqual(
-                                    previous.categories,
-                                    current.categories,
-                                  );
-                              final refreshChanged =
-                                  previous.refreshTimestamp !=
-                                  current.refreshTimestamp;
-                              if (lengthChanged || contentChanged || refreshChanged) {
-                                LoggerUtil.d(
-                                  '🔄 List or refresh changed: ${previous.categories.length} -> ${current.categories.length} items, refresh: $refreshChanged',
-                                );
-                              }
-                              return lengthChanged || contentChanged || refreshChanged;
-                            }
-                            return false;
-                          },
-                          builder: (context, state) {
+        }
+      },
+      child: Builder(
+        builder:
+            (blocContext) => Scaffold(
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    // Header
+                    DepositPageHeader(
+                      theme: widget.theme,
+                      colorScheme: widget.colorScheme,
+                      l10n: widget.l10n,
+                      onAddCategory:
+                          () => _showAddCategoryBottomSheet(blocContext),
+                    ),
+                    // Categories list with BlocBuilder
+                    Expanded(
+                      child: BlocBuilder<DepositBloc, DepositState>(
+                        buildWhen: (previous, current) {
+                          // Always rebuild on state type changes
+                          if (previous.runtimeType != current.runtimeType) {
                             LoggerUtil.d(
-                              '🎨 BlocBuilder building with state: ${state.runtimeType}',
+                              '🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}',
+                            );
+                            return true;
+                          }
+                          // Rebuild when transitioning to/from refreshing state
+                          if (previous is DepositRefreshing ||
+                              current is DepositRefreshing) {
+                            return true;
+                          }
+                          // For DepositLoaded states, rebuild when list changes OR refresh timestamp changes
+                          // This ensures transaction counts are recalculated even when categories are the same
+                          if (previous is DepositLoaded &&
+                              current is DepositLoaded) {
+                            final lengthChanged =
+                                previous.categories.length !=
+                                current.categories.length;
+                            final contentChanged =
+                                !_listsEqual(
+                                  previous.categories,
+                                  current.categories,
+                                );
+                            final refreshChanged =
+                                previous.refreshTimestamp !=
+                                current.refreshTimestamp;
+                            if (lengthChanged ||
+                                contentChanged ||
+                                refreshChanged) {
+                              LoggerUtil.d(
+                                '🔄 List or refresh changed: ${previous.categories.length} -> ${current.categories.length} items, refresh: $refreshChanged',
+                              );
+                            }
+                            return lengthChanged ||
+                                contentChanged ||
+                                refreshChanged;
+                          }
+                          return false;
+                        },
+                        builder: (context, state) {
+                          LoggerUtil.d(
+                            '🎨 BlocBuilder building with state: ${state.runtimeType}',
+                          );
+
+                          // Show loading state with skeleton
+                          if (state is DepositLoading) {
+                            LoggerUtil.d('⏳ Showing skeleton loading state');
+                            return SkeletonCategoriesList(
+                              theme: widget.theme,
+                              colorScheme: widget.colorScheme,
+                              l10n: widget.l10n,
+                            );
+                          }
+
+                          // Show refreshing state with skeleton overlay
+                          if (state is DepositRefreshing) {
+                            LoggerUtil.d(
+                              '🔄 Showing skeleton refreshing state',
+                            );
+                            return CategoriesList(
+                              theme: widget.theme,
+                              colorScheme: widget.colorScheme,
+                              l10n: widget.l10n,
+                              categories: state.categories,
+                              isLoading: true,
+                            );
+                          }
+
+                          // Show error state
+                          if (state is DepositError) {
+                            LoggerUtil.w(
+                              '⚠️ Showing error state: ${state.error}',
+                            );
+                            return DepositErrorState(
+                              theme: widget.theme,
+                              colorScheme: widget.colorScheme,
+                              l10n: widget.l10n,
+                              error: state.error,
+                            );
+                          }
+
+                          if (state is DepositLoaded) {
+                            final categories = state.categories;
+                            LoggerUtil.d(
+                              '📋 Rendering ${categories.length} categories',
                             );
 
-                            // Show loading state with skeleton
-                            if (state is DepositLoading) {
-                              LoggerUtil.d('⏳ Showing skeleton loading state');
-                              return _buildSkeletonList();
-                            }
-
-                            // Show refreshing state with skeleton overlay
-                            if (state is DepositRefreshing) {
-                              LoggerUtil.d('🔄 Showing skeleton refreshing state');
-                              return _buildRefreshingList(state.categories);
-                            }
-
-                            // Show error state
-                            if (state is DepositError) {
-                              LoggerUtil.w(
-                                '⚠️ Showing error state: ${state.error}',
-                              );
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.error_outline,
-                                      size: 64,
-                                      color: Colors.red.withValues(alpha: 0.5),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      widget.l10n.deposit_page_error_loading,
-                                      style: widget.theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            color: widget.colorScheme.onSurface
-                                                .withValues(alpha: 0.6),
-                                          ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      state.error,
-                                      style: widget.theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: widget.colorScheme.onSurface
-                                                .withValues(alpha: 0.5),
-                                          ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        context.read<DepositBloc>().add(
-                                          LoadDeposits(),
-                                        );
-                                      },
-                                      child: Text(widget.l10n.deposit_page_retry),
-                                    ),
-                                  ],
-                                ),
+                            if (categories.isEmpty) {
+                              LoggerUtil.d('📭 Showing empty state');
+                              return DepositEmptyState(
+                                theme: widget.theme,
+                                colorScheme: widget.colorScheme,
+                                l10n: widget.l10n,
                               );
                             }
 
-                            if (state is DepositLoaded) {
-                              final categories = state.categories;
-                              LoggerUtil.d(
-                                '📋 Rendering ${categories.length} categories',
-                              );
+                            return CategoriesList(
+                              theme: widget.theme,
+                              colorScheme: widget.colorScheme,
+                              l10n: widget.l10n,
+                              categories: categories,
+                              isLoading: false,
+                            );
+                          }
 
-                              if (categories.isEmpty) {
-                                LoggerUtil.d('📭 Showing empty state');
-                                return Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.category_outlined,
-                                        size: 64,
-                                        color: widget.colorScheme.onSurface.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        widget.l10n.deposit_page_no_categories,
-                                        style: widget.theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              color: widget.colorScheme.onSurface
-                                                  .withValues(alpha: 0.6),
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        widget.l10n.deposit_page_add_category_hint,
-                                        style: widget.theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: widget.colorScheme.onSurface
-                                                  .withValues(alpha: 0.5),
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-
-                              return _buildCategoriesList(categories, isLoading: false);
-                            }
-
-                            // Default fallback
-                            return const SizedBox.shrink();
-                          },
-                        ),
+                          // Default fallback
+                          return const SizedBox.shrink();
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-        ),
-    );
-  }
-
-  Widget _buildSkeletonList() {
-    return Skeletonizer(
-      enabled: true,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          LoggerUtil.d('🔄 Pull to refresh triggered (skeleton)');
-          context.read<DepositBloc>().add(RefreshDeposits());
-          await Future.delayed(const Duration(milliseconds: 300));
-        },
-        color: widget.colorScheme.primary,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: 5, // Show 5 skeleton cards
-          itemBuilder: (context, index) {
-            // Create a dummy category for skeleton
-            final dummyCategory = CategoryEntity(
-              id: 'skeleton_$index',
-              name: 'Loading Category Name',
-              iconIndex: 0, // Default icon index
-              type: 'deposits',
-              createdAt: DateTime.now(),
-            );
-            return SlidableCategoryCard(
-              category: dummyCategory,
-              theme: widget.theme,
-              colorScheme: widget.colorScheme,
-              l10n: widget.l10n,
-              transactionCount: 0,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRefreshingList(List<CategoryEntity> categories) {
-    return Skeletonizer(
-      enabled: true,
-      child: _buildCategoriesList(categories, isLoading: true),
-    );
-  }
-
-  Widget _buildCategoriesList(List<CategoryEntity> categories, {bool isLoading = false}) {
-    // Initialize TransactionService to get counts
-    TransactionService.init();
-    final transactionService = TransactionService();
-    
-    return RefreshIndicator(
-      onRefresh: () async {
-        LoggerUtil.d('🔄 Pull to refresh triggered');
-        context.read<DepositBloc>().add(RefreshDeposits());
-        // Wait a bit for the refresh to complete
-        await Future.delayed(const Duration(milliseconds: 300));
-      },
-      color: widget.colorScheme.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-        ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final transactionCount = transactionService
-              .getTransactionCountByCategoryId(category.id);
-          return SlidableCategoryCard(
-            category: category,
-            theme: widget.theme,
-            colorScheme: widget.colorScheme,
-            l10n: widget.l10n,
-            transactionCount: transactionCount,
-          );
-        },
+            ),
       ),
     );
   }
