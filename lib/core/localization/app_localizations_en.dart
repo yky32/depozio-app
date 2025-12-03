@@ -260,6 +260,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setting_page_select_language => 'Select Language';
 
   @override
+  String get setting_page_default_currency => 'Default Currency';
+
+  @override
+  String get setting_page_select_default_currency => 'Select Default Currency';
+
+  @override
   String get setting_page_app_version => 'App Version';
 
   @override

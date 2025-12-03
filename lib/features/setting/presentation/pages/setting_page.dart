@@ -561,7 +561,7 @@ class SettingPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Default Currency',
+                          context.l10n.setting_page_default_currency,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -610,7 +610,7 @@ class SettingPage extends StatelessWidget {
       builder: (BuildContext context) {
         return SelectCurrencyBottomSheet(
           currentCurrency: currentCurrency,
-          title: 'Select Default Currency',
+          title: context.l10n.setting_page_select_default_currency,
         );
       },
     );

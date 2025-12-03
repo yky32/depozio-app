@@ -555,6 +555,18 @@ abstract class AppLocalizations {
   /// **'Select Language'**
   String get setting_page_select_language;
 
+  /// No description provided for @setting_page_default_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Currency'**
+  String get setting_page_default_currency;
+
+  /// No description provided for @setting_page_select_default_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Default Currency'**
+  String get setting_page_select_default_currency;
+
   /// No description provided for @setting_page_app_version.
   ///
   /// In en, this message translates to:

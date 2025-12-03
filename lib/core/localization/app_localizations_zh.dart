@@ -255,6 +255,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setting_page_select_language => '选择语言';
 
   @override
+  String get setting_page_default_currency => '默认货币';
+
+  @override
+  String get setting_page_select_default_currency => '选择默认货币';
+
+  @override
   String get setting_page_app_version => '应用版本';
 
   @override
@@ -541,6 +547,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get setting_page_select_language => '選擇語言';
+
+  @override
+  String get setting_page_default_currency => '預設貨幣';
+
+  @override
+  String get setting_page_select_default_currency => '選擇預設貨幣';
 
   @override
   String get setting_page_app_version => '應用程式版本';

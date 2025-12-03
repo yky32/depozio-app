@@ -142,6 +142,8 @@
   "setting_page_app_information": "应用信息",
   "setting_page_language": "语言",
   "setting_page_select_language": "选择语言",
+  "setting_page_default_currency": "默认货币",
+  "setting_page_select_default_currency": "选择默认货币",
   "setting_page_app_version": "应用版本",
   "setting_page_app_name": "应用名称",
   "setting_page_data_management": "数据管理",

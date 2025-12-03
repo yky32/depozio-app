@@ -142,6 +142,8 @@
   "setting_page_app_information": "App Information",
   "setting_page_language": "Language",
   "setting_page_select_language": "Select Language",
+  "setting_page_default_currency": "Default Currency",
+  "setting_page_select_default_currency": "Select Default Currency",
   "setting_page_app_version": "App Version",
   "setting_page_app_name": "App Name",
   "setting_page_data_management": "Data Management",
