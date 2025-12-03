@@ -1,42 +1,12 @@
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
+import 'package:depozio/core/network/logger.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Simulate data loading
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
-  }
-
-  Future<void> _handleRefresh() async {
-    setState(() {
-      _isLoading = true;
-    });
-    // Simulate data refresh
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,91 +14,203 @@ class _HomePageState extends State<HomePage> {
     final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
 
+    LoggerUtil.i('🏗️ Building HomePage');
+
+    return BlocProvider(
+      create: (context) {
+        LoggerUtil.d('🔧 Creating HomeBloc instance');
+        return HomeBloc()..add(const LoadHome());
+      },
+      child: _HomePageContent(
+        theme: theme,
+        colorScheme: colorScheme,
+        l10n: l10n,
+      ),
+    );
+  }
+}
+
+class _HomePageContent extends StatelessWidget {
+  const _HomePageContent({
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+  });
+
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final dynamic l10n;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _handleRefresh,
-          color: colorScheme.primary,
-          child: Skeletonizer(
-            enabled: _isLoading,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.home_page_title,
-                    style: theme.textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+        child: BlocBuilder<HomeBloc, HomeState>(
+          buildWhen: (previous, current) {
+            // Always rebuild on state type changes
+            if (previous.runtimeType != current.runtimeType) {
+              LoggerUtil.d(
+                '🔄 State type changed: ${previous.runtimeType} -> ${current.runtimeType}',
+              );
+              return true;
+            }
+            // Rebuild when transitioning to/from refreshing state
+            if (previous is HomeRefreshing || current is HomeRefreshing) {
+              return true;
+            }
+            // For HomeLoaded states, rebuild when refresh timestamp changes
+            if (previous is HomeLoaded && current is HomeLoaded) {
+              final refreshChanged =
+                  previous.refreshTimestamp != current.refreshTimestamp;
+              if (refreshChanged) {
+                LoggerUtil.d('🔄 Refresh timestamp changed');
+              }
+              return refreshChanged;
+            }
+            return false;
+          },
+          builder: (context, state) {
+            LoggerUtil.d(
+              '🎨 BlocBuilder building with state: ${state.runtimeType}',
+            );
+
+            // Show error state
+            if (state is HomeError) {
+              LoggerUtil.w('⚠️ Showing error state: ${state.error}');
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.withValues(alpha: 0.5),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  // Total Savings Card
-                  _buildTotalSavingsCard(
-                    context: context,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 24),
-                  // Grid with 2 columns
-                  GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 1.25,
-                    children: [
-                      _buildStatisticCard(
-                        context: context,
-                        theme: theme,
-                        colorScheme: colorScheme,
-                        title: l10n.home_page_deposits,
-                        value: '0',
-                        icon: Icons.account_balance_wallet,
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading home data',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
-                      _buildStatisticCard(
-                        context: context,
-                        theme: theme,
-                        colorScheme: colorScheme,
-                        title: l10n.home_page_expenses,
-                        value: '0',
-                        icon: Icons.receipt_long,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.error,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Savings Goal Progress
-                  _buildSavingsGoalCard(
-                    context: context,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 24),
-                  // Monthly Savings
-                  _buildMonthlySavingsCard(
-                    context: context,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 24),
-                  // Recent Activity
-                  _buildRecentActivitySection(
-                    context: context,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    l10n: l10n,
-                  ),
-                ],
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<HomeBloc>().add(const LoadHome());
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // For all other states (Loading, Refreshing, Loaded), use the same structure
+            // This prevents layout shifts and zoom effects
+            final isSkeletonEnabled =
+                state is HomeLoading || state is HomeRefreshing;
+
+            return Skeletonizer(
+              enabled: isSkeletonEnabled,
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  LoggerUtil.d('🔄 Pull to refresh triggered');
+                  context.read<HomeBloc>().add(const RefreshHome());
+                  await Future.delayed(const Duration(milliseconds: 300));
+                },
+                color: colorScheme.primary,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                  child: _buildHomeContent(context),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildHomeContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.home_page_title,
+          style: theme.textTheme.displayMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 32),
+        // Total Savings Card
+        _buildTotalSavingsCard(
+          context: context,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        ),
+        const SizedBox(height: 24),
+        // Grid with 2 columns
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 1.25,
+          children: [
+            _buildStatisticCard(
+              context: context,
+              theme: theme,
+              colorScheme: colorScheme,
+              title: l10n.home_page_deposits,
+              value: '0',
+              icon: Icons.account_balance_wallet,
+            ),
+            _buildStatisticCard(
+              context: context,
+              theme: theme,
+              colorScheme: colorScheme,
+              title: l10n.home_page_expenses,
+              value: '0',
+              icon: Icons.receipt_long,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        // Savings Goal Progress
+        _buildSavingsGoalCard(
+          context: context,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        ),
+        const SizedBox(height: 24),
+        // Monthly Savings
+        _buildMonthlySavingsCard(
+          context: context,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        ),
+        const SizedBox(height: 24),
+        // Recent Activity
+        _buildRecentActivitySection(
+          context: context,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        ),
+      ],
     );
   }
 
