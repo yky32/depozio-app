@@ -53,6 +53,44 @@ def increment_build_number_in_pubspec
   return new_build
 end
 
+# Helper function to commit and push build number change
+def commit_and_push_build_number(new_build_number)
+  UI.message("📝 Committing build number change...")
+  
+  begin
+    # Check if we're in a git repository
+    unless system("cd #{PROJECT_ROOT} && git rev-parse --git-dir > /dev/null 2>&1")
+      UI.important("⚠️  Not a git repository, skipping commit")
+      return
+    end
+    
+    # Check if there are uncommitted changes to pubspec.yaml
+    git_status = `cd #{PROJECT_ROOT} && git status --porcelain pubspec.yaml`.strip
+    if git_status.empty?
+      UI.important("ℹ️  No changes to pubspec.yaml, skipping commit")
+      return
+    end
+    
+    # Stage the pubspec.yaml file
+    sh("cd #{PROJECT_ROOT} && git add pubspec.yaml")
+    
+    # Commit with a descriptive message
+    # Use multiple -m flags for multi-line commit message
+    sh("cd #{PROJECT_ROOT} && git commit -m 'chore: Auto-increment build number to #{new_build_number}' -m 'Build number automatically incremented by Fastfile' -m 'Updated to 1.0.0+#{new_build_number}'")
+    
+    UI.success("✅ Build number change committed")
+    
+    # Push to remote
+    UI.message("🚀 Pushing to remote repository...")
+    sh("cd #{PROJECT_ROOT} && git push")
+    
+    UI.success("✅ Build number change pushed to remote")
+  rescue => ex
+    UI.important("⚠️  Failed to commit/push build number: #{ex.message}")
+    UI.important("   You may need to commit and push manually")
+  end
+end
+
 platform :ios do
   desc "Build iOS app for development (Debug)"
   lane :build_debug do
@@ -126,6 +164,9 @@ platform :ios do
       # Automatically increment build number before building
       UI.important("🔢 Auto-incrementing build number...")
       new_build_number = increment_build_number_in_pubspec
+      
+      # Commit and push the build number change
+      commit_and_push_build_number(new_build_number)
       UI.important("")
       
       UI.important("📦 Building IPA for App Store...")
