@@ -1,8 +1,42 @@
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Simulate data loading
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  Future<void> _handleRefresh() async {
+    setState(() {
+      _isLoading = true;
+    });
+    // Simulate data refresh
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,78 +46,86 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.home_page_title,
-                style: theme.textTheme.displayMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Total Savings Card
-              _buildTotalSavingsCard(
-                context: context,
-                theme: theme,
-                colorScheme: colorScheme,
-                l10n: l10n,
-              ),
-              const SizedBox(height: 24),
-              // Grid with 2 columns
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 1.25,
+        child: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          color: colorScheme.primary,
+          child: Skeletonizer(
+            enabled: _isLoading,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildStatisticCard(
-                    context: context,
-                    theme: theme,
-                    colorScheme: colorScheme,
-                    title: l10n.home_page_deposits,
-                    value: '0',
-                    icon: Icons.account_balance_wallet,
+                  Text(
+                    l10n.home_page_title,
+                    style: theme.textTheme.displayMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  _buildStatisticCard(
+                  const SizedBox(height: 32),
+                  // Total Savings Card
+                  _buildTotalSavingsCard(
                     context: context,
                     theme: theme,
                     colorScheme: colorScheme,
-                    title: l10n.home_page_expenses,
-                    value: '0',
-                    icon: Icons.receipt_long,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 24),
+                  // Grid with 2 columns
+                  GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: 1.25,
+                    children: [
+                      _buildStatisticCard(
+                        context: context,
+                        theme: theme,
+                        colorScheme: colorScheme,
+                        title: l10n.home_page_deposits,
+                        value: '0',
+                        icon: Icons.account_balance_wallet,
+                      ),
+                      _buildStatisticCard(
+                        context: context,
+                        theme: theme,
+                        colorScheme: colorScheme,
+                        title: l10n.home_page_expenses,
+                        value: '0',
+                        icon: Icons.receipt_long,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Savings Goal Progress
+                  _buildSavingsGoalCard(
+                    context: context,
+                    theme: theme,
+                    colorScheme: colorScheme,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 24),
+                  // Monthly Savings
+                  _buildMonthlySavingsCard(
+                    context: context,
+                    theme: theme,
+                    colorScheme: colorScheme,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 24),
+                  // Recent Activity
+                  _buildRecentActivitySection(
+                    context: context,
+                    theme: theme,
+                    colorScheme: colorScheme,
+                    l10n: l10n,
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              // Savings Goal Progress
-              _buildSavingsGoalCard(
-                context: context,
-                theme: theme,
-                colorScheme: colorScheme,
-                l10n: l10n,
-              ),
-              const SizedBox(height: 24),
-              // Monthly Savings
-              _buildMonthlySavingsCard(
-                context: context,
-                theme: theme,
-                colorScheme: colorScheme,
-                l10n: l10n,
-              ),
-              const SizedBox(height: 24),
-              // Recent Activity
-              _buildRecentActivitySection(
-                context: context,
-                theme: theme,
-                colorScheme: colorScheme,
-                l10n: l10n,
-              ),
-            ],
+            ),
           ),
         ),
       ),
