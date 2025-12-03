@@ -14,6 +14,234 @@ v2
 
 ## 🎨 Design Practices
 
+### BLoC Stateless Widget Design Principle
+
+**Core Principle:** All widget interactions should use BLoC (Business Logic Component) pattern with stateless widgets. This ensures predictable state management, testability, and maintainability across the entire application.
+
+#### Why BLoC Stateless Design?
+
+1. **Predictable State Management**: State changes flow through events and states, making the app behavior predictable
+2. **Testability**: Business logic is separated from UI, making unit testing straightforward
+3. **Reusability**: BLoC can be shared across multiple widgets
+4. **Maintainability**: Clear separation of concerns between UI and business logic
+5. **Performance**: Stateless widgets are more efficient and enable better Flutter optimizations
+6. **Debugging**: State transitions are traceable and debuggable
+
+#### Implementation Guidelines
+
+**1. Always Use StatelessWidget for UI Components**
+
+```dart
+// ✅ CORRECT: Stateless widget with BLoC
+class MyPage extends StatelessWidget {
+  const MyPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => MyBloc()..add(LoadData()),
+      child: _MyPageContent(),
+    );
+  }
+}
+
+// ❌ AVOID: StatefulWidget for state management
+class MyPage extends StatefulWidget {
+  // Don't use setState for business logic
+}
+```
+
+**2. Use BlocProvider for Dependency Injection**
+
+```dart
+// Provide BLoC at the appropriate level in widget tree
+BlocProvider(
+  create: (context) => MyBloc()..add(InitialEvent()),
+  child: MyWidget(),
+)
+```
+
+**3. Use BlocBuilder for Reactive UI Updates**
+
+```dart
+BlocBuilder<MyBloc, MyState>(
+  buildWhen: (previous, current) {
+    // Only rebuild when specific conditions are met
+    return previous.runtimeType != current.runtimeType;
+  },
+  builder: (context, state) {
+    if (state is LoadingState) {
+      return LoadingWidget();
+    }
+    if (state is LoadedState) {
+      return ContentWidget(data: state.data);
+    }
+    return ErrorWidget(error: state.error);
+  },
+)
+```
+
+**4. Use BlocListener for Side Effects**
+
+```dart
+BlocListener<MyBloc, MyState>(
+  listenWhen: (previous, current) {
+    // Only listen to specific state changes
+    return current is ErrorState && previous is! ErrorState;
+  },
+  listener: (context, state) {
+    // Handle side effects (navigation, dialogs, etc.)
+    if (state is ErrorState) {
+      // Show error dialog
+    }
+  },
+  child: MyWidget(),
+)
+```
+
+**5. Dispatch Events Instead of Direct Method Calls**
+
+```dart
+// ✅ CORRECT: Dispatch events
+onPressed: () {
+  context.read<MyBloc>().add(RefreshData());
+}
+
+// ❌ AVOID: Direct method calls or setState
+onPressed: () {
+  setState(() {
+    // Don't manage state in UI
+  });
+}
+```
+
+**6. State Structure Pattern**
+
+```dart
+// Standard state structure
+abstract class MyState extends Equatable {
+  const MyState();
+}
+
+class MyInitial extends MyState {}
+class MyLoading extends MyState {}
+class MyRefreshing extends MyState {
+  final List<Data> existingData;
+  const MyRefreshing({required this.existingData});
+}
+class MyLoaded extends MyState {
+  final List<Data> data;
+  final DateTime refreshTimestamp;
+  const MyLoaded({
+    required this.data,
+    DateTime? refreshTimestamp,
+  }) : refreshTimestamp = refreshTimestamp ?? DateTime.now();
+}
+class MyError extends MyState {
+  final String error;
+  const MyError({required this.error});
+}
+```
+
+**7. Event Structure Pattern**
+
+```dart
+// Standard event structure
+abstract class MyEvent extends Equatable {
+  const MyEvent();
+}
+
+class LoadData extends MyEvent {
+  const LoadData();
+}
+
+class RefreshData extends MyEvent {
+  const RefreshData();
+}
+```
+
+#### When to Use StatefulWidget
+
+StatefulWidget should **ONLY** be used for:
+- Managing UI-only state (e.g., scroll position, animation controllers, form field focus)
+- Widget lifecycle management (e.g., StreamSubscription cleanup)
+- Local UI interactions that don't affect business logic
+
+```dart
+// ✅ ACCEPTABLE: StatefulWidget for UI-only state
+class _MyFormState extends State<MyForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
+  
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+  
+  // UI-only state management
+}
+```
+
+#### Skeleton Loading Pattern
+
+When implementing loading states with skeleton animations:
+
+1. **Use same widget structure** for skeleton and loaded states to prevent layout shifts
+2. **Toggle Skeletonizer enabled/disabled** instead of replacing widgets
+3. **Use BlocBuilder** to react to state changes (Loading → Loaded)
+
+```dart
+BlocBuilder<MyBloc, MyState>(
+  builder: (context, state) {
+    final isSkeletonEnabled = state is MyLoading || state is MyRefreshing;
+    
+    return Skeletonizer(
+      enabled: isSkeletonEnabled,
+      child: RefreshIndicator(
+        onRefresh: () {
+          context.read<MyBloc>().add(RefreshData());
+        },
+        child: SingleChildScrollView(
+          child: _buildContent(context),
+        ),
+      ),
+    );
+  },
+)
+```
+
+#### Best Practices Checklist
+
+- ✅ All pages use `StatelessWidget` with `BlocProvider`
+- ✅ State management handled by BLoC, not `setState`
+- ✅ UI updates through `BlocBuilder` reacting to state changes
+- ✅ Side effects (navigation, dialogs) handled by `BlocListener`
+- ✅ Events dispatched instead of direct method calls
+- ✅ State classes extend `Equatable` for proper comparison
+- ✅ `buildWhen` used to optimize rebuilds
+- ✅ `listenWhen` used to optimize side effects
+- ✅ Skeleton loading uses same widget structure
+- ✅ Error states properly handled with retry functionality
+
+#### Migration Guide
+
+When converting existing StatefulWidget to BLoC pattern:
+
+1. **Extract state management** to a BLoC
+2. **Convert setState calls** to event dispatches
+3. **Replace StatefulWidget** with StatelessWidget
+4. **Wrap with BlocProvider** at appropriate level
+5. **Use BlocBuilder** for reactive UI updates
+6. **Use BlocListener** for side effects
+
+#### Examples in Codebase
+
+- **HomePage**: `lib/features/home/presentation/pages/home_page.dart`
+- **DepositPage**: `lib/features/deposit/presentation/pages/deposit_page.dart`
+- **HomeBloc**: `lib/features/home/presentation/bloc/home_bloc.dart`
+- **DepositBloc**: `lib/features/deposit/presentation/bloc/deposit_bloc.dart`
+
 ### Common Reusable Widgets Naming Convention
 
 All common reusable widgets that are shared across multiple features or used in different parts of the application should be placed in the `lib/widgets/` directory and documented with comments indicating their shared usage.

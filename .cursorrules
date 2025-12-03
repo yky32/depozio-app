@@ -1,0 +1,116 @@
+# Cursor Rules for Depozio Flutter App
+
+## Core Design Principles
+
+### BLoC Stateless Widget Design (MANDATORY)
+
+**All widget interactions MUST use BLoC pattern with StatelessWidget.**
+
+#### Rules:
+
+1. **Always use StatelessWidget** for UI components. StatefulWidget is ONLY allowed for:
+   - UI-only state (scroll controllers, animation controllers, form keys)
+   - Widget lifecycle management (dispose cleanup)
+   - Local UI interactions that don't affect business logic
+
+2. **State management MUST be handled by BLoC**, never by setState() for business logic.
+
+3. **Use BlocProvider** for dependency injection at the appropriate widget tree level.
+
+4. **Use BlocBuilder** for reactive UI updates with proper `buildWhen` conditions.
+
+5. **Use BlocListener** for side effects (navigation, dialogs, toasts) with proper `listenWhen` conditions.
+
+6. **Dispatch events** instead of calling methods directly:
+   ```dart
+   // ✅ CORRECT
+   context.read<MyBloc>().add(RefreshData());
+   
+   // ❌ WRONG
+   myBloc.refreshData(); // Don't do this
+   ```
+
+7. **State classes MUST extend Equatable** for proper state comparison.
+
+8. **Standard state structure**:
+   - `Initial` - Initial state
+   - `Loading` - Loading state
+   - `Refreshing` - Refreshing state (with existing data if applicable)
+   - `Loaded` - Loaded state (with data and refreshTimestamp)
+   - `Error` - Error state (with error message)
+
+9. **Skeleton loading pattern**:
+   - Use same widget structure for skeleton and loaded states
+   - Toggle Skeletonizer `enabled` property instead of replacing widgets
+   - Prevents layout shifts and zoom effects
+
+#### Code Structure:
+
+```dart
+// Page structure
+class MyPage extends StatelessWidget {
+  const MyPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => MyBloc()..add(LoadData()),
+      child: _MyPageContent(),
+    );
+  }
+}
+
+// Content with BlocBuilder
+class _MyPageContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MyBloc, MyState>(
+      buildWhen: (previous, current) {
+        return previous.runtimeType != current.runtimeType;
+      },
+      builder: (context, state) {
+        // Handle different states
+      },
+    );
+  }
+}
+```
+
+#### When reviewing code, ensure:
+
+- ✅ No setState() for business logic
+- ✅ All state changes go through BLoC events
+- ✅ StatelessWidget used unless absolutely necessary for UI-only state
+- ✅ BlocBuilder with proper buildWhen conditions
+- ✅ BlocListener for side effects
+- ✅ Events properly structured and dispatched
+- ✅ States properly structured with Equatable
+- ✅ Skeleton loading uses consistent widget structure
+
+#### Examples to follow:
+
+- `lib/features/home/presentation/pages/home_page.dart`
+- `lib/features/deposit/presentation/pages/deposit_page.dart`
+
+---
+
+## Additional Guidelines
+
+### Common Reusable Widgets
+
+- Place common reusable widgets in `lib/widgets/` directory
+- Use clear, descriptive names without special prefixes
+- Document shared usage in comments
+
+### File Organization
+
+- Features organized under `lib/features/{feature_name}/`
+- Each feature has: `presentation/`, `data/`, `domain/` (if needed)
+- BLoC files: `{feature}_bloc.dart`, `{feature}_event.dart`, `{feature}_state.dart`
+
+### Naming Conventions
+
+- Entity classes: Use `Entity` suffix (e.g., `CategoryEntity`, `TransactionEntity`)
+- Service classes: Use `Service` suffix (e.g., `CategoryService`, `TransactionService`)
+- BLoC classes: Use `Bloc` suffix (e.g., `HomeBloc`, `DepositBloc`)
+
