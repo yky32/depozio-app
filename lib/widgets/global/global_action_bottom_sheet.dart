@@ -40,60 +40,60 @@ class ActionBottomSheet extends StatelessWidget {
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeOut,
       child: Container(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              behavior: HitTestBehavior.opaque,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              width: double.infinity,
+              alignment: Alignment.center,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: Container(
-                  width: 80,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                width: 80,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurface.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: Text(
-                context.l10n.transaction_record_title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Text(
+              context.l10n.transaction_record_title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Flexible(
-              child: BlocProvider(
-                create: (context) => TransactionBloc(),
-                child: _TransactionFormContent(
-                  theme: theme,
-                  colorScheme: colorScheme,
-                ),
+          ),
+          Flexible(
+            child: BlocProvider(
+              create: (context) => TransactionBloc(),
+              child: _TransactionFormContent(
+                theme: theme,
+                colorScheme: colorScheme,
               ),
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );
@@ -545,8 +545,8 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             // Transaction saved - the deposit page will automatically refresh
                             // via the transaction watcher in _DepositPageContent
 
-                            bloc.add(const ResetTransaction());
-                            Navigator.of(context).pop();
+                          bloc.add(const ResetTransaction());
+                          Navigator.of(context).pop();
                           }
                         } catch (e) {
                           // Error saving transaction - silently fail

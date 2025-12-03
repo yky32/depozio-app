@@ -13,6 +13,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     LoggerUtil.i('HomeBloc initialized');
     on<LoadHome>(_handleLoadHome);
     on<RefreshHome>(_handleRefreshHome);
+    on<UpdateScrollOffset>(_handleUpdateScrollOffset);
   }
 
   Future<void> _handleLoadHome(LoadHome event, Emitter<HomeState> emit) async {
@@ -25,15 +26,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       await CategoryService.init();
 
       LoggerUtil.d('📖 Loading home data...');
-      
+
       // Load recent transactions (top 10, latest first)
       final recentTransactions = _loadRecentTransactions();
 
-      emit(HomeLoaded(
-        refreshTimestamp: DateTime.now(),
-        recentTransactions: recentTransactions,
-      ));
-      LoggerUtil.d('📤 State emitted: HomeLoaded with ${recentTransactions.length} transactions');
+      // Preserve scroll offset from previous state
+      final previousScrollOffset =
+          (state is HomeLoaded) ? (state as HomeLoaded).scrollOffset : 0.0;
+
+      emit(
+        HomeLoaded(
+          refreshTimestamp: DateTime.now(),
+          recentTransactions: recentTransactions,
+          scrollOffset: previousScrollOffset,
+        ),
+      );
+      LoggerUtil.d(
+        '📤 State emitted: HomeLoaded with ${recentTransactions.length} transactions',
+      );
     } catch (e, stackTrace) {
       LoggerUtil.e(
         '❌ Error loading home data',
@@ -57,7 +67,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       // Map to TransactionWithCategory
       return top10Transactions.map((transaction) {
-        final category = categoryService.getCategoryById(transaction.categoryId);
+        final category = categoryService.getCategoryById(
+          transaction.categoryId,
+        );
         return TransactionWithCategory(
           transactionId: transaction.id,
           amount: transaction.amount,
@@ -84,6 +96,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     );
 
     if (state is HomeLoaded) {
+      // Capture scroll offset before emitting refreshing state
+      final currentState = state as HomeLoaded;
+      final preservedScrollOffset = currentState.scrollOffset;
+
       // Emit refreshing state to show skeleton
       emit(const HomeRefreshing());
 
@@ -92,15 +108,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await Future.delayed(const Duration(milliseconds: 300));
 
         LoggerUtil.d('📖 Refreshing home data...');
-        
+
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
-        emit(HomeLoaded(
-          refreshTimestamp: DateTime.now(),
-          recentTransactions: recentTransactions,
-        ));
-        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions');
+        // Preserve scroll offset from before refresh
+        emit(
+          HomeLoaded(
+            refreshTimestamp: DateTime.now(),
+            recentTransactions: recentTransactions,
+            scrollOffset: preservedScrollOffset,
+          ),
+        );
+        LoggerUtil.d(
+          '📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions',
+        );
       } catch (e, stackTrace) {
         LoggerUtil.e(
           '❌ Error refreshing home data',
@@ -111,17 +133,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     } else if (state is HomeRefreshing) {
       // Already refreshing, just update the data
+      // Note: Scroll offset should have been preserved before HomeRefreshing was emitted
       try {
         LoggerUtil.d('📖 Refreshing home data...');
-        
+
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
-        emit(HomeLoaded(
-          refreshTimestamp: DateTime.now(),
-          recentTransactions: recentTransactions,
-        ));
-        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions');
+        // Use 0.0 as default - scroll offset should be updated via UpdateScrollOffset
+        emit(
+          HomeLoaded(
+            refreshTimestamp: DateTime.now(),
+            recentTransactions: recentTransactions,
+            scrollOffset: 0.0,
+          ),
+        );
+        LoggerUtil.d(
+          '📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions',
+        );
       } catch (e, stackTrace) {
         LoggerUtil.e(
           '❌ Error refreshing home data',
@@ -134,6 +163,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // If not loaded, trigger load
       LoggerUtil.d('⚠️ Not loaded yet, triggering LoadHome');
       add(const LoadHome());
+    }
+  }
+
+  void _handleUpdateScrollOffset(
+    UpdateScrollOffset event,
+    Emitter<HomeState> emit,
+  ) {
+    if (state is HomeLoaded) {
+      final currentState = state as HomeLoaded;
+      emit(currentState.copyWith(scrollOffset: event.scrollOffset));
     }
   }
 }

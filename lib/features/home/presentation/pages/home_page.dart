@@ -120,34 +120,76 @@ class _HomePageContent extends StatelessWidget {
             final isSkeletonEnabled =
                 state is HomeLoading || state is HomeRefreshing;
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                LoggerUtil.d('🔄 Pull to refresh triggered');
-                context.read<HomeBloc>().add(const RefreshHome());
-                await Future.delayed(const Duration(milliseconds: 300));
+            // Use a GlobalKey to access ScrollPosition for restoration
+            final scrollKey = GlobalKey();
+
+            return BlocListener<HomeBloc, HomeState>(
+              listenWhen: (previous, current) {
+                // Listen when transitioning from Refreshing to Loaded
+                return previous is HomeRefreshing && current is HomeLoaded;
               },
-              color: colorScheme.primary,
-              child: SingleChildScrollView(
-                key: const ValueKey('home_scroll_view'),
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Page title (not skeletonized, stays in position)
-                    Text(
-                      l10n.home_page_title,
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              listener: (context, state) {
+                // Restore scroll position after refresh
+                if (state is HomeLoaded) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    final scrollableState =
+                        scrollKey.currentContext
+                            ?.findAncestorStateOfType<ScrollableState>();
+                    if (scrollableState != null) {
+                      final position = scrollableState.position;
+                      position.jumpTo(state.scrollOffset);
+                    }
+                  });
+                }
+              },
+              child: NotificationListener<ScrollUpdateNotification>(
+                onNotification: (notification) {
+                  // Update scroll position in BLoC as user scrolls
+                  final offset = notification.metrics.pixels;
+                  context.read<HomeBloc>().add(UpdateScrollOffset(offset));
+                  return false;
+                },
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    LoggerUtil.d('🔄 Pull to refresh triggered');
+                    // Save current scroll position before refresh
+                    final scrollableState =
+                        scrollKey.currentContext
+                            ?.findAncestorStateOfType<ScrollableState>();
+                    if (scrollableState != null) {
+                      final position = scrollableState.position;
+                      final currentOffset = position.pixels;
+                      context.read<HomeBloc>().add(
+                        UpdateScrollOffset(currentOffset),
+                      );
+                    }
+                    context.read<HomeBloc>().add(const RefreshHome());
+                    await Future.delayed(const Duration(milliseconds: 300));
+                  },
+                  color: colorScheme.primary,
+                  child: SingleChildScrollView(
+                    key: scrollKey,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Page title (not skeletonized, stays in position)
+                        Text(
+                          l10n.home_page_title,
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        // Content with Skeletonizer (only content, not title)
+                        Skeletonizer(
+                          enabled: isSkeletonEnabled,
+                          child: _buildHomeContent(context, state),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 32),
-                    // Content with Skeletonizer (only content, not title)
-                    Skeletonizer(
-                      enabled: isSkeletonEnabled,
-                      child: _buildHomeContent(context, state),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );

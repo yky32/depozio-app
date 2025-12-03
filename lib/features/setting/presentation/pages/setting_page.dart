@@ -328,7 +328,7 @@ class SettingPage extends StatelessWidget {
                 ),
               ),
               if (showChevron)
-                const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
             ],
           ),
         ),

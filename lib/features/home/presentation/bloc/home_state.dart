@@ -22,15 +22,33 @@ class HomeRefreshing extends HomeState {
 class HomeLoaded extends HomeState {
   final DateTime refreshTimestamp;
   final List<TransactionWithCategory> recentTransactions;
+  final double scrollOffset;
 
   HomeLoaded({
     DateTime? refreshTimestamp,
     List<TransactionWithCategory>? recentTransactions,
-  })  : refreshTimestamp = refreshTimestamp ?? DateTime.now(),
-        recentTransactions = recentTransactions ?? const [];
+    this.scrollOffset = 0.0,
+  }) : refreshTimestamp = refreshTimestamp ?? DateTime.now(),
+       recentTransactions = recentTransactions ?? const [];
 
   @override
-  List<Object?> get props => [refreshTimestamp, recentTransactions];
+  List<Object?> get props => [
+    refreshTimestamp,
+    recentTransactions,
+    scrollOffset,
+  ];
+
+  HomeLoaded copyWith({
+    DateTime? refreshTimestamp,
+    List<TransactionWithCategory>? recentTransactions,
+    double? scrollOffset,
+  }) {
+    return HomeLoaded(
+      refreshTimestamp: refreshTimestamp ?? this.refreshTimestamp,
+      recentTransactions: recentTransactions ?? this.recentTransactions,
+      scrollOffset: scrollOffset ?? this.scrollOffset,
+    );
+  }
 }
 
 /// Helper class to combine transaction with its category information
@@ -57,15 +75,15 @@ class TransactionWithCategory extends Equatable {
 
   @override
   List<Object?> get props => [
-        transactionId,
-        amount,
-        currencyCode,
-        categoryId,
-        categoryName,
-        categoryIcon,
-        createdAt,
-        notes,
-      ];
+    transactionId,
+    amount,
+    currencyCode,
+    categoryId,
+    categoryName,
+    categoryIcon,
+    createdAt,
+    notes,
+  ];
 }
 
 class HomeError extends HomeState {
