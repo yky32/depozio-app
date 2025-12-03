@@ -5,6 +5,8 @@ import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/select_category_bottom_sheet.dart';
+import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
+import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/widgets/bottom_sheets/select_currency_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/presentation/bloc/transaction_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
@@ -40,60 +42,60 @@ class ActionBottomSheet extends StatelessWidget {
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeOut,
       child: Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              width: double.infinity,
-              alignment: Alignment.center,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              behavior: HitTestBehavior.opaque,
               child: Container(
-                width: 80,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                width: double.infinity,
+                alignment: Alignment.center,
+                child: Container(
+                  width: 80,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurface.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: Text(
-              context.l10n.transaction_record_title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: Text(
+                context.l10n.transaction_record_title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Flexible(
-            child: BlocProvider(
-              create: (context) => TransactionBloc(),
-              child: _TransactionFormContent(
-                theme: theme,
-                colorScheme: colorScheme,
+            Flexible(
+              child: BlocProvider(
+                create: (context) => TransactionBloc(),
+                child: _TransactionFormContent(
+                  theme: theme,
+                  colorScheme: colorScheme,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -161,13 +163,27 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     await CategoryService.init();
 
     // Get all categories
-    final categories = CategoryService().getAllCategories();
+    var categories = CategoryService().getAllCategories();
 
     if (categories.isEmpty) {
-      return;
+      // No categories found - show add category bottom sheet
+      if (!context.mounted) return;
+      await _showAddCategoryBottomSheet(context);
+
+      // Wait a bit for the category to be saved to Hive
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Get updated categories after category creation
+      categories = CategoryService().getAllCategories();
+
+      // If still no categories, user dismissed without creating
+      if (categories.isEmpty) {
+        return;
+      }
     }
 
     // Show category selection bottom sheet
+    if (!context.mounted) return;
     final selectedCategory = await showModalBottomSheet<CategoryEntity>(
       context: context,
       isScrollControlled: true,
@@ -179,9 +195,66 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
       },
     );
 
-    if (selectedCategory != null) {
+    if (selectedCategory != null && context.mounted) {
       bloc.add(SelectCategory(category: selectedCategory));
     }
+  }
+
+  Future<void> _showAddCategoryBottomSheet(BuildContext context) async {
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final screenHeight = mediaQuery.size.height;
+    final hasKeyboard = keyboardHeight > 0;
+
+    // When keyboard is visible, reduce max height to leave space at top for dismissal
+    // Reserve about 10% of screen height at the top when keyboard is up
+    final maxHeightPercentage = hasKeyboard ? 0.85 : 0.95;
+    final topMargin = hasKeyboard ? screenHeight * 0.1 : 0.0;
+
+    // Create a DepositBloc for the add category bottom sheet
+    final depositBloc = DepositBloc()..add(LoadDeposits());
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      useRootNavigator: true,
+      useSafeArea: false,
+      builder: (bottomSheetContext) {
+        return BlocProvider.value(
+          value: depositBloc,
+          child: Stack(
+            children: [
+              // Backdrop to cover navigation bar - tappable to dismiss
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(bottomSheetContext).pop(),
+                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
+                ),
+              ),
+              // Bottom sheet content
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: keyboardHeight,
+                    top: topMargin,
+                  ),
+                  child: AddCategoryBottomSheet(
+                    maxHeightPercentage: maxHeightPercentage,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    // Clean up the bloc after the bottom sheet is closed
+    depositBloc.close();
   }
 
   @override
@@ -271,22 +344,20 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           // Allow only numbers and decimal point
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                           // Ensure only one decimal point
-                          TextInputFormatter.withFunction(
-                            (oldValue, newValue) {
-                              final text = newValue.text;
-                              // Count decimal points
-                              final decimalCount = '.'.allMatches(text).length;
-                              // If more than one decimal point, reject
-                              if (decimalCount > 1) {
-                                return oldValue;
-                              }
-                              // If decimal point is at the start, reject
-                              if (text.startsWith('.')) {
-                                return oldValue;
-                              }
-                              return newValue;
-                            },
-                          ),
+                          TextInputFormatter.withFunction((oldValue, newValue) {
+                            final text = newValue.text;
+                            // Count decimal points
+                            final decimalCount = '.'.allMatches(text).length;
+                            // If more than one decimal point, reject
+                            if (decimalCount > 1) {
+                              return oldValue;
+                            }
+                            // If decimal point is at the start, reject
+                            if (text.startsWith('.')) {
+                              return oldValue;
+                            }
+                            return newValue;
+                          }),
                         ],
                         onTapOutside: (event) => _amountFocusNode.unfocus(),
                         onChanged: (value) {
@@ -533,20 +604,23 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             currencyCode: currentState.currencyCode,
                             categoryId: currentState.selectedCategory!.id,
                             createdAt: DateTime.now(),
-                            notes: currentState.description.trim().isEmpty
-                                ? null
-                                : currentState.description.trim(),
+                            notes:
+                                currentState.description.trim().isEmpty
+                                    ? null
+                                    : currentState.description.trim(),
                           );
                           await TransactionService().addTransaction(
                             transaction,
                           );
 
                           if (context.mounted) {
-                            // Transaction saved - the deposit page will automatically refresh
+                            // Transaction saved - the home page will automatically refresh
+                            // via the transaction watcher in _HomePageContentState
+                            // The deposit page will automatically refresh
                             // via the transaction watcher in _DepositPageContent
 
-                          bloc.add(const ResetTransaction());
-                          Navigator.of(context).pop();
+                            bloc.add(const ResetTransaction());
+                            Navigator.of(context).pop();
                           }
                         } catch (e) {
                           // Error saving transaction - silently fail

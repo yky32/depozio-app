@@ -211,6 +211,63 @@ BlocBuilder<MyBloc, MyState>(
 )
 ```
 
+#### BLoC-Managed Reactive Subscriptions Pattern
+
+When you need to watch external data sources (like Hive streams, Firebase streams, etc.) for automatic UI updates, manage subscriptions within the BLoC, not in the widget. This keeps widgets as pure StatelessWidgets.
+
+**Key Principles:**
+
+1. **Keep widgets as StatelessWidget** - No StatefulWidget needed for subscriptions
+2. **Manage subscriptions in BLoC** - Handle `StreamSubscription` in the BLoC, not the widget
+3. **Auto-refresh via streams** - Subscribe to data changes (e.g., `TransactionService.watchTransactions()`) in the BLoC constructor
+4. **Automatic event dispatch** - When the stream emits, dispatch a refresh event (e.g., `RefreshHome()`) from within the BLoC
+5. **Cleanup in `close()`** - Cancel subscriptions in the BLoC's `close()` method
+
+**Implementation Pattern:**
+
+```dart
+class MyBloc extends Bloc<MyEvent, MyState> {
+  StreamSubscription? _dataSubscription;
+
+  MyBloc() : super(MyInitial()) {
+    on<LoadData>(_handleLoadData);
+    on<RefreshData>(_handleRefreshData);
+    
+    // Start watching for automatic refresh
+    _startDataWatcher();
+  }
+
+  void _startDataWatcher() {
+    DataService.init().then((_) {
+      final service = DataService();
+      _dataSubscription = service.watchData().listen((_) {
+        // Data changed, automatically refresh
+        LoggerUtil.d('🔄 Data changed, refreshing');
+        add(const RefreshData());
+      });
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _dataSubscription?.cancel();
+    return super.close();
+  }
+}
+```
+
+**Benefits:**
+
+- ✅ Pure StatelessWidget pattern - No StatefulWidget needed
+- ✅ Centralized state management - All reactive logic in BLoC
+- ✅ Automatic reactive updates - UI updates automatically when data changes
+- ✅ Proper resource cleanup - Subscriptions cancelled in `close()`
+- ✅ Clean separation of concerns - Widgets remain pure UI components
+
+**Example in Codebase:**
+
+- **HomeBloc**: `lib/features/home/presentation/bloc/home_bloc.dart` - Watches `TransactionService.watchTransactions()` and automatically refreshes recent activities when transactions change
+
 #### Best Practices Checklist
 
 - ✅ All pages use `StatelessWidget` with `BlocProvider`

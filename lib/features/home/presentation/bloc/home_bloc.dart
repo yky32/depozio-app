@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -9,11 +10,35 @@ part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  StreamSubscription? _transactionSubscription;
+
   HomeBloc() : super(const HomeInitial()) {
     LoggerUtil.i('HomeBloc initialized');
     on<LoadHome>(_handleLoadHome);
     on<RefreshHome>(_handleRefreshHome);
     on<UpdateScrollOffset>(_handleUpdateScrollOffset);
+
+    // Start watching transactions for automatic refresh
+    _startTransactionWatcher();
+  }
+
+  void _startTransactionWatcher() {
+    TransactionService.init().then((_) {
+      final transactionService = TransactionService();
+      _transactionSubscription = transactionService.watchTransactions().listen((
+        _,
+      ) {
+        // Transaction changed, automatically refresh
+        LoggerUtil.d('🔄 Transaction changed, refreshing home data');
+        add(const RefreshHome());
+      });
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _transactionSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _handleLoadHome(LoadHome event, Emitter<HomeState> emit) async {
