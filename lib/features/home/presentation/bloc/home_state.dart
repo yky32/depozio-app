@@ -23,11 +23,15 @@ class HomeLoaded extends HomeState {
   final DateTime refreshTimestamp;
   final List<TransactionWithCategory> recentTransactions;
   final double scrollOffset;
+  final double totalDeposits;
+  final double totalExpenses;
 
   HomeLoaded({
     DateTime? refreshTimestamp,
     List<TransactionWithCategory>? recentTransactions,
     this.scrollOffset = 0.0,
+    this.totalDeposits = 0.0,
+    this.totalExpenses = 0.0,
   }) : refreshTimestamp = refreshTimestamp ?? DateTime.now(),
        recentTransactions = recentTransactions ?? const [];
 
@@ -36,17 +40,23 @@ class HomeLoaded extends HomeState {
     refreshTimestamp,
     recentTransactions,
     scrollOffset,
+    totalDeposits,
+    totalExpenses,
   ];
 
   HomeLoaded copyWith({
     DateTime? refreshTimestamp,
     List<TransactionWithCategory>? recentTransactions,
     double? scrollOffset,
+    double? totalDeposits,
+    double? totalExpenses,
   }) {
     return HomeLoaded(
       refreshTimestamp: refreshTimestamp ?? this.refreshTimestamp,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       scrollOffset: scrollOffset ?? this.scrollOffset,
+      totalDeposits: totalDeposits ?? this.totalDeposits,
+      totalExpenses: totalExpenses ?? this.totalExpenses,
     );
   }
 }

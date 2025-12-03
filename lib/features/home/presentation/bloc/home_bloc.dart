@@ -55,6 +55,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Load recent transactions (top 10, latest first)
       final recentTransactions = _loadRecentTransactions();
 
+      // Calculate total deposits and expenses
+      final totalDeposits = _calculateTotalDeposits();
+      final totalExpenses = _calculateTotalExpenses();
+
       // Preserve scroll offset from previous state
       final previousScrollOffset =
           (state is HomeLoaded) ? (state as HomeLoaded).scrollOffset : 0.0;
@@ -64,6 +68,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           refreshTimestamp: DateTime.now(),
           recentTransactions: recentTransactions,
           scrollOffset: previousScrollOffset,
+          totalDeposits: totalDeposits,
+          totalExpenses: totalExpenses,
         ),
       );
       LoggerUtil.d(
@@ -113,6 +119,58 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
+  double _calculateTotalDeposits() {
+    try {
+      final transactionService = TransactionService();
+      final categoryService = CategoryService();
+
+      // Get all transactions
+      final allTransactions = transactionService.getAllTransactions();
+
+      // Calculate sum of all deposit transactions
+      double total = 0.0;
+      for (final transaction in allTransactions) {
+        final category = categoryService.getCategoryById(
+          transaction.categoryId,
+        );
+        if (category?.type == 'deposits') {
+          total += transaction.amount;
+        }
+      }
+
+      return total;
+    } catch (e) {
+      LoggerUtil.e('❌ Error calculating total deposits', error: e);
+      return 0.0;
+    }
+  }
+
+  double _calculateTotalExpenses() {
+    try {
+      final transactionService = TransactionService();
+      final categoryService = CategoryService();
+
+      // Get all transactions
+      final allTransactions = transactionService.getAllTransactions();
+
+      // Calculate sum of all expense transactions
+      double total = 0.0;
+      for (final transaction in allTransactions) {
+        final category = categoryService.getCategoryById(
+          transaction.categoryId,
+        );
+        if (category?.type == 'expenses') {
+          total += transaction.amount;
+        }
+      }
+
+      return total;
+    } catch (e) {
+      LoggerUtil.e('❌ Error calculating total expenses', error: e);
+      return 0.0;
+    }
+  }
+
   Future<void> _handleRefreshHome(
     RefreshHome event,
     Emitter<HomeState> emit,
@@ -138,12 +196,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
+        // Calculate total deposits and expenses
+        final totalDeposits = _calculateTotalDeposits();
+        final totalExpenses = _calculateTotalExpenses();
+
         // Preserve scroll offset from before refresh
         emit(
           HomeLoaded(
             refreshTimestamp: DateTime.now(),
             recentTransactions: recentTransactions,
             scrollOffset: preservedScrollOffset,
+            totalDeposits: totalDeposits,
+            totalExpenses: totalExpenses,
           ),
         );
         LoggerUtil.d(
@@ -166,12 +230,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
+        // Calculate total deposits and expenses
+        final totalDeposits = _calculateTotalDeposits();
+        final totalExpenses = _calculateTotalExpenses();
+
         // Use 0.0 as default - scroll offset should be updated via UpdateScrollOffset
         emit(
           HomeLoaded(
             refreshTimestamp: DateTime.now(),
             recentTransactions: recentTransactions,
             scrollOffset: 0.0,
+            totalDeposits: totalDeposits,
+            totalExpenses: totalExpenses,
           ),
         );
         LoggerUtil.d(

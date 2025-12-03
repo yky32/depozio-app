@@ -5,6 +5,8 @@ import 'package:depozio/features/home/presentation/pages/widgets/statistic_card.
 import 'package:depozio/features/home/presentation/pages/widgets/savings_goal_card.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/monthly_savings_card.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/recent_activity_section.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
+import 'package:intl/intl.dart';
 
 class HomeContent extends StatelessWidget {
   const HomeContent({
@@ -22,6 +24,24 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get total deposits and expenses from state
+    final totalDeposits =
+        state is HomeLoaded ? (state as HomeLoaded).totalDeposits : 0.0;
+    final totalExpenses =
+        state is HomeLoaded ? (state as HomeLoaded).totalExpenses : 0.0;
+
+    // Format totals as currency (using USD as default)
+    final currencyCode = 'USD'; // Default currency
+    final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
+    final formattedDeposits = NumberFormat.currency(
+      symbol: currencySymbol,
+      decimalDigits: 2,
+    ).format(totalDeposits);
+    final formattedExpenses = NumberFormat.currency(
+      symbol: currencySymbol,
+      decimalDigits: 2,
+    ).format(totalExpenses);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,15 +61,23 @@ class HomeContent extends StatelessWidget {
               theme: theme,
               colorScheme: colorScheme,
               title: l10n.home_page_deposits,
-              value: '0',
+              value: formattedDeposits,
               icon: Icons.account_balance_wallet,
+              valueColor: Colors.green.shade700,
+              topRightIcon: Icons.arrow_upward,
+              topRightIconColor: Colors.green.shade700,
+              topRightIconBackgroundColor: Colors.green.withValues(alpha: 0.1),
             ),
             StatisticCard(
               theme: theme,
               colorScheme: colorScheme,
               title: l10n.home_page_expenses,
-              value: '0',
+              value: formattedExpenses,
               icon: Icons.receipt_long,
+              valueColor: Colors.red.shade700,
+              topRightIcon: Icons.arrow_downward,
+              topRightIconColor: Colors.red.shade700,
+              topRightIconBackgroundColor: Colors.red.withValues(alpha: 0.1),
             ),
           ],
         ),
