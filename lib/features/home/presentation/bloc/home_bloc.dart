@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/deposit/data/services/category_service.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -17,14 +20,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(const HomeLoading());
 
     try {
-      // Simulate data loading
-      await Future.delayed(const Duration(milliseconds: 800));
+      // Initialize services
+      await TransactionService.init();
+      await CategoryService.init();
 
       LoggerUtil.d('📖 Loading home data...');
-      // In the future, load actual data here
+      
+      // Load recent transactions (top 10, latest first)
+      final recentTransactions = _loadRecentTransactions();
 
-      emit(HomeLoaded(refreshTimestamp: DateTime.now()));
-      LoggerUtil.d('📤 State emitted: HomeLoaded');
+      emit(HomeLoaded(
+        refreshTimestamp: DateTime.now(),
+        recentTransactions: recentTransactions,
+      ));
+      LoggerUtil.d('📤 State emitted: HomeLoaded with ${recentTransactions.length} transactions');
     } catch (e, stackTrace) {
       LoggerUtil.e(
         '❌ Error loading home data',
@@ -32,6 +41,37 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         stackTrace: stackTrace,
       );
       emit(HomeError(error: e.toString()));
+    }
+  }
+
+  List<TransactionWithCategory> _loadRecentTransactions() {
+    try {
+      final transactionService = TransactionService();
+      final categoryService = CategoryService();
+
+      // Get all transactions (already sorted by createdAt descending)
+      final allTransactions = transactionService.getAllTransactions();
+
+      // Take top 10
+      final top10Transactions = allTransactions.take(10).toList();
+
+      // Map to TransactionWithCategory
+      return top10Transactions.map((transaction) {
+        final category = categoryService.getCategoryById(transaction.categoryId);
+        return TransactionWithCategory(
+          transactionId: transaction.id,
+          amount: transaction.amount,
+          currencyCode: transaction.currencyCode,
+          categoryId: transaction.categoryId,
+          categoryName: category?.name ?? 'Unknown',
+          categoryIcon: category?.icon ?? Icons.category,
+          createdAt: transaction.createdAt,
+          notes: transaction.notes,
+        );
+      }).toList();
+    } catch (e) {
+      LoggerUtil.e('❌ Error loading recent transactions', error: e);
+      return [];
     }
   }
 
@@ -52,10 +92,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await Future.delayed(const Duration(milliseconds: 300));
 
         LoggerUtil.d('📖 Refreshing home data...');
-        // In the future, refresh actual data here
+        
+        // Reload recent transactions
+        final recentTransactions = _loadRecentTransactions();
 
-        emit(HomeLoaded(refreshTimestamp: DateTime.now()));
-        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed)');
+        emit(HomeLoaded(
+          refreshTimestamp: DateTime.now(),
+          recentTransactions: recentTransactions,
+        ));
+        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions');
       } catch (e, stackTrace) {
         LoggerUtil.e(
           '❌ Error refreshing home data',
@@ -68,10 +113,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Already refreshing, just update the data
       try {
         LoggerUtil.d('📖 Refreshing home data...');
-        // In the future, refresh actual data here
+        
+        // Reload recent transactions
+        final recentTransactions = _loadRecentTransactions();
 
-        emit(HomeLoaded(refreshTimestamp: DateTime.now()));
-        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed)');
+        emit(HomeLoaded(
+          refreshTimestamp: DateTime.now(),
+          recentTransactions: recentTransactions,
+        ));
+        LoggerUtil.d('📤 State emitted: HomeLoaded (refreshed) with ${recentTransactions.length} transactions');
       } catch (e, stackTrace) {
         LoggerUtil.e(
           '❌ Error refreshing home data',

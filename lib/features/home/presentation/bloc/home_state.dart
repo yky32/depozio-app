@@ -21,12 +21,51 @@ class HomeRefreshing extends HomeState {
 
 class HomeLoaded extends HomeState {
   final DateTime refreshTimestamp;
+  final List<TransactionWithCategory> recentTransactions;
 
-  HomeLoaded({DateTime? refreshTimestamp})
-    : refreshTimestamp = refreshTimestamp ?? DateTime.now();
+  HomeLoaded({
+    DateTime? refreshTimestamp,
+    List<TransactionWithCategory>? recentTransactions,
+  })  : refreshTimestamp = refreshTimestamp ?? DateTime.now(),
+        recentTransactions = recentTransactions ?? const [];
 
   @override
-  List<Object?> get props => [refreshTimestamp];
+  List<Object?> get props => [refreshTimestamp, recentTransactions];
+}
+
+/// Helper class to combine transaction with its category information
+class TransactionWithCategory extends Equatable {
+  final String transactionId;
+  final double amount;
+  final String currencyCode;
+  final String categoryId;
+  final String categoryName;
+  final IconData categoryIcon;
+  final DateTime createdAt;
+  final String? notes;
+
+  const TransactionWithCategory({
+    required this.transactionId,
+    required this.amount,
+    required this.currencyCode,
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.createdAt,
+    this.notes,
+  });
+
+  @override
+  List<Object?> get props => [
+        transactionId,
+        amount,
+        currencyCode,
+        categoryId,
+        categoryName,
+        categoryIcon,
+        createdAt,
+        notes,
+      ];
 }
 
 class HomeError extends HomeState {

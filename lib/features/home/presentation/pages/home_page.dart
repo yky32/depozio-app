@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
 import 'package:depozio/core/network/logger.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -143,7 +145,7 @@ class _HomePageContent extends StatelessWidget {
                     // Content with Skeletonizer (only content, not title)
                     Skeletonizer(
                       enabled: isSkeletonEnabled,
-                      child: _buildHomeContent(context),
+                      child: _buildHomeContent(context, state),
                     ),
                   ],
                 ),
@@ -155,7 +157,7 @@ class _HomePageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildHomeContent(BuildContext context) {
+  Widget _buildHomeContent(BuildContext context, HomeState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -217,6 +219,7 @@ class _HomePageContent extends StatelessWidget {
           theme: theme,
           colorScheme: colorScheme,
           l10n: l10n,
+          state: state,
         ),
       ],
     );
@@ -490,7 +493,13 @@ class _HomePageContent extends StatelessWidget {
     required ThemeData theme,
     required ColorScheme colorScheme,
     required dynamic l10n,
+    required HomeState state,
   }) {
+    final recentTransactions =
+        state is HomeLoaded
+            ? state.recentTransactions
+            : <TransactionWithCategory>[];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -514,29 +523,145 @@ class _HomePageContent extends StatelessWidget {
               ),
             ],
           ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 48,
-                    color: colorScheme.onSurface.withValues(alpha: 0.3),
+          child:
+              recentTransactions.isEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 48,
+                            color: colorScheme.onSurface.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.home_page_no_activity,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: recentTransactions.length,
+                    separatorBuilder:
+                        (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final transaction = recentTransactions[index];
+                      return _buildTransactionItem(
+                        context: context,
+                        theme: theme,
+                        colorScheme: colorScheme,
+                        transaction: transaction,
+                      );
+                    },
                   ),
-                  const SizedBox(height: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransactionItem({
+    required BuildContext context,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required TransactionWithCategory transaction,
+  }) {
+    final currencySymbol = CurrencyHelper.getSymbol(transaction.currencyCode);
+    final formattedAmount = NumberFormat.currency(
+      symbol: currencySymbol,
+      decimalDigits: 2,
+    ).format(transaction.amount);
+
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+    final formattedDate = dateFormat.format(transaction.createdAt);
+    final formattedTime = timeFormat.format(transaction.createdAt);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          // Category icon
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              transaction.categoryIcon,
+              color: colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Transaction details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.categoryName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (transaction.notes != null &&
+                    transaction.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
                   Text(
-                    l10n.home_page_no_activity,
+                    transaction.notes!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // Amount with currency flag and date
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    CurrencyHelper.getFlag(transaction.currencyCode),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    formattedAmount,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                '$formattedDate • $formattedTime',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
