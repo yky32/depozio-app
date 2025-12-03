@@ -5,14 +5,9 @@ import 'package:depozio/features/deposit/data/models/category_entity.dart';
 /// Bottom sheet for selecting a category from a list
 /// Common reusable widget - used across multiple features
 class SelectCategoryBottomSheet extends StatelessWidget {
-  const SelectCategoryBottomSheet({
-    super.key,
-    required this.categories,
-    this.maxHeightPercentage = 0.7,
-  });
+  const SelectCategoryBottomSheet({super.key, required this.categories});
 
   final List<CategoryEntity> categories;
-  final double maxHeightPercentage;
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +18,32 @@ class SelectCategoryBottomSheet extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final keyboardHeight = mediaQuery.viewInsets.bottom;
 
+    // Calculate dynamic height based on content
+    // Header: drag handle (16*2) + title padding (16+24) + title height (~24) = ~80
+    // Each item: bottom padding (12) + container padding (16*2) + content (~80) = ~124
+    // Bottom padding: 24
+    // Empty state: ~120
+    const headerHeight = 80.0;
+    const itemHeight =
+        124.0; // More accurate: 12 padding + 32 container padding + 80 content
+    const bottomPadding = 24.0;
+    const emptyStateHeight = 120.0;
+
+    final contentHeight =
+        categories.isEmpty
+            ? headerHeight + emptyStateHeight + bottomPadding
+            : headerHeight + (categories.length * itemHeight) + bottomPadding;
+
+    // Use 90% max, but use actual content height if smaller
+    final maxScreenHeight = screenHeight * 0.9;
     final availableHeight = screenHeight - keyboardHeight;
-    final maxHeight = (screenHeight * maxHeightPercentage).clamp(
+    final dynamicHeight = contentHeight.clamp(
       0.0,
-      availableHeight,
+      maxScreenHeight.clamp(0.0, availableHeight),
     );
 
     return Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+      height: dynamicHeight,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
@@ -74,7 +87,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          Flexible(
+          Expanded(
             child:
                 categories.isEmpty
                     ? Center(

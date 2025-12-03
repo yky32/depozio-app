@@ -9,7 +9,6 @@ class SelectCurrencyBottomSheet extends StatelessWidget {
     super.key,
     required this.currentCurrency,
     this.title,
-    this.maxHeightPercentage = 0.5,
   });
 
   /// Currently selected currency code
@@ -17,10 +16,6 @@ class SelectCurrencyBottomSheet extends StatelessWidget {
 
   /// Title text for the bottom sheet. If null, uses default localized text.
   final String? title;
-
-  /// Maximum height as a percentage of screen height (0.0 to 1.0)
-  /// Default is 0.5 (50%)
-  final double maxHeightPercentage;
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +26,28 @@ class SelectCurrencyBottomSheet extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final keyboardHeight = mediaQuery.viewInsets.bottom;
 
+    // Calculate dynamic height based on content
+    // Header: drag handle (16*2) + title padding (16+24) + title height (~24) = ~80
+    // Each item: bottom padding (12) + container padding (16*2) + content (~80) = ~124
+    // Bottom padding: 24
+    const headerHeight = 80.0;
+    const itemHeight =
+        124.0; // More accurate: 12 padding + 32 container padding + 80 content
+    const bottomPadding = 24.0;
+    final itemCount = CurrencyHelper.currencies.length;
+    final contentHeight =
+        headerHeight + (itemCount * itemHeight) + bottomPadding;
+
+    // Use 90% max, but use actual content height if smaller
+    final maxScreenHeight = screenHeight * 0.9;
     final availableHeight = screenHeight - keyboardHeight;
-    final maxHeight = (screenHeight * maxHeightPercentage).clamp(
+    final dynamicHeight = contentHeight.clamp(
       0.0,
-      availableHeight,
+      maxScreenHeight.clamp(0.0, availableHeight),
     );
 
     return Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+      height: dynamicHeight,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.only(
@@ -82,9 +91,8 @@ class SelectCurrencyBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          Flexible(
+          Expanded(
             child: ListView.builder(
-              shrinkWrap: true,
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               itemCount: CurrencyHelper.currencies.length,
               itemBuilder: (context, index) {

@@ -136,6 +136,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     final bloc = context.read<TransactionBloc>();
     showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return SelectCurrencyBottomSheet(currentCurrency: currentCurrency);
@@ -167,10 +168,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
       isDismissible: true,
       enableDrag: true,
       builder: (BuildContext context) {
-        return SelectCategoryBottomSheet(
-          categories: categories,
-          maxHeightPercentage: 0.7,
-        );
+        return SelectCategoryBottomSheet(categories: categories);
       },
     );
 
