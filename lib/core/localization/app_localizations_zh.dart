@@ -256,6 +256,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setting_page_app_name => '应用名称';
 
   @override
+  String get setting_page_data_management => '数据管理';
+
+  @override
+  String get setting_page_clear_all_data => '清除所有数据';
+
+  @override
+  String get setting_page_clear_all_data_subtitle => '删除所有类别和交易记录（应用设置将保留）';
+
+  @override
+  String get setting_page_clear_data_dialog_title => '清除所有数据';
+
+  @override
+  String get setting_page_clear_data_dialog_message =>
+      '这将永久删除所有类别和交易记录。应用设置（语言、货币）将保留。此操作无法撤销。';
+
+  @override
+  String get setting_page_clear_data_confirm => '清除';
+
+  @override
+  String get setting_page_clear_data_success => '所有数据已成功清除';
+
+  @override
+  String get setting_page_clear_data_error => '清除数据时发生错误';
+
+  @override
   String get login_page_error => '电子邮件或密码不正确。';
 
   @override
@@ -512,6 +537,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get setting_page_app_name => '應用程式名稱';
+
+  @override
+  String get setting_page_data_management => '資料管理';
+
+  @override
+  String get setting_page_clear_all_data => '清除所有資料';
+
+  @override
+  String get setting_page_clear_all_data_subtitle => '刪除所有類別和交易記錄（應用程式設定將保留）';
+
+  @override
+  String get setting_page_clear_data_dialog_title => '清除所有資料';
+
+  @override
+  String get setting_page_clear_data_dialog_message =>
+      '這將永久刪除所有類別和交易記錄。應用程式設定（語言、貨幣）將保留。此操作無法復原。';
+
+  @override
+  String get setting_page_clear_data_confirm => '清除';
+
+  @override
+  String get setting_page_clear_data_success => '所有資料已成功清除';
+
+  @override
+  String get setting_page_clear_data_error => '清除資料時發生錯誤';
 
   @override
   String get login_page_error => '電子郵件或密碼不正確。';

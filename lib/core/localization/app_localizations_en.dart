@@ -261,6 +261,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setting_page_app_name => 'App Name';
 
   @override
+  String get setting_page_data_management => 'Data Management';
+
+  @override
+  String get setting_page_clear_all_data => 'Clear All Data';
+
+  @override
+  String get setting_page_clear_all_data_subtitle =>
+      'Delete all categories and transactions (app settings will be preserved)';
+
+  @override
+  String get setting_page_clear_data_dialog_title => 'Clear All Data';
+
+  @override
+  String get setting_page_clear_data_dialog_message =>
+      'This will permanently delete all categories and transactions. App settings (language, currency) will be preserved. This action cannot be undone.';
+
+  @override
+  String get setting_page_clear_data_confirm => 'Clear';
+
+  @override
+  String get setting_page_clear_data_success => 'All data cleared successfully';
+
+  @override
+  String get setting_page_clear_data_error => 'Error clearing data';
+
+  @override
   String get login_page_error => 'Email or password is incorrect.';
 
   @override

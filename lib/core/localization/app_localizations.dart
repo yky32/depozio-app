@@ -561,6 +561,54 @@ abstract class AppLocalizations {
   /// **'App Name'**
   String get setting_page_app_name;
 
+  /// No description provided for @setting_page_data_management.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get setting_page_data_management;
+
+  /// No description provided for @setting_page_clear_all_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Data'**
+  String get setting_page_clear_all_data;
+
+  /// No description provided for @setting_page_clear_all_data_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all categories and transactions (app settings will be preserved)'**
+  String get setting_page_clear_all_data_subtitle;
+
+  /// No description provided for @setting_page_clear_data_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Data'**
+  String get setting_page_clear_data_dialog_title;
+
+  /// No description provided for @setting_page_clear_data_dialog_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all categories and transactions. App settings (language, currency) will be preserved. This action cannot be undone.'**
+  String get setting_page_clear_data_dialog_message;
+
+  /// No description provided for @setting_page_clear_data_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get setting_page_clear_data_confirm;
+
+  /// No description provided for @setting_page_clear_data_success.
+  ///
+  /// In en, this message translates to:
+  /// **'All data cleared successfully'**
+  String get setting_page_clear_data_success;
+
+  /// No description provided for @setting_page_clear_data_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error clearing data'**
+  String get setting_page_clear_data_error;
+
   /// No description provided for @login_page_error.
   ///
   /// In en, this message translates to:

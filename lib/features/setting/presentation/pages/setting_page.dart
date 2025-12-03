@@ -9,6 +9,10 @@ import 'package:depozio/core/services/app_setting_service.dart';
 import 'package:depozio/core/bloc/app_core_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/widgets/bottom_sheets/select_currency_bottom_sheet.dart';
+import 'package:depozio/features/deposit/data/services/category_service.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
+import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
+import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -22,7 +26,7 @@ class SettingPage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -41,6 +45,7 @@ class SettingPage extends StatelessWidget {
               const SizedBox(height: 32),
               // App Info Section
               _buildAppInfoSection(context, theme, colorScheme),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -113,11 +118,78 @@ class SettingPage extends StatelessWidget {
           title: l10n.setting_page_font_test,
           subtitle: l10n.setting_page_font_test_subtitle,
           onTap: () => context.go(AppPage.fontTest.path),
+          theme: theme,
+          colorScheme: colorScheme,
         ),
       ],
       theme,
       colorScheme,
     );
+  }
+
+  Future<void> _showClearDataConfirmation(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text(l10n.setting_page_clear_data_dialog_title),
+            content: Text(l10n.setting_page_clear_data_dialog_message),
+            actions: [
+              TextButton(
+                onPressed: () => dialogContext.pop(false),
+                child: Text(l10n.action_cancel),
+              ),
+              TextButton(
+                onPressed: () => dialogContext.pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: Text(l10n.setting_page_clear_data_confirm),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await _clearAllData(context);
+    }
+  }
+
+  Future<void> _clearAllData(BuildContext context) async {
+    try {
+      // Initialize services
+      await CategoryService.init();
+      await TransactionService.init();
+
+      // Clear all categories
+      final categoryService = CategoryService();
+      await categoryService.clearAllCategories();
+
+      // Clear all transactions
+      final transactionService = TransactionService();
+      await transactionService.clearAllTransactions();
+
+      // Refresh DepositBloc if available
+      try {
+        context.read<DepositBloc>().add(LoadDeposits());
+      } catch (e) {
+        // DepositBloc might not be available in this context
+      }
+
+      // Refresh HomeBloc if available
+      try {
+        context.read<HomeBloc>().add(const RefreshHome());
+      } catch (e) {
+        // HomeBloc might not be available in this context
+      }
+
+      // Data cleared successfully (silent success)
+    } catch (e) {
+      // Error clearing data (silent failure)
+    }
   }
 
   Widget _buildAppInfoSection(
@@ -161,6 +233,16 @@ class SettingPage extends StatelessWidget {
               theme: theme,
               colorScheme: colorScheme,
             ),
+            _buildSettingsTile(
+              icon: Icons.delete_outline,
+              title: l10n.setting_page_clear_all_data,
+              subtitle: l10n.setting_page_clear_all_data_subtitle,
+              onTap:
+                  () => _showClearDataConfirmation(context, theme, colorScheme),
+              theme: theme,
+              colorScheme: colorScheme,
+              showChevron: false,
+            ),
           ],
           theme,
           colorScheme,
@@ -203,6 +285,9 @@ class SettingPage extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    bool showChevron = true,
   }) {
     return Material(
       color: Colors.transparent,
@@ -216,10 +301,10 @@ class SettingPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: const Color(0xFF8B5CF6), size: 20),
+                child: Icon(icon, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -228,24 +313,22 @@ class SettingPage extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+              if (showChevron)
+                const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
             ],
           ),
         ),
@@ -329,7 +412,8 @@ class SettingPage extends StatelessWidget {
     return BlocBuilder<AppCoreBloc, AppCoreState>(
       buildWhen: (previous, current) {
         // Rebuild when currency changes in settings state
-        if (previous is AppCoreSettingsLoaded && current is AppCoreSettingsLoaded) {
+        if (previous is AppCoreSettingsLoaded &&
+            current is AppCoreSettingsLoaded) {
           return previous.currencyCode != current.currencyCode;
         }
         // Rebuild when transitioning to settings loaded state
@@ -337,7 +421,8 @@ class SettingPage extends StatelessWidget {
       },
       builder: (context, state) {
         // Load currency if not already loaded
-        if (state is! AppCoreSettingsLoaded && state is! AppCoreCurrencyLoaded) {
+        if (state is! AppCoreSettingsLoaded &&
+            state is! AppCoreCurrencyLoaded) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<AppCoreBloc>().add(const LoadCurrency());
           });
@@ -354,7 +439,10 @@ class SettingPage extends StatelessWidget {
           currentCurrency = AppSettingService.getDefaultCurrency();
         }
 
-        final currencyName = CurrencyHelper.getName(currentCurrency, context.l10n);
+        final currencyName = CurrencyHelper.getName(
+          currentCurrency,
+          context.l10n,
+        );
         final currencySymbol = CurrencyHelper.getSymbol(currentCurrency);
         final flag = CurrencyHelper.getFlag(currentCurrency);
 
@@ -393,15 +481,14 @@ class SettingPage extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            Text(
-                              flag,
-                              style: const TextStyle(fontSize: 16),
-                            ),
+                            Text(flag, style: const TextStyle(fontSize: 16)),
                             const SizedBox(width: 8),
                             Text(
                               '$currencySymbol $currencyName',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.6,
+                                ),
                               ),
                             ),
                           ],
@@ -470,7 +557,7 @@ class SettingPage extends StatelessWidget {
             // Backdrop to cover navigation bar - tappable to dismiss
             Positioned.fill(
               child: GestureDetector(
-                onTap: () => Navigator.of(bottomSheetContext).pop(),
+                onTap: () => bottomSheetContext.pop(),
                 child: Container(color: Colors.black.withValues(alpha: 0.5)),
               ),
             ),
@@ -490,7 +577,7 @@ class SettingPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(bottomSheetContext).pop(),
+                      onTap: () => bottomSheetContext.pop(),
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -532,10 +619,7 @@ class SettingPage extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: GestureDetector(
-                              onTap:
-                                  () => Navigator.of(
-                                    bottomSheetContext,
-                                  ).pop(locale),
+                              onTap: () => bottomSheetContext.pop(locale),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
