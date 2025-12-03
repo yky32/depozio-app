@@ -5,9 +5,14 @@ import 'package:depozio/features/deposit/data/models/category_entity.dart';
 /// Bottom sheet for selecting a category from a list
 /// Common reusable widget - used across multiple features
 class SelectCategoryBottomSheet extends StatelessWidget {
-  const SelectCategoryBottomSheet({super.key, required this.categories});
+  const SelectCategoryBottomSheet({
+    super.key,
+    required this.categories,
+    this.onAddCategory,
+  });
 
   final List<CategoryEntity> categories;
+  final Future<void> Function()? onAddCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +85,25 @@ class SelectCategoryBottomSheet extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: Text(
-              context.l10n.transaction_select_category,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  context.l10n.transaction_select_category,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (onAddCategory != null)
+                  IconButton(
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      color: colorScheme.primary,
+                    ),
+                    onPressed: onAddCategory,
+                    tooltip: context.l10n.deposit_page_add_category,
+                  ),
+              ],
             ),
           ),
           Expanded(

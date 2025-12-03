@@ -184,19 +184,74 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
 
     // Show category selection bottom sheet
     if (!context.mounted) return;
-    final selectedCategory = await showModalBottomSheet<CategoryEntity>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      isDismissible: true,
-      enableDrag: true,
-      builder: (BuildContext context) {
-        return SelectCategoryBottomSheet(categories: categories);
-      },
+    final selectedCategory = await _showCategorySelectionBottomSheet(
+      context,
+      categories,
     );
 
     if (selectedCategory != null && context.mounted) {
       bloc.add(SelectCategory(category: selectedCategory));
+    }
+  }
+
+  Future<CategoryEntity?> _showCategorySelectionBottomSheet(
+    BuildContext context,
+    List<CategoryEntity> categories,
+  ) async {
+    while (true) {
+      final initialCategoryCount = categories.length;
+
+      final result = await showModalBottomSheet<CategoryEntity>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        isDismissible: true,
+        enableDrag: true,
+        builder: (BuildContext bottomSheetContext) {
+          return SelectCategoryBottomSheet(
+            categories: categories,
+            onAddCategory: () async {
+              // Close the category selection bottom sheet first
+              Navigator.of(bottomSheetContext).pop();
+
+              // Show add category bottom sheet
+              await _showAddCategoryBottomSheet(context);
+
+              // Wait a bit for the category to be saved to Hive
+              await Future.delayed(const Duration(milliseconds: 500));
+
+              // Get updated categories after category creation
+              final updatedCategories = CategoryService().getAllCategories();
+
+              // Update categories for next iteration
+              if (updatedCategories.isNotEmpty) {
+                categories = updatedCategories;
+              }
+            },
+          );
+        },
+      );
+
+      // If a category was selected, return it
+      if (result != null) {
+        return result;
+      }
+
+      // If dismissed, check if new categories were added
+      if (!context.mounted) {
+        return null;
+      }
+
+      final updatedCategories = CategoryService().getAllCategories();
+
+      // Only re-show if categories were actually added (count increased)
+      if (updatedCategories.length > initialCategoryCount) {
+        categories = updatedCategories;
+        continue; // Show selector again with new categories
+      }
+
+      // No new categories added, exit
+      return null;
     }
   }
 

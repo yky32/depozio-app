@@ -95,6 +95,22 @@ class TransactionItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                   ],
+                  // Red icon for expenses (money going out)
+                  if (transaction.categoryType == 'expenses') ...[
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(
+                        Icons.arrow_downward,
+                        size: 14,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   Text(
                     CurrencyHelper.getFlag(transaction.currencyCode),
                     style: const TextStyle(fontSize: 16),
@@ -106,7 +122,9 @@ class TransactionItem extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: transaction.categoryType == 'deposits'
                           ? Colors.green.shade700
-                          : colorScheme.primary,
+                          : transaction.categoryType == 'expenses'
+                              ? Colors.red.shade700
+                              : colorScheme.primary,
                     ),
                   ),
                 ],

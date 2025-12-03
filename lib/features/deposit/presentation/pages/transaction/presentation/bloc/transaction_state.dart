@@ -20,7 +20,7 @@ class TransactionFormState extends TransactionState {
   final String currencyCode;
   final String description;
 
-  TransactionFormState({
+  const TransactionFormState({
     this.amount = '',
     this.selectedCategory,
     required this.currencyCode,
