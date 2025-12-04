@@ -236,10 +236,10 @@ class _HomePageContent extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        title,
-                                        style: theme.textTheme.displayMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                              title,
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                                       ),
                                     ),
                                     Container(

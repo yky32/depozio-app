@@ -558,16 +558,46 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                     ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                selectedCategory.categoryType ==
-                                        CategoryType.deposits
-                                    ? l10n.add_category_type_deposits
-                                    : l10n.add_category_type_expenses,
-                                style: widget.theme.textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: widget.colorScheme.onSurface
-                                          .withValues(alpha: 0.6),
+                              Row(
+                                children: [
+                                  // Arrow symbol with color in front of type
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: selectedCategory.categoryType ==
+                                              CategoryType.deposits
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : Colors.red.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
+                                    child: Icon(
+                                      selectedCategory.categoryType ==
+                                              CategoryType.deposits
+                                          ? Icons.arrow_upward
+                                          : Icons.arrow_downward,
+                                      size: 14,
+                                      color: selectedCategory.categoryType ==
+                                              CategoryType.deposits
+                                          ? Colors.green.shade700
+                                          : Colors.red.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  // Category type text
+                                  Text(
+                                    selectedCategory.categoryType ==
+                                            CategoryType.deposits
+                                        ? l10n.add_category_type_deposits
+                                        : l10n.add_category_type_expenses,
+                                    style: widget.theme.textTheme.bodySmall
+                                        ?.copyWith(
+                                      color: selectedCategory.categoryType ==
+                                              CategoryType.deposits
+                                          ? Colors.green.shade700
+                                          : Colors.red.shade700,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

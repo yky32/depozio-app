@@ -145,11 +145,11 @@ class _SelectCurrencyBottomSheetState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
+            child: Text(
                     widget.title ?? l10n.transaction_select_currency,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
                   ),
                 ),
                 IconButton(
@@ -168,10 +168,10 @@ class _SelectCurrencyBottomSheetState
           Expanded(
             child: _isReorderMode
                 ? ReorderableListView.builder(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                     itemCount: _currencyOrder.length,
                     onReorder: _onReorder,
-                    itemBuilder: (context, index) {
+              itemBuilder: (context, index) {
                       final currencyCode = _currencyOrder[index];
                       final flag = CurrencyHelper.getFlag(currencyCode);
                       final symbol = CurrencyHelper.getSymbol(currencyCode);
@@ -195,8 +195,8 @@ class _SelectCurrencyBottomSheetState
                     itemCount: _currencyOrder.length,
                     itemBuilder: (context, index) {
                       final currencyCode = _currencyOrder[index];
-                      final flag = CurrencyHelper.getFlag(currencyCode);
-                      final symbol = CurrencyHelper.getSymbol(currencyCode);
+                final flag = CurrencyHelper.getFlag(currencyCode);
+                final symbol = CurrencyHelper.getSymbol(currencyCode);
                       final currencyName =
                           CurrencyHelper.getName(currencyCode, l10n);
                       final isSelected = widget.currentCurrency == currencyCode;
@@ -231,72 +231,72 @@ class _SelectCurrencyBottomSheetState
     required bool isReorderMode,
     bool isSelected = false,
   }) {
-    return Padding(
+                return Padding(
       key: key,
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
         onTap: isReorderMode
             ? null
             : () => Navigator.of(context).pop(currencyCode),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
-          decoration: BoxDecoration(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
             color: isSelected
-                ? colorScheme.primary.withValues(alpha: 0.1)
-                : colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
+                                ? colorScheme.primary.withValues(alpha: 0.1)
+                                : colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.2),
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
+                                  ? colorScheme.primary
+                                  : colorScheme.outline.withValues(alpha: 0.2),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
               if (isReorderMode)
                 Icon(
                   Icons.drag_handle,
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               if (isReorderMode) const SizedBox(width: 8),
-              Text(flag, style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currencyName,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight:
+                          Text(flag, style: const TextStyle(fontSize: 24)),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currencyName,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.normal,
                         color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$currencyCode • $symbol',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                                            ? colorScheme.primary
+                                            : colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '$currencyCode • $symbol',
+                                  style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+              if (isSelected && !isReorderMode)
+                            Icon(
+                              Icons.check_circle,
+                              color: colorScheme.primary,
+                            ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              if (isSelected && !isReorderMode)
-                Icon(
-                  Icons.check_circle,
-                  color: colorScheme.primary,
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }
