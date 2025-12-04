@@ -142,25 +142,44 @@ class _HomePageContent extends StatelessWidget {
             // Use a GlobalKey to access ScrollPosition for restoration
             final scrollKey = GlobalKey();
 
-            return BlocListener<HomeBloc, HomeState>(
-              listenWhen: (previous, current) {
-                // Listen when transitioning from Refreshing to Loaded
-                return previous is HomeRefreshing && current is HomeLoaded;
-              },
-              listener: (context, state) {
-                // Restore scroll position after refresh
-                if (state is HomeLoaded) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    final scrollableState =
-                        scrollKey.currentContext
-                            ?.findAncestorStateOfType<ScrollableState>();
-                    if (scrollableState != null) {
-                      final position = scrollableState.position;
-                      position.jumpTo(state.scrollOffset);
+            return MultiBlocListener(
+              listeners: [
+                BlocListener<HomeBloc, HomeState>(
+                  listenWhen: (previous, current) {
+                    // Listen when transitioning from Refreshing to Loaded
+                    return previous is HomeRefreshing && current is HomeLoaded;
+                  },
+                  listener: (context, state) {
+                    // Restore scroll position after refresh
+                    if (state is HomeLoaded) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        final scrollableState =
+                            scrollKey.currentContext
+                                ?.findAncestorStateOfType<ScrollableState>();
+                        if (scrollableState != null) {
+                          final position = scrollableState.position;
+                          position.jumpTo(state.scrollOffset);
+                        }
+                      });
                     }
-                  });
-                }
-              },
+                  },
+                ),
+                BlocListener<AppCoreBloc, AppCoreState>(
+                  listenWhen: (previous, current) {
+                    // Listen when start date changes
+                    if (previous is AppCoreSettingsLoaded &&
+                        current is AppCoreSettingsLoaded) {
+                      return previous.startDate != current.startDate;
+                    }
+                    return false;
+                  },
+                  listener: (context, state) {
+                    // Refresh home data when start date changes
+                    LoggerUtil.d('📅 Start date changed, refreshing home data');
+                    context.read<HomeBloc>().add(const RefreshHome());
+                  },
+                ),
+              ],
               child: NotificationListener<ScrollUpdateNotification>(
                 onNotification: (notification) {
                   // Update scroll position in BLoC as user scrolls

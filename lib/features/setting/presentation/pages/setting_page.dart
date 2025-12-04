@@ -1062,6 +1062,55 @@ class _StartDateSelectorContentState
     }
   }
 
+  String _getTimezoneDisplay() {
+    final now = DateTime.now();
+    final timeZoneName = now.timeZoneName;
+    final timeZoneOffset = now.timeZoneOffset;
+    
+    // Try to get a readable timezone name
+    // Default to HKT if we can't determine, or use device timezone
+    String displayName = 'HKT'; // Default
+    
+    // Check if we can get a better timezone name from the device
+    if (timeZoneName.isNotEmpty) {
+      // Common timezone mappings
+      final timezoneMap = {
+        'HKT': 'HKT (Hong Kong Time)',
+        'CST': 'CST (China Standard Time)',
+        'JST': 'JST (Japan Standard Time)',
+        'SGT': 'SGT (Singapore Time)',
+        'PST': 'PST (Pacific Standard Time)',
+        'EST': 'EST (Eastern Standard Time)',
+        'GMT': 'GMT (Greenwich Mean Time)',
+        'UTC': 'UTC (Coordinated Universal Time)',
+      };
+      
+      // Try to match the timezone name
+      final upperName = timeZoneName.toUpperCase();
+      if (timezoneMap.containsKey(upperName)) {
+        displayName = timezoneMap[upperName]!;
+      } else {
+        // Format offset as +/-HH:MM
+        final hours = timeZoneOffset.inHours;
+        final minutes = (timeZoneOffset.inMinutes % 60).abs();
+        final offsetStr = '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        displayName = '$timeZoneName (UTC$offsetStr)';
+      }
+    } else {
+      // Fallback: use offset to determine timezone
+      final hours = timeZoneOffset.inHours;
+      if (hours == 8) {
+        displayName = 'HKT (Hong Kong Time)';
+      } else {
+        final minutes = (timeZoneOffset.inMinutes % 60).abs();
+        final offsetStr = '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        displayName = 'UTC$offsetStr';
+      }
+    }
+    
+    return displayName;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -1113,18 +1162,23 @@ class _StartDateSelectorContentState
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                    child: Text(
-                      'Select Start Date',
-                      style: widget.theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                            child: Text(
+                              'Select Start Date',
+                              style: widget.theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
                       children: [
                         // Display selected day with suffix
                         Text(
@@ -1254,6 +1308,54 @@ class _StartDateSelectorContentState
                                 .withValues(alpha: 0.6),
                           ),
                         ),
+                        const SizedBox(height: 24),
+                        // Timezone section
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: widget.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: widget.colorScheme.outline.withValues(
+                                alpha: 0.1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: 20,
+                                color: widget.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Timezone',
+                                      style: widget.theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                        color: widget.colorScheme.onSurface
+                                            .withValues(alpha: 0.6),
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _getTimezoneDisplay(),
+                                      style: widget.theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 32),
                         // Action buttons
                         Row(
@@ -1292,6 +1394,10 @@ class _StartDateSelectorContentState
                         ),
                         SizedBox(height: 24 + keyboardHeight),
                       ],
+                    ),
+                  ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
