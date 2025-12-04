@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' as widgets;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
@@ -13,6 +14,45 @@ import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
+
+/// Custom input formatter to restrict day input to 1-31
+class _DayOfMonthInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Allow empty input
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Only allow digits
+    if (!RegExp(r'^\d+$').hasMatch(newValue.text)) {
+      return oldValue;
+    }
+
+    final value = int.tryParse(newValue.text);
+    
+    // If parsing fails, reject
+    if (value == null) {
+      return oldValue;
+    }
+
+    // If value is 0, allow it (user might be typing "10", "20", "30")
+    if (value == 0) {
+      return newValue;
+    }
+
+    // If value is greater than 31, reject
+    if (value > 31) {
+      return oldValue;
+    }
+
+    // Allow values 1-31
+    return newValue;
+  }
+}
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -307,6 +347,7 @@ class SettingPage extends StatelessWidget {
           [
             _buildLanguageTile(context, theme, colorScheme),
             _buildCurrencyTile(context, theme, colorScheme),
+            _buildStartDateTile(context, theme, colorScheme),
             _buildInfoTile(
               icon: Icons.info_outline,
               title: l10n.setting_page_app_version,
@@ -779,6 +820,137 @@ class SettingPage extends StatelessWidget {
     }
   }
 
+  Widget _buildStartDateTile(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return BlocBuilder<AppCoreBloc, AppCoreState>(
+      buildWhen: (previous, current) {
+        // Rebuild when start date changes in settings state
+        if (previous is AppCoreSettingsLoaded &&
+            current is AppCoreSettingsLoaded) {
+          return previous.startDate != current.startDate;
+        }
+        // Rebuild when transitioning to settings loaded state
+        return current is AppCoreSettingsLoaded;
+      },
+      builder: (context, state) {
+        // Load start date if not already loaded
+        if (state is! AppCoreSettingsLoaded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AppCoreBloc>().add(const LoadStartDate());
+          });
+        }
+
+        // Get current start date from state or fallback to service
+        int currentStartDate;
+        if (state is AppCoreSettingsLoaded) {
+          currentStartDate = state.startDate;
+        } else {
+          AppSettingService.init();
+          currentStartDate = AppSettingService.getStartDate();
+        }
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showStartDateSelector(context, currentStartDate),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.calendar_today,
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Start Date',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Every ${currentStartDate}${_getDaySuffix(currentStartDate)} of the month',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  Future<void> _showStartDateSelector(
+    BuildContext context,
+    int currentStartDate,
+  ) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final bloc = context.read<AppCoreBloc>();
+
+    final result = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      useRootNavigator: true,
+      useSafeArea: false,
+      builder: (bottomSheetContext) {
+        return _StartDateSelectorContent(
+          initialDay: currentStartDate,
+          theme: theme,
+          colorScheme: colorScheme,
+        );
+      },
+    );
+
+    if (result != null && result != currentStartDate) {
+      // Dispatch ChangeStartDate event to AppCoreBloc
+      bloc.add(ChangeStartDate(dayOfMonth: result));
+    }
+  }
+
   Widget _buildInfoTile({
     required IconData icon,
     required String title,
@@ -821,6 +993,313 @@ class SettingPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Stateful widget for start date selector bottom sheet content
+/// Properly manages TextController and FocusNode lifecycle
+class _StartDateSelectorContent extends StatefulWidget {
+  const _StartDateSelectorContent({
+    required this.initialDay,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  final int initialDay;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  @override
+  State<_StartDateSelectorContent> createState() =>
+      _StartDateSelectorContentState();
+}
+
+class _StartDateSelectorContentState
+    extends State<_StartDateSelectorContent> {
+  late final TextEditingController _textController;
+  late final FocusNode _focusNode;
+  late int _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = widget.initialDay;
+    _textController = TextEditingController(
+      text: widget.initialDay.toString(),
+    );
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _updateDay(int newDay) {
+    final clampedDay = newDay.clamp(1, 31);
+    setState(() {
+      _selectedDay = clampedDay;
+      _textController.text = clampedDay.toString();
+    });
+  }
+
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final maxHeight = screenHeight * 0.5;
+
+    return Stack(
+      children: [
+        // Backdrop to cover navigation bar - tappable to dismiss
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
+          ),
+        ),
+        // Bottom sheet content
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: keyboardHeight),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              decoration: BoxDecoration(
+                color: widget.theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 80,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: widget.colorScheme.onSurface
+                              .withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    child: Text(
+                      'Select Start Date',
+                      style: widget.theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        // Display selected day with suffix
+                        Text(
+                          'Every ${_selectedDay}${_getDaySuffix(_selectedDay)} of the month',
+                          style: widget.theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: widget.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        // Number input with plus/minus buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Minus button
+                            IconButton(
+                              onPressed: () {
+                                _updateDay(_selectedDay - 1);
+                                _focusNode.unfocus();
+                              },
+                              icon: const Icon(Icons.remove_circle_outline),
+                              iconSize: 32,
+                              color: widget.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 24),
+                            // Number input field
+                            SizedBox(
+                              width: 80,
+                              child: TextField(
+                                controller: _textController,
+                                focusNode: _focusNode,
+                                autofocus: true,
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  _DayOfMonthInputFormatter(),
+                                ],
+                                style: widget.theme.textTheme.headlineMedium
+                                    ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: widget.colorScheme.surface,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: widget.colorScheme.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: widget.colorScheme.outline
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: widget.colorScheme.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                    horizontal: 8,
+                                  ),
+                                ),
+                                onTap: () {
+                                  // Select all text when tapped
+                                  _textController.selection = TextSelection(
+                                    baseOffset: 0,
+                                    extentOffset:
+                                        _textController.text.length,
+                                  );
+                                },
+                                onChanged: (value) {
+                                  // Allow empty input while typing
+                                  if (value.isEmpty) {
+                                    setState(() {
+                                      _selectedDay = 1;
+                                    });
+                                    return;
+                                  }
+                                  final day = int.tryParse(value);
+                                  if (day != null && day >= 1 && day <= 31) {
+                                    setState(() {
+                                      _selectedDay = day;
+                                    });
+                                  }
+                                },
+                                onSubmitted: (value) {
+                                  final day = int.tryParse(value);
+                                  if (day != null) {
+                                    _updateDay(day);
+                                  } else {
+                                    // If invalid, reset to current
+                                    _textController.text =
+                                        _selectedDay.toString();
+                                  }
+                                  _focusNode.unfocus();
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // Plus button
+                            IconButton(
+                              onPressed: () {
+                                _updateDay(_selectedDay + 1);
+                                _focusNode.unfocus();
+                              },
+                              icon: const Icon(Icons.add_circle_outline),
+                              iconSize: 32,
+                              color: widget.colorScheme.primary,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Helper text
+                        Text(
+                          'Enter a number between 1 and 31',
+                          style: widget.theme.textTheme.bodySmall?.copyWith(
+                            color: widget.colorScheme.onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        // Action buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Text(context.l10n.action_cancel),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(_selectedDay),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Text('Save'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24 + keyboardHeight),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

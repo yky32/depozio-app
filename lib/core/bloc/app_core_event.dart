@@ -40,6 +40,22 @@ class ChangeCurrency extends AppCoreEvent {
   List<Object?> get props => [currencyCode];
 }
 
+// ==================== Start Date Events ====================
+
+/// Load the saved start date from storage
+class LoadStartDate extends AppCoreEvent {
+  const LoadStartDate();
+}
+
+/// Change the start date (day of month, 1-31)
+class ChangeStartDate extends AppCoreEvent {
+  final int dayOfMonth;
+  const ChangeStartDate({required this.dayOfMonth});
+
+  @override
+  List<Object?> get props => [dayOfMonth];
+}
+
 // ==================== Future Events (Examples) ====================
 // Uncomment and implement as needed:
 //

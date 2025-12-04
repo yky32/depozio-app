@@ -5,6 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
 import 'package:depozio/core/network/logger.dart';
 import 'package:depozio/core/services/app_setting_service.dart';
+import 'package:depozio/core/bloc/app_core_bloc.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/home_content.dart';
 
 class HomePage extends StatelessWidget {
@@ -43,11 +44,29 @@ class _HomePageContent extends StatelessWidget {
   final ColorScheme colorScheme;
   final dynamic l10n;
 
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: BlocBuilder<HomeBloc, HomeState>(
+        child: Stack(
+          children: [
+            BlocBuilder<HomeBloc, HomeState>(
           buildWhen: (previous, current) {
             // Always rebuild on state type changes
             if (previous.runtimeType != current.runtimeType) {
@@ -174,7 +193,7 @@ class _HomePageContent extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Page title with username (not skeletonized, stays in position)
+                        // Page title with username and start date badge (not skeletonized, stays in position)
                         Builder(
                           builder: (context) {
                             AppSettingService.init();
@@ -184,11 +203,83 @@ class _HomePageContent extends StatelessWidget {
                                     ? l10n.home_page_greeting(username)
                                     : l10n.home_page_title;
 
-                            return Text(
-                              title,
-                              style: theme.textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            return BlocBuilder<AppCoreBloc, AppCoreState>(
+                              buildWhen: (previous, current) {
+                                // Rebuild when start date changes in settings state
+                                if (previous is AppCoreSettingsLoaded &&
+                                    current is AppCoreSettingsLoaded) {
+                                  return previous.startDate != current.startDate;
+                                }
+                                // Rebuild when transitioning to settings loaded state
+                                return current is AppCoreSettingsLoaded;
+                              },
+                              builder: (context, appCoreState) {
+                                // Load start date if not already loaded
+                                if (appCoreState is! AppCoreSettingsLoaded) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    context.read<AppCoreBloc>().add(const LoadStartDate());
+                                  });
+                                }
+
+                                // Get current start date from state or fallback to service
+                                int startDate;
+                                if (appCoreState is AppCoreSettingsLoaded) {
+                                  startDate = appCoreState.startDate;
+                                } else {
+                                  AppSettingService.init();
+                                  startDate = AppSettingService.getStartDate();
+                                }
+
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        title,
+                                        style: theme.textTheme.displayMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.1),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 14,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '${startDate}${_getDaySuffix(startDate)}',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
                           },
                         ),
@@ -211,6 +302,8 @@ class _HomePageContent extends StatelessWidget {
               ),
             );
           },
+        ),
+          ],
         ),
       ),
     );

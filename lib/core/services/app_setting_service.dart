@@ -7,8 +7,10 @@ class AppSettingService {
   static const String _localeKey = 'locale';
   static const String _defaultCurrencyKey = 'default_currency';
   static const String _usernameKey = 'username';
+  static const String _startDateKey = 'start_date';
   static const String _defaultCurrency =
       'HKD'; // Default fallback (Hong Kong Dollar)
+  static const int _defaultStartDate = 1; // Default to 1st of the month
 
   static hive.Box? _box;
   static bool _initialized = false;
@@ -126,5 +128,24 @@ class AppSettingService {
       await init();
     }
     await _box!.put(_usernameKey, username);
+  }
+
+  // ==================== Start Date Methods ====================
+
+  /// Get saved start date (day of month, 1-31)
+  static int getStartDate() {
+    if (_box == null) return _defaultStartDate;
+    final startDate = _box!.get(_startDateKey) as int?;
+    return startDate ?? _defaultStartDate;
+  }
+
+  /// Save start date preference (day of month, 1-31)
+  static Future<void> saveStartDate(int dayOfMonth) async {
+    if (_box == null) {
+      await init();
+    }
+    // Validate day is between 1 and 31
+    final validDay = dayOfMonth.clamp(1, 31);
+    await _box!.put(_startDateKey, validDay);
   }
 }

@@ -27,6 +27,10 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     // Currency events
     on<LoadCurrency>(_handleLoadCurrency);
     on<ChangeCurrency>(_handleChangeCurrency);
+    
+    // Start date events
+    on<LoadStartDate>(_handleLoadStartDate);
+    on<ChangeStartDate>(_handleChangeStartDate);
   }
 
   // ==================== Locale Handlers ====================
@@ -38,7 +42,12 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       final locale = AppSettingService.getSavedLocale();
       final currencyCode = AppSettingService.getDefaultCurrency();
-      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: currencyCode));
+      final startDate = AppSettingService.getStartDate();
+      emit(AppCoreSettingsLoaded(
+        locale: locale,
+        currencyCode: currencyCode,
+        startDate: startDate,
+      ));
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
     }
@@ -51,9 +60,14 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       emit(const AppCoreLocaleLoading());
       await AppSettingService.saveLocale(event.locale);
-      // Preserve currency when changing locale
+      // Preserve currency and start date when changing locale
       final currencyCode = AppSettingService.getDefaultCurrency();
-      emit(AppCoreSettingsLoaded(locale: event.locale, currencyCode: currencyCode));
+      final startDate = AppSettingService.getStartDate();
+      emit(AppCoreSettingsLoaded(
+        locale: event.locale,
+        currencyCode: currencyCode,
+        startDate: startDate,
+      ));
       LoggerUtil.d('🌍 Locale changed to: ${event.locale}');
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
@@ -69,9 +83,14 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       final currencyCode = AppSettingService.getDefaultCurrency();
-      // Preserve locale when loading currency
+      // Preserve locale and start date when loading currency
       final locale = AppSettingService.getSavedLocale();
-      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: currencyCode));
+      final startDate = AppSettingService.getStartDate();
+      emit(AppCoreSettingsLoaded(
+        locale: locale,
+        currencyCode: currencyCode,
+        startDate: startDate,
+      ));
       LoggerUtil.d('💰 Currency loaded: $currencyCode');
     } catch (e) {
       emit(AppCoreCurrencyError(error: e.toString()));
@@ -86,13 +105,60 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       emit(const AppCoreCurrencyLoading());
       await AppSettingService.saveDefaultCurrency(event.currencyCode);
-      // Preserve locale when changing currency
+      // Preserve locale and start date when changing currency
       final locale = AppSettingService.getSavedLocale();
-      emit(AppCoreSettingsLoaded(locale: locale, currencyCode: event.currencyCode));
+      final startDate = AppSettingService.getStartDate();
+      emit(AppCoreSettingsLoaded(
+        locale: locale,
+        currencyCode: event.currencyCode,
+        startDate: startDate,
+      ));
       LoggerUtil.d('💰 Currency changed to: ${event.currencyCode}');
     } catch (e) {
       emit(AppCoreCurrencyError(error: e.toString()));
       LoggerUtil.e('❌ Error changing currency: $e');
+    }
+  }
+
+  // ==================== Start Date Handlers ====================
+
+  Future<void> _handleLoadStartDate(
+    LoadStartDate event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      final startDate = AppSettingService.getStartDate();
+      // Preserve locale and currency when loading start date
+      final locale = AppSettingService.getSavedLocale();
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      emit(AppCoreSettingsLoaded(
+        locale: locale,
+        currencyCode: currencyCode,
+        startDate: startDate,
+      ));
+      LoggerUtil.d('📅 Start date loaded: $startDate');
+    } catch (e) {
+      LoggerUtil.e('❌ Error loading start date: $e');
+    }
+  }
+
+  Future<void> _handleChangeStartDate(
+    ChangeStartDate event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      await AppSettingService.saveStartDate(event.dayOfMonth);
+      // Preserve locale and currency when changing start date
+      final locale = AppSettingService.getSavedLocale();
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      emit(AppCoreSettingsLoaded(
+        locale: locale,
+        currencyCode: currencyCode,
+        startDate: event.dayOfMonth,
+      ));
+      LoggerUtil.d('📅 Start date changed to: ${event.dayOfMonth}');
+    } catch (e) {
+      LoggerUtil.e('❌ Error changing start date: $e');
     }
   }
 }

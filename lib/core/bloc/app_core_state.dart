@@ -65,13 +65,15 @@ class AppCoreCurrencyError extends AppCoreState {
 class AppCoreSettingsLoaded extends AppCoreState {
   final Locale? locale;
   final String currencyCode;
+  final int startDate;
   const AppCoreSettingsLoaded({
     required this.locale,
     required this.currencyCode,
+    required this.startDate,
   });
 
   @override
-  List<Object?> get props => [locale, currencyCode];
+  List<Object?> get props => [locale, currencyCode, startDate];
 }
 
 // ==================== Future States (Examples) ====================
