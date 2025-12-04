@@ -184,6 +184,7 @@
   "select_datetime_title": "選擇日期和時間",
   "transaction_date": "交易日期",
   "transaction_select_date": "選擇日期",
+  "transaction_is_today": "今天",
   "login_page_error": "電子郵件或密碼不正確。",
   "login_page_email_hint": "example@example.com"
 }

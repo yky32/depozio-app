@@ -759,6 +759,12 @@ abstract class AppLocalizations {
   /// **'Select date'**
   String get transaction_select_date;
 
+  /// No description provided for @transaction_is_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Today'**
+  String get transaction_is_today;
+
   /// No description provided for @login_page_error.
   ///
   /// In en, this message translates to:

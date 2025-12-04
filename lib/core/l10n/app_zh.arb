@@ -182,6 +182,7 @@
   "select_datetime_title": "选择日期和时间",
   "transaction_date": "交易日期",
   "transaction_select_date": "选择日期",
+  "transaction_is_today": "今天",
   "login_page_error": "电子邮件或密码不正确。",
   "login_page_email_hint": "example@example.com"
 }

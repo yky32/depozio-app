@@ -35,13 +35,15 @@ class TransactionFormState extends TransactionState {
     String? currencyCode,
     String? description,
     DateTime? transactionDt,
+    bool clearTransactionDt = false,
   }) {
     return TransactionFormState(
       amount: amount ?? this.amount,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       currencyCode: currencyCode ?? this.currencyCode,
       description: description ?? this.description,
-      transactionDt: transactionDt ?? this.transactionDt,
+      transactionDt:
+          clearTransactionDt ? null : (transactionDt ?? this.transactionDt),
     );
   }
 

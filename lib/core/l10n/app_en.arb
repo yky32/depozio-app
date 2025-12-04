@@ -183,6 +183,7 @@
   "select_datetime_title": "Select Date & Time",
   "transaction_date": "Transaction Date",
   "transaction_select_date": "Select date",
+  "transaction_is_today": "Is Today",
   "login_page_error": "Email or password is incorrect.",
   "login_page_email_hint": "example@example.com"
 }

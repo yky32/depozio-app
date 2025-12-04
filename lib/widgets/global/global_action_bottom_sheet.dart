@@ -624,12 +624,57 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                 ),
               ],
               const SizedBox(height: 32),
-              // Transaction date field
-              Text(
-                l10n.transaction_date,
-                style: widget.theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              // Transaction date field with isToday toggle
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    l10n.transaction_date,
+                    style: widget.theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.transaction_is_today,
+                        style: widget.theme.textTheme.bodyMedium?.copyWith(
+                          color: widget.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Switch(
+                        value:
+                            transactionDt != null &&
+                            transactionDt.year == DateTime.now().year &&
+                            transactionDt.month == DateTime.now().month &&
+                            transactionDt.day == DateTime.now().day,
+                        onChanged: (value) {
+                          final bloc = context.read<TransactionBloc>();
+                          if (value) {
+                            // Set to today's date and time
+                            bloc.add(
+                              SelectTransactionDate(
+                                transactionDt: DateTime.now(),
+                              ),
+                            );
+                          } else {
+                            // When toggled off, clear the date (reset to default/null)
+                            // Use a sentinel date (1900-01-01) to signal clearing
+                            bloc.add(
+                              SelectTransactionDate(
+                                transactionDt: DateTime(1900, 1, 1),
+                              ),
+                            );
+                          }
+                        },
+                        activeColor: widget.colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               GestureDetector(

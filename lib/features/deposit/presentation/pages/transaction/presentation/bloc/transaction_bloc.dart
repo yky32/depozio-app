@@ -24,18 +24,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     return TransactionFormState(currencyCode: defaultCurrency);
   }
 
-  void _handleUpdateAmount(
-    UpdateAmount event,
-    Emitter<TransactionState> emit,
-  ) {
+  void _handleUpdateAmount(UpdateAmount event, Emitter<TransactionState> emit) {
     LoggerUtil.d('💰 UpdateAmount event received: ${event.amount}');
     final currentState = state;
     if (currentState is TransactionFormState) {
-      emit(
-        currentState.copyWith(
-          amount: event.amount,
-        ),
-      );
+      emit(currentState.copyWith(amount: event.amount));
     } else {
       AppSettingService.init();
       final defaultCurrency = AppSettingService.getDefaultCurrency();
@@ -55,11 +48,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoggerUtil.d('📁 SelectCategory event received: ${event.category.name}');
     final currentState = state;
     if (currentState is TransactionFormState) {
-      emit(
-        currentState.copyWith(
-          selectedCategory: event.category,
-        ),
-      );
+      emit(currentState.copyWith(selectedCategory: event.category));
     } else {
       AppSettingService.init();
       final defaultCurrency = AppSettingService.getDefaultCurrency();
@@ -79,17 +68,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoggerUtil.d('💱 SelectCurrency event received: ${event.currencyCode}');
     final currentState = state;
     if (currentState is TransactionFormState) {
-      emit(
-        currentState.copyWith(
-          currencyCode: event.currencyCode,
-        ),
-      );
+      emit(currentState.copyWith(currencyCode: event.currencyCode));
     } else {
-      emit(
-        TransactionFormState(
-          currencyCode: event.currencyCode,
-        ),
-      );
+      emit(TransactionFormState(currencyCode: event.currencyCode));
     }
   }
 
@@ -100,11 +81,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoggerUtil.d('📝 UpdateDescription event received: ${event.description}');
     final currentState = state;
     if (currentState is TransactionFormState) {
-      emit(
-        currentState.copyWith(
-          description: event.description,
-        ),
-      );
+      emit(currentState.copyWith(description: event.description));
     } else {
       AppSettingService.init();
       final defaultCurrency = AppSettingService.getDefaultCurrency();
@@ -121,12 +98,21 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     SelectTransactionDate event,
     Emitter<TransactionState> emit,
   ) {
-    LoggerUtil.d('📅 SelectTransactionDate event received: ${event.transactionDt}');
+    LoggerUtil.d(
+      '📅 SelectTransactionDate event received: ${event.transactionDt}',
+    );
     final currentState = state;
     if (currentState is TransactionFormState) {
+      // Check if this is a sentinel value to clear the date
+      final isClearDate =
+          event.transactionDt.year == 1900 &&
+          event.transactionDt.month == 1 &&
+          event.transactionDt.day == 1;
+
       emit(
         currentState.copyWith(
-          transactionDt: event.transactionDt,
+          transactionDt: isClearDate ? null : event.transactionDt,
+          clearTransactionDt: isClearDate,
         ),
       );
     } else {
@@ -148,10 +134,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoggerUtil.d('🔄 ResetTransaction event received');
     AppSettingService.init();
     final defaultCurrency = AppSettingService.getDefaultCurrency();
-    emit(TransactionFormState(
-      currencyCode: defaultCurrency,
-      transactionDt: null,
-    ));
+    emit(
+      TransactionFormState(currencyCode: defaultCurrency, transactionDt: null),
+    );
   }
 }
-
