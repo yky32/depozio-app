@@ -427,11 +427,14 @@ class _CarouselSectionState extends State<_CarouselSection> {
               // Page 1: Total Savings Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: TotalSavingsCard(
-                  theme: widget.theme,
-                  colorScheme: widget.colorScheme,
-                  l10n: widget.l10n,
-                  amount: widget.totalSavings,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: TotalSavingsCard(
+                    theme: widget.theme,
+                    colorScheme: widget.colorScheme,
+                    l10n: widget.l10n,
+                    amount: widget.totalSavings,
+                  ),
                 ),
               ),
               // Page 2: Savings Goal Card

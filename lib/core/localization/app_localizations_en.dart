@@ -15,6 +15,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get action_confirm => 'Confirm';
 
   @override
+  String get action_save => 'Save';
+
+  @override
   String get login_page_email => 'Email';
 
   @override
@@ -296,6 +299,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setting_page_clear_data_error => 'Error clearing data';
+
+  @override
+  String get setting_page_cleanup_data => 'Clean Up Data';
+
+  @override
+  String get setting_page_cleanup_data_subtitle => 'Select what to clean';
+
+  @override
+  String get setting_page_cleanup_dialog_title => 'Clean Up Data';
+
+  @override
+  String get setting_page_cleanup_categories => 'Categories';
+
+  @override
+  String get setting_page_cleanup_transactions => 'Transactions';
+
+  @override
+  String get setting_page_cleanup_dialog_message =>
+      'Select the data you want to clean. App settings will be preserved.';
+
+  @override
+  String get setting_page_cleanup_success => 'Data cleaned successfully';
+
+  @override
+  String get setting_page_cleanup_error => 'Error cleaning data';
+
+  @override
+  String get setting_page_set_username => 'Set Username';
+
+  @override
+  String get setting_page_enter_username_hint => 'Enter your username';
+
+  @override
+  String get setting_page_start_date => 'Start Date';
+
+  @override
+  String setting_page_start_date_format(String day) {
+    return 'Every $day of the month';
+  }
+
+  @override
+  String get setting_page_select_start_date => 'Select Start Date';
+
+  @override
+  String get setting_page_start_date_hint => 'Enter a number between 1 and 31';
+
+  @override
+  String get setting_page_timezone => 'Timezone';
+
+  @override
+  String get setting_page_tap_to_set_username => 'Tap to set username';
+
+  @override
+  String get action_retry => 'Retry';
+
+  @override
+  String get transactions_page_title => 'Transactions';
 
   @override
   String get login_page_error => 'Email or password is incorrect.';

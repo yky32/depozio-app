@@ -111,6 +111,12 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get action_confirm;
 
+  /// No description provided for @action_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get action_save;
+
   /// No description provided for @login_page_email.
   ///
   /// In en, this message translates to:
@@ -626,6 +632,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error clearing data'**
   String get setting_page_clear_data_error;
+
+  /// No description provided for @setting_page_cleanup_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean Up Data'**
+  String get setting_page_cleanup_data;
+
+  /// No description provided for @setting_page_cleanup_data_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select what to clean'**
+  String get setting_page_cleanup_data_subtitle;
+
+  /// No description provided for @setting_page_cleanup_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean Up Data'**
+  String get setting_page_cleanup_dialog_title;
+
+  /// No description provided for @setting_page_cleanup_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get setting_page_cleanup_categories;
+
+  /// No description provided for @setting_page_cleanup_transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get setting_page_cleanup_transactions;
+
+  /// No description provided for @setting_page_cleanup_dialog_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the data you want to clean. App settings will be preserved.'**
+  String get setting_page_cleanup_dialog_message;
+
+  /// No description provided for @setting_page_cleanup_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Data cleaned successfully'**
+  String get setting_page_cleanup_success;
+
+  /// No description provided for @setting_page_cleanup_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error cleaning data'**
+  String get setting_page_cleanup_error;
+
+  /// No description provided for @setting_page_set_username.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Username'**
+  String get setting_page_set_username;
+
+  /// No description provided for @setting_page_enter_username_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your username'**
+  String get setting_page_enter_username_hint;
+
+  /// No description provided for @setting_page_start_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get setting_page_start_date;
+
+  /// No description provided for @setting_page_start_date_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {day} of the month'**
+  String setting_page_start_date_format(String day);
+
+  /// No description provided for @setting_page_select_start_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Start Date'**
+  String get setting_page_select_start_date;
+
+  /// No description provided for @setting_page_start_date_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between 1 and 31'**
+  String get setting_page_start_date_hint;
+
+  /// No description provided for @setting_page_timezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get setting_page_timezone;
+
+  /// No description provided for @setting_page_tap_to_set_username.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to set username'**
+  String get setting_page_tap_to_set_username;
+
+  /// No description provided for @action_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get action_retry;
+
+  /// No description provided for @transactions_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions_page_title;
 
   /// No description provided for @login_page_error.
   ///

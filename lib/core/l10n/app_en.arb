@@ -2,6 +2,7 @@
   "@@locale": "en",
   "action_cancel": "Cancel",
   "action_confirm": "Confirm",
+  "action_save": "Save",
   "login_page_email": "Email",
   "login_page_password": "Password",
   "login_page_submit": "Login",
@@ -154,6 +155,31 @@
   "setting_page_clear_data_confirm": "Clear",
   "setting_page_clear_data_success": "All data cleared successfully",
   "setting_page_clear_data_error": "Error clearing data",
+  "setting_page_cleanup_data": "Clean Up Data",
+  "setting_page_cleanup_data_subtitle": "Select what to clean",
+  "setting_page_cleanup_dialog_title": "Clean Up Data",
+  "setting_page_cleanup_categories": "Categories",
+  "setting_page_cleanup_transactions": "Transactions",
+  "setting_page_cleanup_dialog_message": "Select the data you want to clean. App settings will be preserved.",
+  "setting_page_cleanup_success": "Data cleaned successfully",
+  "setting_page_cleanup_error": "Error cleaning data",
+  "setting_page_set_username": "Set Username",
+  "setting_page_enter_username_hint": "Enter your username",
+  "setting_page_start_date": "Start Date",
+  "setting_page_start_date_format": "Every {day} of the month",
+  "@setting_page_start_date_format": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "setting_page_select_start_date": "Select Start Date",
+  "setting_page_start_date_hint": "Enter a number between 1 and 31",
+  "setting_page_timezone": "Timezone",
+  "setting_page_tap_to_set_username": "Tap to set username",
+  "action_retry": "Retry",
+  "transactions_page_title": "Transactions",
   "login_page_error": "Email or password is incorrect.",
   "login_page_email_hint": "example@example.com"
 }

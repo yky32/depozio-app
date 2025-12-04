@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/models/transaction_entity.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
@@ -17,6 +18,7 @@ class TransactionsListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     // Load category from service
     CategoryService.init();
@@ -26,7 +28,7 @@ class TransactionsListPage extends StatelessWidget {
     if (category == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Transactions'),
+          title: Text(l10n.transactions_page_title),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.pop(),

@@ -6,6 +6,7 @@ import 'package:depozio/core/network/logger.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/core/enum/category_type.dart';
+import 'package:depozio/core/services/app_setting_service.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -121,17 +122,78 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
+  /// Get the current period start date based on startDay
+  DateTime _getCurrentPeriodStart(DateTime now, int startDay) {
+    // If current day is >= startDay, period started on startDay of current month
+    // Otherwise, period started on startDay of previous month
+    if (now.day >= startDay) {
+      return DateTime(now.year, now.month, startDay);
+    } else {
+      // Previous month
+      final prevMonth = now.month == 1 ? 12 : now.month - 1;
+      final prevYear = now.month == 1 ? now.year - 1 : now.year;
+      // Handle months with fewer days (e.g., Feb 29th -> Feb 28th)
+      final daysInMonth = DateTime(prevYear, prevMonth + 1, 0).day;
+      final adjustedDay = startDay > daysInMonth ? daysInMonth : startDay;
+      return DateTime(prevYear, prevMonth, adjustedDay);
+    }
+  }
+
+  /// Get the next period start date based on startDay
+  DateTime _getNextPeriodStart(DateTime now, int startDay) {
+    // Next period starts on startDay of next month
+    final nextMonth = now.month == 12 ? 1 : now.month + 1;
+    final nextYear = now.month == 12 ? now.year + 1 : now.year;
+    // Handle months with fewer days
+    final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
+    final adjustedDay = startDay > daysInMonth ? daysInMonth : startDay;
+    return DateTime(nextYear, nextMonth, adjustedDay);
+  }
+
+  /// Check if a transaction is within the current period based on startDay
+  bool _isTransactionInCurrentPeriod(
+    DateTime transactionDate,
+    int startDay,
+  ) {
+    final now = DateTime.now();
+    final periodStart = _getCurrentPeriodStart(now, startDay);
+    final nextPeriodStart = _getNextPeriodStart(now, startDay);
+    
+    // Use the earlier of now or nextPeriodStart as the end date
+    final periodEnd = now.isBefore(nextPeriodStart) ? now : nextPeriodStart;
+    
+    // Filter: periodStart <= transaction.createdAt < periodEnd
+    // Normalize periodStart to start of day (00:00:00) for inclusive comparison
+    final periodStartNormalized = DateTime(
+      periodStart.year,
+      periodStart.month,
+      periodStart.day,
+    );
+    
+    // Transaction date must be >= periodStart (start of day) and < periodEnd
+    return !transactionDate.isBefore(periodStartNormalized) &&
+           transactionDate.isBefore(periodEnd);
+  }
+
   double _calculateTotalDeposits() {
     try {
       final transactionService = TransactionService();
       final categoryService = CategoryService();
 
+      // Get startDay from settings
+      final startDay = AppSettingService.getStartDate();
+
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
 
-      // Calculate sum of all deposit transactions
+      // Calculate sum of deposit transactions within the current period
       double total = 0.0;
       for (final transaction in allTransactions) {
+        // Filter by date range: startDay <= transaction.createdAt < Next StartDay (or Now)
+        if (!_isTransactionInCurrentPeriod(transaction.createdAt, startDay)) {
+          continue;
+        }
+        
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
@@ -152,12 +214,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final transactionService = TransactionService();
       final categoryService = CategoryService();
 
+      // Get startDay from settings
+      final startDay = AppSettingService.getStartDate();
+
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
 
-      // Calculate sum of all expense transactions
+      // Calculate sum of expense transactions within the current period
       double total = 0.0;
       for (final transaction in allTransactions) {
+        // Filter by date range: startDay <= transaction.createdAt < Next StartDay (or Now)
+        if (!_isTransactionInCurrentPeriod(transaction.createdAt, startDay)) {
+          continue;
+        }
+        
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );

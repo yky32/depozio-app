@@ -281,6 +281,170 @@ class MyBloc extends Bloc<MyEvent, MyState> {
 - ✅ Skeleton loading uses same widget structure
 - ✅ Error states properly handled with retry functionality
 
+### UI Feedback Patterns
+
+#### No SnackBar Usage
+
+**Important:** Do not use `SnackBar` for showing success or error messages in this application.
+
+**Pattern:**
+- ✅ **Silent Actions**: Actions should complete silently without showing success messages
+- ✅ **Automatic UI Updates**: UI should update automatically through BLoC state changes
+- ✅ **Silent Error Handling**: Errors should be handled silently (logged but not shown to users)
+- ✅ **State-Driven Feedback**: Use BLoC state changes to reflect action results in the UI
+
+**Rationale:**
+- Actions complete and the UI updates automatically through reactive state management
+- Users can see the results of their actions directly in the updated UI
+- Reduces UI clutter and provides a cleaner user experience
+- Follows the principle of "show, don't tell" - the UI state itself is the feedback
+
+**Examples:**
+- ✅ Transaction saved → Dialog closes, home page automatically refreshes via bloc
+- ✅ Category deleted → Category list automatically updates via bloc state
+- ✅ Data cleaned → UI automatically refreshes via bloc, no success message needed
+- ❌ Don't show: `ScaffoldMessenger.of(context).showSnackBar(...)`
+
+**Implementation:**
+```dart
+// ✅ CORRECT: Silent action with automatic UI update
+Future<void> _cleanupData(BuildContext context) async {
+  try {
+    await service.clearData();
+    // Refresh blocs - UI will update automatically
+    context.read<HomeBloc>().add(const RefreshHome());
+    // No SnackBar needed - UI state is the feedback
+  } catch (e) {
+    // Error handled silently - logged but not shown
+  }
+}
+
+// ❌ AVOID: Using SnackBar for feedback
+Future<void> _cleanupData(BuildContext context) async {
+  try {
+    await service.clearData();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Success!')), // Don't do this
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error!')), // Don't do this
+    );
+  }
+}
+```
+
+#### Action Confirmation and Bloc Refresh Pattern
+
+**Important:** Always check if resources exist before performing actions, and refresh relevant blocs after confirmations.
+
+**Pattern:**
+- ✅ **Check Existence First**: Verify that resources (data, services, blocs) exist before performing actions
+- ✅ **Refresh Blocs After Confirmation**: After any confirmed action, refresh relevant blocs to update the UI
+- ✅ **Safe Context Checks**: Always check `context.mounted` before accessing blocs or navigating
+- ✅ **Try-Catch for Bloc Access**: Wrap bloc access in try-catch since blocs might not be available in all contexts
+
+**Rationale:**
+- Prevents errors from accessing non-existent resources
+- Ensures UI stays in sync with data changes
+- Provides better user experience with immediate visual feedback
+- Handles edge cases gracefully
+
+**Implementation:**
+```dart
+// ✅ CORRECT: Check existence and refresh blocs after action
+Future<void> _performAction(BuildContext context) async {
+  try {
+    // 1. Check if service exists/initialized
+    await Service.init();
+    final service = Service();
+    
+    // 2. Check if data exists before action
+    final data = service.getData();
+    if (data == null || data.isEmpty) {
+      // Handle empty state appropriately
+      return;
+    }
+    
+    // 3. Perform action
+    await service.performAction();
+    
+    // 4. Refresh blocs after confirmation (if context is still mounted)
+    if (context.mounted) {
+      // Refresh relevant blocs
+      try {
+        context.read<HomeBloc>().add(const RefreshHome());
+      } catch (e) {
+        // Bloc might not be available in this context - silently handle
+      }
+      
+      try {
+        context.read<DepositBloc>().add(LoadDeposits());
+      } catch (e) {
+        // Bloc might not be available in this context - silently handle
+      }
+    }
+  } catch (e) {
+    // Error handled silently - logged but not shown
+  }
+}
+
+// ✅ CORRECT: Check existence in dialog confirmation
+Future<void> _showConfirmationDialog(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      // ... dialog content
+    ),
+  );
+
+  if (confirmed == true && context.mounted) {
+    // Check if service exists
+    await Service.init();
+    final service = Service();
+    
+    // Check if data exists
+    if (service.hasData()) {
+      await service.performAction();
+      
+      // Refresh blocs after confirmation
+      if (context.mounted) {
+        try {
+          context.read<HomeBloc>().add(const RefreshHome());
+        } catch (e) {
+          // Bloc might not be available - silently handle
+        }
+      }
+    }
+  }
+}
+
+// ❌ AVOID: Not checking existence or not refreshing blocs
+Future<void> _performAction(BuildContext context) async {
+  // Don't check if service exists
+  final service = Service(); // Might fail if not initialized
+  
+  // Don't check if data exists
+  await service.performAction(); // Might fail on empty data
+  
+  // Don't refresh blocs - UI won't update
+  // Missing: context.read<HomeBloc>().add(const RefreshHome());
+}
+```
+
+**Best Practices:**
+- ✅ Always initialize services before use: `await Service.init()`
+- ✅ Check for null/empty data before operations
+- ✅ Use `context.mounted` before accessing blocs or navigating
+- ✅ Wrap bloc access in try-catch blocks
+- ✅ Refresh all relevant blocs that might be affected by the action
+- ✅ Handle missing blocs gracefully (they might not be available in all contexts)
+
+**Examples in Codebase:**
+- **Data Cleanup**: `lib/features/setting/presentation/pages/setting_page.dart` - Checks service initialization, refreshes HomeBloc and DepositBloc after cleanup
+- **Transaction Save**: `lib/widgets/global/global_action_bottom_sheet.dart` - Initializes services, saves transaction, refreshes via watchers
+- **Category Delete**: `lib/features/deposit/presentation/bloc/deposit_bloc.dart` - Checks service, deletes category, refreshes state
+
 #### Migration Guide
 
 When converting existing StatefulWidget to BLoC pattern:

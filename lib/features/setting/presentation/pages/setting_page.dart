@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' as widgets;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/core/extensions/localizations.dart';
+import 'package:depozio/core/localization/app_localizations.dart';
 import 'package:depozio/router/app_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -162,7 +163,7 @@ class SettingPage extends StatelessWidget {
                       ),
                       if (currentUsername.isEmpty)
                         Text(
-                          'Tap to set username',
+                          context.l10n.setting_page_tap_to_set_username,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
@@ -192,11 +193,11 @@ class SettingPage extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => AlertDialog(
-            title: Text('Set Username'),
+            title: Text(l10n.setting_page_set_username),
             content: TextField(
               controller: textController,
               decoration: InputDecoration(
-                hintText: 'Enter your username',
+                hintText: l10n.setting_page_enter_username_hint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -215,7 +216,7 @@ class SettingPage extends StatelessWidget {
                     dialogContext.pop(username);
                   }
                 },
-                child: Text('Save'),
+                child: Text(l10n.action_save),
               ),
             ],
           ),
@@ -255,68 +256,128 @@ class SettingPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showClearDataConfirmation(
+  Future<void> _showCleanupDataDialog(
     BuildContext context,
     ThemeData theme,
     ColorScheme colorScheme,
   ) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    bool cleanCategories = false;
+    bool cleanTransactions = false;
+
+    final result = await showDialog<Map<String, bool>>(
       context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: Text(l10n.setting_page_clear_data_dialog_title),
-            content: Text(l10n.setting_page_clear_data_dialog_message),
-            actions: [
-              TextButton(
-                onPressed: () => dialogContext.pop(false),
-                child: Text(l10n.action_cancel),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(l10n.setting_page_cleanup_dialog_title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.setting_page_cleanup_dialog_message,
+                style: theme.textTheme.bodyMedium,
               ),
-              TextButton(
-                onPressed: () => dialogContext.pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: Text(l10n.setting_page_clear_data_confirm),
+              const SizedBox(height: 16),
+              CheckboxListTile(
+                title: Text(l10n.setting_page_cleanup_categories),
+                value: cleanCategories,
+                onChanged: (value) {
+                  setState(() {
+                    cleanCategories = value ?? false;
+                  });
+                },
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: Text(l10n.setting_page_cleanup_transactions),
+                value: cleanTransactions,
+                onChanged: (value) {
+                  setState(() {
+                    cleanTransactions = value ?? false;
+                  });
+                },
+                contentPadding: EdgeInsets.zero,
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => dialogContext.pop(null),
+              child: Text(l10n.action_cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                if (cleanCategories || cleanTransactions) {
+                  dialogContext.pop({
+                    'categories': cleanCategories,
+                    'transactions': cleanTransactions,
+                  });
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(l10n.setting_page_clear_data_confirm),
+            ),
+          ],
+        ),
+      ),
     );
 
-    if (confirmed == true && context.mounted) {
-      await _clearAllData(context);
+    if (result != null && context.mounted) {
+      await _cleanupData(
+        context,
+        cleanCategories: result['categories'] ?? false,
+        cleanTransactions: result['transactions'] ?? false,
+      );
     }
   }
 
-  Future<void> _clearAllData(BuildContext context) async {
+  Future<void> _cleanupData(
+    BuildContext context, {
+    required bool cleanCategories,
+    required bool cleanTransactions,
+  }) async {
     try {
       // Initialize services
-      await CategoryService.init();
-      await TransactionService.init();
+      if (cleanCategories) {
+        await CategoryService.init();
+      }
+      if (cleanTransactions) {
+        await TransactionService.init();
+      }
 
-      // Clear all categories
-      final categoryService = CategoryService();
-      await categoryService.clearAllCategories();
+      // Clear selected data
+      if (cleanCategories) {
+        final categoryService = CategoryService();
+        await categoryService.clearAllCategories();
+      }
 
-      // Clear all transactions
-      final transactionService = TransactionService();
-      await transactionService.clearAllTransactions();
+      if (cleanTransactions) {
+        final transactionService = TransactionService();
+        await transactionService.clearAllTransactions();
+      }
 
       // Refresh DepositBloc if available
-      try {
-        context.read<DepositBloc>().add(LoadDeposits());
-      } catch (e) {
-        // DepositBloc might not be available in this context
+      if (cleanCategories) {
+        try {
+          context.read<DepositBloc>().add(LoadDeposits());
+        } catch (e) {
+          // DepositBloc might not be available in this context
+        }
       }
 
       // Refresh HomeBloc if available
-      try {
-        context.read<HomeBloc>().add(const RefreshHome());
-      } catch (e) {
-        // HomeBloc might not be available in this context
+      if (cleanCategories || cleanTransactions) {
+        try {
+          context.read<HomeBloc>().add(const RefreshHome());
+        } catch (e) {
+          // HomeBloc might not be available in this context
+        }
       }
 
-      // Data cleared successfully (silent success)
+      // Data cleaned successfully - UI will automatically refresh via bloc updates
     } catch (e) {
-      // Error clearing data (silent failure)
+      // Error cleaning data - silently fail
     }
   }
 
@@ -363,14 +424,14 @@ class SettingPage extends StatelessWidget {
               colorScheme: colorScheme,
             ),
             _buildSettingsTile(
-              icon: Icons.delete_outline,
-              title: l10n.setting_page_clear_all_data,
-              subtitle: l10n.setting_page_clear_all_data_subtitle,
+              icon: Icons.cleaning_services_outlined,
+              title: l10n.setting_page_cleanup_data,
+              subtitle: l10n.setting_page_cleanup_data_subtitle,
               onTap:
-                  () => _showClearDataConfirmation(context, theme, colorScheme),
+                  () => _showCleanupDataDialog(context, theme, colorScheme),
               theme: theme,
               colorScheme: colorScheme,
-              showChevron: false,
+              showChevron: true,
             ),
           ],
           theme,
@@ -825,6 +886,7 @@ class SettingPage extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
+    final l10n = context.l10n;
     return BlocBuilder<AppCoreBloc, AppCoreState>(
       buildWhen: (previous, current) {
         // Rebuild when start date changes in settings state
@@ -879,14 +941,16 @@ class SettingPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Start Date',
+                          l10n.setting_page_start_date,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Every ${currentStartDate}${_getDaySuffix(currentStartDate)} of the month',
+                          l10n.setting_page_start_date_format(
+                            '${currentStartDate}${_getDaySuffix(currentStartDate)}',
+                          ),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
@@ -924,6 +988,7 @@ class SettingPage extends StatelessWidget {
     BuildContext context,
     int currentStartDate,
   ) async {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final bloc = context.read<AppCoreBloc>();
@@ -941,6 +1006,7 @@ class SettingPage extends StatelessWidget {
           initialDay: currentStartDate,
           theme: theme,
           colorScheme: colorScheme,
+          l10n: l10n,
         );
       },
     );
@@ -1004,11 +1070,13 @@ class _StartDateSelectorContent extends StatefulWidget {
     required this.initialDay,
     required this.theme,
     required this.colorScheme,
+    required this.l10n,
   });
 
   final int initialDay;
   final ThemeData theme;
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
   @override
   State<_StartDateSelectorContent> createState() =>
@@ -1170,7 +1238,7 @@ class _StartDateSelectorContentState
                           Padding(
                             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                             child: Text(
-                              'Select Start Date',
+                              widget.l10n.setting_page_select_start_date,
                               style: widget.theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1182,7 +1250,9 @@ class _StartDateSelectorContentState
                       children: [
                         // Display selected day with suffix
                         Text(
-                          'Every ${_selectedDay}${_getDaySuffix(_selectedDay)} of the month',
+                          widget.l10n.setting_page_start_date_format(
+                            '${_selectedDay}${_getDaySuffix(_selectedDay)}',
+                          ),
                           style: widget.theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: widget.colorScheme.primary,
@@ -1302,7 +1372,7 @@ class _StartDateSelectorContentState
                         const SizedBox(height: 8),
                         // Helper text
                         Text(
-                          'Enter a number between 1 and 31',
+                          widget.l10n.setting_page_start_date_hint,
                           style: widget.theme.textTheme.bodySmall?.copyWith(
                             color: widget.colorScheme.onSurface
                                 .withValues(alpha: 0.6),
@@ -1334,7 +1404,7 @@ class _StartDateSelectorContentState
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Timezone',
+                                      widget.l10n.setting_page_timezone,
                                       style: widget.theme.textTheme.bodySmall
                                           ?.copyWith(
                                         color: widget.colorScheme.onSurface
@@ -1387,7 +1457,7 @@ class _StartDateSelectorContentState
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: const Text('Save'),
+                                child: Text(widget.l10n.action_save),
                               ),
                             ),
                           ],

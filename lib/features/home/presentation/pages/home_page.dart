@@ -127,7 +127,7 @@ class _HomePageContent extends StatelessWidget {
                       onPressed: () {
                         context.read<HomeBloc>().add(const LoadHome());
                       },
-                      child: const Text('Retry'),
+                      child: Text(l10n.action_retry),
                     ),
                   ],
                 ),

@@ -15,6 +15,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get action_confirm => '確認';
 
   @override
+  String get action_save => 'Save';
+
+  @override
   String get login_page_email => '電子郵件';
 
   @override
@@ -292,6 +295,62 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setting_page_clear_data_error => '清除数据时发生错误';
 
   @override
+  String get setting_page_cleanup_data => '清理数据';
+
+  @override
+  String get setting_page_cleanup_data_subtitle => '选择要清理的内容';
+
+  @override
+  String get setting_page_cleanup_dialog_title => '清理数据';
+
+  @override
+  String get setting_page_cleanup_categories => '类别';
+
+  @override
+  String get setting_page_cleanup_transactions => '交易记录';
+
+  @override
+  String get setting_page_cleanup_dialog_message => '选择要清理的数据。应用设置将保留。';
+
+  @override
+  String get setting_page_cleanup_success => '数据清理成功';
+
+  @override
+  String get setting_page_cleanup_error => '清理数据时发生错误';
+
+  @override
+  String get setting_page_set_username => '设置用户名';
+
+  @override
+  String get setting_page_enter_username_hint => '请输入您的用户名';
+
+  @override
+  String get setting_page_start_date => '开始日期';
+
+  @override
+  String setting_page_start_date_format(String day) {
+    return '每月$day';
+  }
+
+  @override
+  String get setting_page_select_start_date => '选择开始日期';
+
+  @override
+  String get setting_page_start_date_hint => '请输入1到31之间的数字';
+
+  @override
+  String get setting_page_timezone => '时区';
+
+  @override
+  String get setting_page_tap_to_set_username => '点击设置用户名';
+
+  @override
+  String get action_retry => '重试';
+
+  @override
+  String get transactions_page_title => '交易记录';
+
+  @override
   String get login_page_error => '电子邮件或密码不正确。';
 
   @override
@@ -307,6 +366,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get action_confirm => '確認';
+
+  @override
+  String get action_save => '儲存';
 
   @override
   String get login_page_email => '電子郵件';
@@ -584,6 +646,62 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get setting_page_clear_data_error => '清除資料時發生錯誤';
+
+  @override
+  String get setting_page_cleanup_data => '清理資料';
+
+  @override
+  String get setting_page_cleanup_data_subtitle => '選擇要清理的內容';
+
+  @override
+  String get setting_page_cleanup_dialog_title => '清理資料';
+
+  @override
+  String get setting_page_cleanup_categories => '類別';
+
+  @override
+  String get setting_page_cleanup_transactions => '交易記錄';
+
+  @override
+  String get setting_page_cleanup_dialog_message => '選擇要清理的資料。應用程式設定將保留。';
+
+  @override
+  String get setting_page_cleanup_success => '資料清理成功';
+
+  @override
+  String get setting_page_cleanup_error => '清理資料時發生錯誤';
+
+  @override
+  String get setting_page_set_username => '設定使用者名稱';
+
+  @override
+  String get setting_page_enter_username_hint => '請輸入您的使用者名稱';
+
+  @override
+  String get setting_page_start_date => '開始日期';
+
+  @override
+  String setting_page_start_date_format(String day) {
+    return '每月$day';
+  }
+
+  @override
+  String get setting_page_select_start_date => '選擇開始日期';
+
+  @override
+  String get setting_page_start_date_hint => '請輸入1到31之間的數字';
+
+  @override
+  String get setting_page_timezone => '時區';
+
+  @override
+  String get setting_page_tap_to_set_username => '點擊設定使用者名稱';
+
+  @override
+  String get action_retry => '重試';
+
+  @override
+  String get transactions_page_title => '交易記錄';
 
   @override
   String get login_page_error => '電子郵件或密碼不正確。';

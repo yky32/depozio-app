@@ -154,6 +154,31 @@
   "setting_page_clear_data_confirm": "清除",
   "setting_page_clear_data_success": "所有数据已成功清除",
   "setting_page_clear_data_error": "清除数据时发生错误",
+  "setting_page_cleanup_data": "清理数据",
+  "setting_page_cleanup_data_subtitle": "选择要清理的内容",
+  "setting_page_cleanup_dialog_title": "清理数据",
+  "setting_page_cleanup_categories": "类别",
+  "setting_page_cleanup_transactions": "交易记录",
+  "setting_page_cleanup_dialog_message": "选择要清理的数据。应用设置将保留。",
+  "setting_page_cleanup_success": "数据清理成功",
+  "setting_page_cleanup_error": "清理数据时发生错误",
+  "setting_page_set_username": "设置用户名",
+  "setting_page_enter_username_hint": "请输入您的用户名",
+  "setting_page_start_date": "开始日期",
+  "setting_page_start_date_format": "每月{day}",
+  "@setting_page_start_date_format": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "setting_page_select_start_date": "选择开始日期",
+  "setting_page_start_date_hint": "请输入1到31之间的数字",
+  "setting_page_timezone": "时区",
+  "setting_page_tap_to_set_username": "点击设置用户名",
+  "action_retry": "重试",
+  "transactions_page_title": "交易记录",
   "login_page_error": "电子邮件或密码不正确。",
   "login_page_email_hint": "example@example.com"
 }
