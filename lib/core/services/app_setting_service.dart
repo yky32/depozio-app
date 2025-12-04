@@ -6,6 +6,7 @@ class AppSettingService {
   static const String _boxName = 'app_settings';
   static const String _localeKey = 'locale';
   static const String _defaultCurrencyKey = 'default_currency';
+  static const String _currencyOrderKey = 'currency_order';
   static const String _usernameKey = 'username';
   static const String _startDateKey = 'start_date';
   static const String _defaultCurrency =
@@ -112,6 +113,25 @@ class AppSettingService {
       await init();
     }
     await _box!.put(_defaultCurrencyKey, currencyCode);
+  }
+
+  /// Get saved currency order (list of currency codes)
+  /// Returns null if no custom order is saved
+  static List<String>? getCurrencyOrder() {
+    if (_box == null) return null;
+    final order = _box!.get(_currencyOrderKey);
+    if (order is List) {
+      return order.cast<String>();
+    }
+    return null;
+  }
+
+  /// Save currency order (list of currency codes)
+  static Future<void> saveCurrencyOrder(List<String> currencyOrder) async {
+    if (_box == null) {
+      await init();
+    }
+    await _box!.put(_currencyOrderKey, currencyOrder);
   }
 
   // ==================== Username Methods ====================
