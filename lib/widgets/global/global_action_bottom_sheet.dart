@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:depozio/core/extensions/localizations.dart';
 import 'package:depozio/features/deposit/data/models/category_entity.dart';
 import 'package:depozio/features/deposit/data/services/category_service.dart';
@@ -9,6 +10,7 @@ import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/sele
 import 'package:depozio/features/deposit/presentation/widgets/bottom_sheets/add_category_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/widgets/bottom_sheets/select_currency_bottom_sheet.dart';
+import 'package:depozio/widgets/bottom_sheets/select_date_bottom_sheet.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/presentation/bloc/transaction_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
@@ -330,6 +332,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
         final currencyCode = formState.currencyCode;
         final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
         final flag = CurrencyHelper.getFlag(currencyCode);
+        final transactionDt = formState.transactionDt;
 
         // Sync controllers with state
         if (_amountController.text != formState.amount) {
@@ -463,37 +466,130 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _descriptionController,
-                focusNode: _descriptionFocusNode,
-                textInputAction: TextInputAction.next,
-                maxLines: 3,
-                minLines: 1,
-                onTapOutside: (event) => _descriptionFocusNode.unfocus(),
-                onChanged: (value) {
-                  context.read<TransactionBloc>().add(
-                    UpdateDescription(description: value),
-                  );
-                },
-                style: widget.theme.textTheme.bodyLarge,
-                decoration: InputDecoration(
-                  hintText: l10n.transaction_description_placeholder,
-                  filled: true,
-                  fillColor: widget.colorScheme.surface,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: widget.colorScheme.primary,
-                      width: 2,
+              SizedBox(
+                height: 60,
+                child: TextField(
+                  controller: _descriptionController,
+                  focusNode: _descriptionFocusNode,
+                  textInputAction: TextInputAction.next,
+                  maxLines: 1,
+                  onTapOutside: (event) => _descriptionFocusNode.unfocus(),
+                  onChanged: (value) {
+                    context.read<TransactionBloc>().add(
+                      UpdateDescription(description: value),
+                    );
+                  },
+                  style: widget.theme.textTheme.bodyLarge,
+                  decoration: InputDecoration(
+                    hintText: l10n.transaction_description_placeholder,
+                    filled: true,
+                    fillColor: widget.colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 20,
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: widget.colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Transaction date field
+              Text(
+                'Transaction Date',
+                style: widget.theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () async {
+                  _amountFocusNode.unfocus();
+                  _descriptionFocusNode.unfocus();
+                  final bloc = context.read<TransactionBloc>();
+                  final initialDate = transactionDt ?? DateTime.now();
+                  final pickedDate = await showModalBottomSheet<DateTime>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (BuildContext context) {
+                      return SelectDateBottomSheet(
+                        initialDate: initialDate,
+                      );
+                    },
+                  );
+                  if (pickedDate != null) {
+                    bloc.add(SelectTransactionDate(transactionDt: pickedDate));
+                  }
+                },
+                child: Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: transactionDt != null
+                          ? widget.colorScheme.primary
+                          : widget.colorScheme.outline.withValues(
+                            alpha: 0.3,
+                          ),
+                      width: transactionDt != null ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: widget.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.calendar_today,
+                          color: widget.colorScheme.primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          transactionDt != null
+                              ? DateFormat('MMM d, yyyy').format(transactionDt)
+                              : 'Select date',
+                          style: widget.theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: transactionDt != null
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: transactionDt != null
+                                ? widget.colorScheme.onSurface
+                                : widget.colorScheme.onSurface.withValues(
+                                  alpha: 0.5,
+                                ),
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: widget.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -512,9 +608,9 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   _showCategorySelection(context);
                 },
                 child: Container(
+                  height: 60,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 20,
                   ),
                   decoration: BoxDecoration(
                     color: widget.colorScheme.surface,
@@ -533,8 +629,8 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                     children: [
                       if (selectedCategory != null) ...[
                         Container(
-                          width: 48,
-                          height: 48,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: widget.colorScheme.primary.withValues(
                               alpha: 0.1,
@@ -544,25 +640,28 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           child: Icon(
                             selectedCategory.icon,
                             color: widget.colorScheme.primary,
-                            size: 24,
+                            size: 20,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 selectedCategory.name,
-                                style: widget.theme.textTheme.bodyLarge
+                                style: widget.theme.textTheme.bodyMedium
                                     ?.copyWith(fontWeight: FontWeight.w600),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   // Arrow symbol with color in front of type
                                   Container(
-                                    padding: const EdgeInsets.all(4),
+                                    padding: const EdgeInsets.all(3),
                                     decoration: BoxDecoration(
                                       color: selectedCategory.categoryType ==
                                               CategoryType.deposits
@@ -575,14 +674,14 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                               CategoryType.deposits
                                           ? Icons.arrow_upward
                                           : Icons.arrow_downward,
-                                      size: 14,
+                                      size: 12,
                                       color: selectedCategory.categoryType ==
                                               CategoryType.deposits
                                           ? Colors.green.shade700
                                           : Colors.red.shade700,
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: 4),
                                   // Category type text
                                   Text(
                                     selectedCategory.categoryType ==
@@ -591,6 +690,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                         : l10n.add_category_type_expenses,
                                     style: widget.theme.textTheme.bodySmall
                                         ?.copyWith(
+                                      fontSize: 11,
                                       color: selectedCategory.categoryType ==
                                               CategoryType.deposits
                                           ? Colors.green.shade700
@@ -690,7 +790,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             amount: amount,
                             currencyCode: currentState.currencyCode,
                             categoryId: currentState.selectedCategory!.id,
-                            createdAt: DateTime.now(),
+                            createdAt: currentState.transactionDt ?? DateTime.now(),
                             notes:
                                 currentState.description.trim().isEmpty
                                     ? null

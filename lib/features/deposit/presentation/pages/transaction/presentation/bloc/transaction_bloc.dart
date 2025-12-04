@@ -14,6 +14,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<SelectCategory>(_handleSelectCategory);
     on<SelectCurrency>(_handleSelectCurrency);
     on<UpdateDescription>(_handleUpdateDescription);
+    on<SelectTransactionDate>(_handleSelectTransactionDate);
     on<ResetTransaction>(_handleResetTransaction);
   }
 
@@ -116,6 +117,30 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     }
   }
 
+  void _handleSelectTransactionDate(
+    SelectTransactionDate event,
+    Emitter<TransactionState> emit,
+  ) {
+    LoggerUtil.d('📅 SelectTransactionDate event received: ${event.transactionDt}');
+    final currentState = state;
+    if (currentState is TransactionFormState) {
+      emit(
+        currentState.copyWith(
+          transactionDt: event.transactionDt,
+        ),
+      );
+    } else {
+      AppSettingService.init();
+      final defaultCurrency = AppSettingService.getDefaultCurrency();
+      emit(
+        TransactionFormState(
+          transactionDt: event.transactionDt,
+          currencyCode: defaultCurrency,
+        ),
+      );
+    }
+  }
+
   void _handleResetTransaction(
     ResetTransaction event,
     Emitter<TransactionState> emit,
@@ -123,7 +148,10 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoggerUtil.d('🔄 ResetTransaction event received');
     AppSettingService.init();
     final defaultCurrency = AppSettingService.getDefaultCurrency();
-    emit(TransactionFormState(currencyCode: defaultCurrency));
+    emit(TransactionFormState(
+      currencyCode: defaultCurrency,
+      transactionDt: null,
+    ));
   }
 }
 

@@ -43,6 +43,15 @@ class UpdateDescription extends TransactionEvent {
   List<Object?> get props => [description];
 }
 
+class SelectTransactionDate extends TransactionEvent {
+  final DateTime transactionDt;
+
+  const SelectTransactionDate({required this.transactionDt});
+
+  @override
+  List<Object?> get props => [transactionDt];
+}
+
 class ResetTransaction extends TransactionEvent {
   const ResetTransaction();
 }

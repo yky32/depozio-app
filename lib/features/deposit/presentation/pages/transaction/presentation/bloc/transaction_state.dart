@@ -19,12 +19,14 @@ class TransactionFormState extends TransactionState {
   final CategoryEntity? selectedCategory;
   final String currencyCode;
   final String description;
+  final DateTime? transactionDt;
 
   const TransactionFormState({
     this.amount = '',
     this.selectedCategory,
     required this.currencyCode,
     this.description = '',
+    this.transactionDt,
   });
 
   TransactionFormState copyWith({
@@ -32,12 +34,14 @@ class TransactionFormState extends TransactionState {
     CategoryEntity? selectedCategory,
     String? currencyCode,
     String? description,
+    DateTime? transactionDt,
   }) {
     return TransactionFormState(
       amount: amount ?? this.amount,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       currencyCode: currencyCode ?? this.currencyCode,
       description: description ?? this.description,
+      transactionDt: transactionDt ?? this.transactionDt,
     );
   }
 
@@ -47,5 +51,6 @@ class TransactionFormState extends TransactionState {
     selectedCategory,
     currencyCode,
     description,
+    transactionDt,
   ];
 }
