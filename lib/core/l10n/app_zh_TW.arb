@@ -181,6 +181,9 @@
   "setting_page_tap_to_set_username": "點擊設定使用者名稱",
   "action_retry": "重試",
   "transactions_page_title": "交易記錄",
+  "select_datetime_title": "選擇日期和時間",
+  "transaction_date": "交易日期",
+  "transaction_select_date": "選擇日期",
   "login_page_error": "電子郵件或密碼不正確。",
   "login_page_email_hint": "example@example.com"
 }

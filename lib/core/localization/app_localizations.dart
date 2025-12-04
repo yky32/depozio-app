@@ -741,6 +741,24 @@ abstract class AppLocalizations {
   /// **'Transactions'**
   String get transactions_page_title;
 
+  /// No description provided for @select_datetime_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date & Time'**
+  String get select_datetime_title;
+
+  /// No description provided for @transaction_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Date'**
+  String get transaction_date;
+
+  /// No description provided for @transaction_select_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get transaction_select_date;
+
   /// No description provided for @login_page_error.
   ///
   /// In en, this message translates to:

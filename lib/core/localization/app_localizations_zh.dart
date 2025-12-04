@@ -351,6 +351,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transactions_page_title => '交易记录';
 
   @override
+  String get select_datetime_title => '选择日期和时间';
+
+  @override
+  String get transaction_date => '交易日期';
+
+  @override
+  String get transaction_select_date => '选择日期';
+
+  @override
   String get login_page_error => '电子邮件或密码不正确。';
 
   @override
@@ -702,6 +711,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get transactions_page_title => '交易記錄';
+
+  @override
+  String get select_datetime_title => '選擇日期和時間';
+
+  @override
+  String get transaction_date => '交易日期';
+
+  @override
+  String get transaction_select_date => '選擇日期';
 
   @override
   String get login_page_error => '電子郵件或密碼不正確。';

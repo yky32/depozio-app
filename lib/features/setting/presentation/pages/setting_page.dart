@@ -301,12 +301,12 @@ class SettingPage extends StatelessWidget {
               ),
             ],
           ),
-          actions: [
-            TextButton(
+            actions: [
+              TextButton(
               onPressed: () => dialogContext.pop(null),
-              child: Text(l10n.action_cancel),
-            ),
-            TextButton(
+                child: Text(l10n.action_cancel),
+              ),
+              TextButton(
               onPressed: () {
                 if (cleanCategories || cleanTransactions) {
                   dialogContext.pop({
@@ -315,11 +315,11 @@ class SettingPage extends StatelessWidget {
                   });
                 }
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text(l10n.setting_page_clear_data_confirm),
-            ),
-          ],
-        ),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: Text(l10n.setting_page_clear_data_confirm),
+              ),
+            ],
+          ),
       ),
     );
 
@@ -340,38 +340,38 @@ class SettingPage extends StatelessWidget {
     try {
       // Initialize services
       if (cleanCategories) {
-        await CategoryService.init();
+      await CategoryService.init();
       }
       if (cleanTransactions) {
-        await TransactionService.init();
+      await TransactionService.init();
       }
 
       // Clear selected data
       if (cleanCategories) {
-        final categoryService = CategoryService();
-        await categoryService.clearAllCategories();
+      final categoryService = CategoryService();
+      await categoryService.clearAllCategories();
       }
 
       if (cleanTransactions) {
-        final transactionService = TransactionService();
-        await transactionService.clearAllTransactions();
+      final transactionService = TransactionService();
+      await transactionService.clearAllTransactions();
       }
 
       // Refresh DepositBloc if available
       if (cleanCategories) {
-        try {
-          context.read<DepositBloc>().add(LoadDeposits());
-        } catch (e) {
-          // DepositBloc might not be available in this context
+      try {
+        context.read<DepositBloc>().add(LoadDeposits());
+      } catch (e) {
+        // DepositBloc might not be available in this context
         }
       }
 
       // Refresh HomeBloc if available
       if (cleanCategories || cleanTransactions) {
-        try {
-          context.read<HomeBloc>().add(const RefreshHome());
-        } catch (e) {
-          // HomeBloc might not be available in this context
+      try {
+        context.read<HomeBloc>().add(const RefreshHome());
+      } catch (e) {
+        // HomeBloc might not be available in this context
         }
       }
 
@@ -1235,18 +1235,18 @@ class _StartDateSelectorContentState
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                            child: Text(
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    child: Text(
                               widget.l10n.setting_page_select_start_date,
-                              style: widget.theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Column(
+                      style: widget.theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
                       children: [
                         // Display selected day with suffix
                         Text(

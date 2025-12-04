@@ -358,6 +358,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactions_page_title => 'Transactions';
 
   @override
+  String get select_datetime_title => 'Select Date & Time';
+
+  @override
+  String get transaction_date => 'Transaction Date';
+
+  @override
+  String get transaction_select_date => 'Select date';
+
+  @override
   String get login_page_error => 'Email or password is incorrect.';
 
   @override

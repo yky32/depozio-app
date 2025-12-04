@@ -180,6 +180,9 @@
   "setting_page_tap_to_set_username": "Tap to set username",
   "action_retry": "Retry",
   "transactions_page_title": "Transactions",
+  "select_datetime_title": "Select Date & Time",
+  "transaction_date": "Transaction Date",
+  "transaction_select_date": "Select date",
   "login_page_error": "Email or password is incorrect.",
   "login_page_email_hint": "example@example.com"
 }

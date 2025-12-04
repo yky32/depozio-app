@@ -179,6 +179,9 @@
   "setting_page_tap_to_set_username": "点击设置用户名",
   "action_retry": "重试",
   "transactions_page_title": "交易记录",
+  "select_datetime_title": "选择日期和时间",
+  "transaction_date": "交易日期",
+  "transaction_select_date": "选择日期",
   "login_page_error": "电子邮件或密码不正确。",
   "login_page_email_hint": "example@example.com"
 }
