@@ -6,7 +6,6 @@ import 'package:depozio/core/services/app_setting_service.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/total_savings_card.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/statistic_card.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/savings_goal_card.dart';
-import 'package:depozio/features/home/presentation/pages/widgets/monthly_savings_card.dart';
 import 'package:depozio/features/home/presentation/pages/widgets/recent_activity_section.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:intl/intl.dart';
@@ -80,12 +79,12 @@ class HomeContent extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Total Savings Card
-            TotalSavingsCard(
+            // Carousel with Total Savings and Savings Goal cards
+            _CarouselSection(
               theme: theme,
               colorScheme: colorScheme,
               l10n: l10n,
-              amount: totalSavings,
+              totalSavings: totalSavings,
             ),
             const SizedBox(height: 24),
             // Grid with 2 columns
@@ -126,16 +125,6 @@ class HomeContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            // Savings Goal Progress
-            SavingsGoalCard(theme: theme, colorScheme: colorScheme, l10n: l10n),
-            const SizedBox(height: 24),
-            // Monthly Savings
-            MonthlySavingsCard(
-              theme: theme,
-              colorScheme: colorScheme,
-              l10n: l10n,
-            ),
-            const SizedBox(height: 24),
             // Recent Activity
             RecentActivitySection(
               theme: theme,
@@ -146,6 +135,106 @@ class HomeContent extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Carousel widget for Total Savings and Savings Goal cards
+/// Uses minimal StatefulWidget only for UI-only state (PageController lifecycle)
+/// This follows README.md guidelines: "StatefulWidget should ONLY be used for:
+/// - UI-only state (scroll position, animation controllers, form field focus)
+/// - Widget lifecycle management (e.g., StreamSubscription cleanup)"
+class _CarouselSection extends StatefulWidget {
+  const _CarouselSection({
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+    required this.totalSavings,
+  });
+
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final dynamic l10n;
+  final double totalSavings;
+
+  @override
+  State<_CarouselSection> createState() => _CarouselSectionState();
+}
+
+class _CarouselSectionState extends State<_CarouselSection> {
+  // UI-only state: PageController for scroll position (acceptable per README.md)
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 180, // Height to accommodate both cards
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            children: [
+              // Page 1: Total Savings Card
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: TotalSavingsCard(
+                  theme: widget.theme,
+                  colorScheme: widget.colorScheme,
+                  l10n: widget.l10n,
+                  amount: widget.totalSavings,
+                ),
+              ),
+              // Page 2: Savings Goal Card
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: SavingsGoalCard(
+                  theme: widget.theme,
+                  colorScheme: widget.colorScheme,
+                  l10n: widget.l10n,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Page indicators
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            2,
+            (index) => Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color:
+                    _currentPage == index
+                        ? widget.colorScheme.primary
+                        : widget.colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
