@@ -16,6 +16,43 @@ FASTLANE_DIR = File.dirname(__FILE__)
 IOS_DIR = File.expand_path("..", FASTLANE_DIR)
 PROJECT_ROOT = File.expand_path("..", IOS_DIR)
 
+# Helper function to find pod command
+def find_pod_command
+  # Try common locations for pod
+  possible_paths = [
+    "/opt/homebrew/bin/pod",
+    "/usr/local/bin/pod"
+  ]
+  
+  possible_paths.each do |path|
+    if File.exist?(path)
+      return path
+    end
+  end
+  
+  # Check if pod is in PATH
+  pod_path = `which pod 2>/dev/null`.strip
+  return pod_path unless pod_path.empty?
+  
+  return "pod"  # Default fallback
+end
+
+# Helper function to run pod install safely
+def run_pod_install
+  pod_cmd = find_pod_command
+  UI.message("Running pod install using: #{pod_cmd}")
+  
+  begin
+    sh("cd #{IOS_DIR} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH #{pod_cmd} install", log: true)
+    UI.success("✅ pod install completed successfully")
+    return true
+  rescue => ex
+    UI.important("⚠️  pod install encountered an issue: #{ex.message}")
+    UI.important("Continuing anyway - Flutter will attempt to run pod install if needed")
+    return false
+  end
+end
+
 default_platform(:ios)
 
 # Helper function to increment build number in pubspec.yaml
@@ -97,7 +134,10 @@ platform :ios do
     # Get dependencies
     sh("cd #{PROJECT_ROOT} && flutter pub get")
     
-    # Build iOS app in debug mode (Flutter will automatically run pod install if needed)
+    # Run pod install explicitly to ensure CocoaPods dependencies are up to date
+    run_pod_install
+    
+    # Build iOS app in debug mode
     # Using clean environment to avoid Bundler conflicts with CocoaPods
     sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --debug --no-codesign")
     
@@ -109,7 +149,10 @@ platform :ios do
     # Get dependencies
     sh("cd #{PROJECT_ROOT} && flutter pub get")
     
-    # Build iOS app in release mode (Flutter will automatically run pod install if needed)
+    # Run pod install explicitly to ensure CocoaPods dependencies are up to date
+    run_pod_install
+    
+    # Build iOS app in release mode
     # Using clean environment to avoid Bundler conflicts with CocoaPods
     sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release --no-codesign")
     
@@ -124,7 +167,11 @@ platform :ios do
     # Get dependencies
     sh("cd #{PROJECT_ROOT} && flutter pub get")
     
-    # Build iOS app in release mode (Flutter will automatically run pod install if needed)
+    # Run pod install explicitly to ensure CocoaPods dependencies are up to date
+    # This prevents Flutter from detecting CocoaPods as broken
+    run_pod_install
+    
+    # Build iOS app in release mode
     # Using clean environment to avoid Bundler conflicts with CocoaPods
     sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release")
     
