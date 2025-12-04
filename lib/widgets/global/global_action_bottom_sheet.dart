@@ -125,6 +125,8 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
   late final FocusNode _amountFocusNode;
   late final TextEditingController _descriptionController;
   late final FocusNode _descriptionFocusNode;
+  List<String> _lastDescriptions = [];
+  List<Map<String, String>> _lastAmounts = [];
 
   @override
   void initState() {
@@ -133,6 +135,17 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
     _amountFocusNode = FocusNode();
     _descriptionController = TextEditingController();
     _descriptionFocusNode = FocusNode();
+    _loadLastData();
+  }
+
+  Future<void> _loadLastData() async {
+    await AppSettingService.init();
+    if (mounted) {
+      setState(() {
+        _lastDescriptions = AppSettingService.getLastDescriptions();
+        _lastAmounts = AppSettingService.getLastAmounts();
+      });
+    }
   }
 
   @override
@@ -457,6 +470,67 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   ),
                 ],
               ),
+              // Last amounts list
+              if (_lastAmounts.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _lastAmounts.map((amountPair) {
+                    final amount = amountPair['amount'] ?? '';
+                    final currencyCode = amountPair['currencyCode'] ?? '';
+                    final currencySymbol = CurrencyHelper.getSymbol(currencyCode);
+                    final flag = CurrencyHelper.getFlag(currencyCode);
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        _amountController.text = amount;
+                        context.read<TransactionBloc>().add(
+                          UpdateAmount(amount: amount),
+                        );
+                        context.read<TransactionBloc>().add(
+                          SelectCurrency(currencyCode: currencyCode),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: widget.colorScheme.outline.withValues(
+                              alpha: 0.1,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              flag,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$currencySymbol $amount',
+                              style: widget.theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 12,
+                                color: widget.colorScheme.onSurface.withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
               const SizedBox(height: 32),
               // Description field
               Text(
@@ -502,6 +576,49 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   ),
                 ),
               ),
+              // Last descriptions list
+              if (_lastDescriptions.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _lastDescriptions.map((description) {
+                    return GestureDetector(
+                      onTap: () {
+                        _descriptionController.text = description;
+                        context.read<TransactionBloc>().add(
+                          UpdateDescription(description: description),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: widget.colorScheme.outline.withValues(
+                              alpha: 0.1,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          description,
+                          style: widget.theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 12,
+                            color: widget.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
               const SizedBox(height: 32),
               // Transaction date field
               Text(
@@ -783,6 +900,30 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                         // Save transaction to Hive
                         try {
                           await TransactionService.init();
+                          final descriptionText = currentState.description.trim();
+                          final amountText = currentState.amount.trim();
+                          
+                          // Save description to last descriptions if not empty
+                          if (descriptionText.isNotEmpty) {
+                            await AppSettingService.saveLastDescription(descriptionText);
+                          }
+                          
+                          // Save amount-currency pair to last amounts if not empty
+                          if (amountText.isNotEmpty) {
+                            await AppSettingService.saveLastAmount(
+                              amountText,
+                              currentState.currencyCode,
+                            );
+                          }
+                          
+                          // Refresh last data lists
+                          if (mounted) {
+                            setState(() {
+                              _lastDescriptions = AppSettingService.getLastDescriptions();
+                              _lastAmounts = AppSettingService.getLastAmounts();
+                            });
+                          }
+                          
                           final transaction = TransactionEntity(
                             id:
                                 DateTime.now().millisecondsSinceEpoch
@@ -791,10 +932,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             currencyCode: currentState.currencyCode,
                             categoryId: currentState.selectedCategory!.id,
                             createdAt: currentState.transactionDt ?? DateTime.now(),
-                            notes:
-                                currentState.description.trim().isEmpty
-                                    ? null
-                                    : currentState.description.trim(),
+                            notes: descriptionText.isEmpty ? null : descriptionText,
                           );
                           await TransactionService().addTransaction(
                             transaction,
