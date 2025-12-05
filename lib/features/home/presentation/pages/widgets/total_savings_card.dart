@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
 import 'package:depozio/core/bloc/app_core_bloc.dart';
 import 'package:depozio/core/services/app_setting_service.dart';
+import 'package:depozio/core/models/saving_emoji_range.dart';
 import 'package:intl/intl.dart';
 
 class TotalSavingsCard extends StatelessWidget {
@@ -19,25 +20,13 @@ class TotalSavingsCard extends StatelessWidget {
   final dynamic l10n;
   final double amount;
 
-  /// Get emoji based on saving amount
-  /// Ranges:
-  /// - Very sad: < -10000
-  /// - Sad: -10000 to 0
-  /// - Normal: 0 to 5000
-  /// - Happy: 5000 to 20000
-  /// - Very happy: > 20000
+  /// Get emoji based on saving amount using custom ranges from settings
   String _getSavingEmoji(double amount) {
-    if (amount < -10000) {
-      return '😢'; // Very sad
-    } else if (amount < 0) {
-      return '😟'; // Sad
-    } else if (amount <= 5000) {
-      return '😐'; // Normal
-    } else if (amount <= 20000) {
-      return '😊'; // Happy
-    } else {
-      return '😄'; // Very happy
-    }
+    AppSettingService.init();
+    final rangesData = AppSettingService.getSavingEmojiRanges();
+    final ranges =
+        rangesData.map((map) => SavingEmojiRange.fromMap(map)).toList();
+    return SavingEmojiRange.getEmojiForAmount(amount, ranges);
   }
 
   @override

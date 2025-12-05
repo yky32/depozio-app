@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart' as hive;
+import 'package:depozio/core/models/saving_emoji_range.dart';
 
 /// Centralized service for managing app settings (locale, currency, etc.)
 class AppSettingService {
@@ -11,6 +12,7 @@ class AppSettingService {
   static const String _startDateKey = 'start_date';
   static const String _lastDescriptionsKey = 'last_descriptions';
   static const String _lastAmountsKey = 'last_amounts';
+  static const String _savingEmojiRangesKey = 'saving_emoji_ranges';
   static const String _defaultCurrency =
       'HKD'; // Default fallback (Hong Kong Dollar)
   static const int _defaultStartDate = 1; // Default to 1st of the month
@@ -268,5 +270,38 @@ class AppSettingService {
     final finalList = updatedList.take(_maxLastAmounts).toList();
 
     await _box!.put(_lastAmountsKey, finalList);
+  }
+
+  // ==================== Saving Emoji Ranges Methods ====================
+
+  /// Get saved saving emoji ranges
+  /// Returns default ranges if none are saved
+  static List<Map<String, dynamic>> getSavingEmojiRanges() {
+    if (_box == null) {
+      return SavingEmojiRange.getDefaultRanges()
+          .map((range) => range.toMap())
+          .toList();
+    }
+    final ranges = _box!.get(_savingEmojiRangesKey);
+    if (ranges is List) {
+      return ranges
+          .whereType<Map>()
+          .map((map) => Map<String, dynamic>.from(map))
+          .toList();
+    }
+    // Return default ranges if none saved
+    return SavingEmojiRange.getDefaultRanges()
+        .map((range) => range.toMap())
+        .toList();
+  }
+
+  /// Save saving emoji ranges
+  static Future<void> saveSavingEmojiRanges(
+    List<Map<String, dynamic>> ranges,
+  ) async {
+    if (_box == null) {
+      await init();
+    }
+    await _box!.put(_savingEmojiRangesKey, ranges);
   }
 }

@@ -346,6 +346,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setting_page_start_date_hint => 'Enter a number between 1 and 31';
 
   @override
+  String get setting_page_emoji_ranges => 'Saving Emoji Ranges';
+
+  @override
+  String get setting_page_emoji_ranges_subtitle =>
+      'Customize emoji thresholds for savings';
+
+  @override
+  String get setting_page_emoji_ranges_hint =>
+      'Set the amount thresholds and emojis for different savings levels';
+
+  @override
+  String get setting_page_threshold => 'Threshold';
+
+  @override
+  String get setting_page_threshold_infinity => '∞ (Infinity)';
+
+  @override
+  String get setting_page_emoji => 'Emoji';
+
+  @override
+  String get setting_page_emoji_required => 'Emoji is required';
+
+  @override
+  String get setting_page_invalid_threshold => 'Invalid threshold';
+
+  @override
+  String get setting_page_reset_defaults => 'Reset to Defaults';
+
+  @override
   String get setting_page_timezone => 'Timezone';
 
   @override

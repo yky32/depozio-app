@@ -15,6 +15,7 @@ import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/features/deposit/presentation/pages/transaction/data/services/transaction_service.dart';
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/features/home/presentation/bloc/home_bloc.dart';
+import 'package:depozio/core/models/saving_emoji_range.dart';
 
 /// Custom input formatter to restrict day input to 1-31
 class _DayOfMonthInputFormatter extends TextInputFormatter {
@@ -34,7 +35,7 @@ class _DayOfMonthInputFormatter extends TextInputFormatter {
     }
 
     final value = int.tryParse(newValue.text);
-    
+
     // If parsing fails, reject
     if (value == null) {
       return oldValue;
@@ -267,60 +268,62 @@ class SettingPage extends StatelessWidget {
 
     final result = await showDialog<Map<String, bool>>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(l10n.setting_page_cleanup_dialog_title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.setting_page_cleanup_dialog_message,
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
-              CheckboxListTile(
-                title: Text(l10n.setting_page_cleanup_categories),
-                value: cleanCategories,
-                onChanged: (value) {
-                  setState(() {
-                    cleanCategories = value ?? false;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-              CheckboxListTile(
-                title: Text(l10n.setting_page_cleanup_transactions),
-                value: cleanTransactions,
-                onChanged: (value) {
-                  setState(() {
-                    cleanTransactions = value ?? false;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-            ],
+      builder:
+          (dialogContext) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: Text(l10n.setting_page_cleanup_dialog_title),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.setting_page_cleanup_dialog_message,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      CheckboxListTile(
+                        title: Text(l10n.setting_page_cleanup_categories),
+                        value: cleanCategories,
+                        onChanged: (value) {
+                          setState(() {
+                            cleanCategories = value ?? false;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      CheckboxListTile(
+                        title: Text(l10n.setting_page_cleanup_transactions),
+                        value: cleanTransactions,
+                        onChanged: (value) {
+                          setState(() {
+                            cleanTransactions = value ?? false;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => dialogContext.pop(null),
+                      child: Text(l10n.action_cancel),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (cleanCategories || cleanTransactions) {
+                          dialogContext.pop({
+                            'categories': cleanCategories,
+                            'transactions': cleanTransactions,
+                          });
+                        }
+                      },
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: Text(l10n.setting_page_clear_data_confirm),
+                    ),
+                  ],
+                ),
           ),
-            actions: [
-              TextButton(
-              onPressed: () => dialogContext.pop(null),
-                child: Text(l10n.action_cancel),
-              ),
-              TextButton(
-              onPressed: () {
-                if (cleanCategories || cleanTransactions) {
-                  dialogContext.pop({
-                    'categories': cleanCategories,
-                    'transactions': cleanTransactions,
-                  });
-                }
-              },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: Text(l10n.setting_page_clear_data_confirm),
-              ),
-            ],
-          ),
-      ),
     );
 
     if (result != null && context.mounted) {
@@ -340,38 +343,38 @@ class SettingPage extends StatelessWidget {
     try {
       // Initialize services
       if (cleanCategories) {
-      await CategoryService.init();
+        await CategoryService.init();
       }
       if (cleanTransactions) {
-      await TransactionService.init();
+        await TransactionService.init();
       }
 
       // Clear selected data
       if (cleanCategories) {
-      final categoryService = CategoryService();
-      await categoryService.clearAllCategories();
+        final categoryService = CategoryService();
+        await categoryService.clearAllCategories();
       }
 
       if (cleanTransactions) {
-      final transactionService = TransactionService();
-      await transactionService.clearAllTransactions();
+        final transactionService = TransactionService();
+        await transactionService.clearAllTransactions();
       }
 
       // Refresh DepositBloc if available
       if (cleanCategories) {
-      try {
-        context.read<DepositBloc>().add(LoadDeposits());
-      } catch (e) {
-        // DepositBloc might not be available in this context
+        try {
+          context.read<DepositBloc>().add(LoadDeposits());
+        } catch (e) {
+          // DepositBloc might not be available in this context
         }
       }
 
       // Refresh HomeBloc if available
       if (cleanCategories || cleanTransactions) {
-      try {
-        context.read<HomeBloc>().add(const RefreshHome());
-      } catch (e) {
-        // HomeBloc might not be available in this context
+        try {
+          context.read<HomeBloc>().add(const RefreshHome());
+        } catch (e) {
+          // HomeBloc might not be available in this context
         }
       }
 
@@ -409,6 +412,15 @@ class SettingPage extends StatelessWidget {
             _buildLanguageTile(context, theme, colorScheme),
             _buildCurrencyTile(context, theme, colorScheme),
             _buildStartDateTile(context, theme, colorScheme),
+            _buildSettingsTile(
+              icon: Icons.mood,
+              title: l10n.setting_page_emoji_ranges,
+              subtitle: l10n.setting_page_emoji_ranges_subtitle,
+              onTap: () => _showEmojiRangesDialog(context, theme, colorScheme),
+              theme: theme,
+              colorScheme: colorScheme,
+              showChevron: true,
+            ),
             _buildInfoTile(
               icon: Icons.info_outline,
               title: l10n.setting_page_app_version,
@@ -427,8 +439,7 @@ class SettingPage extends StatelessWidget {
               icon: Icons.cleaning_services_outlined,
               title: l10n.setting_page_cleanup_data,
               subtitle: l10n.setting_page_cleanup_data_subtitle,
-              onTap:
-                  () => _showCleanupDataDialog(context, theme, colorScheme),
+              onTap: () => _showCleanupDataDialog(context, theme, colorScheme),
               theme: theme,
               colorScheme: colorScheme,
               showChevron: true,
@@ -1061,6 +1072,471 @@ class SettingPage extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _showEmojiRangesDialog(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) async {
+    AppSettingService.init();
+    final l10n = context.l10n;
+    final rangesData = AppSettingService.getSavingEmojiRanges();
+    final ranges =
+        rangesData.map((map) => SavingEmojiRange.fromMap(map)).toList();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      useRootNavigator: true,
+      useSafeArea: false,
+      builder: (bottomSheetContext) {
+        return _EmojiRangesSelectorContent(
+          initialRanges: ranges,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        );
+      },
+    );
+  }
+}
+
+/// Stateful widget for emoji ranges selector bottom sheet content
+class _EmojiRangesSelectorContent extends StatefulWidget {
+  const _EmojiRangesSelectorContent({
+    required this.initialRanges,
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+  });
+
+  final List<SavingEmojiRange> initialRanges;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
+
+  @override
+  State<_EmojiRangesSelectorContent> createState() =>
+      _EmojiRangesSelectorContentState();
+}
+
+class _EmojiRangesSelectorContentState
+    extends State<_EmojiRangesSelectorContent> {
+  late List<SavingEmojiRange> _ranges;
+  final Map<int, TextEditingController> _thresholdControllers = {};
+  final Map<int, TextEditingController> _emojiControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _ranges = List.from(widget.initialRanges);
+    // Initialize controllers
+    for (int i = 0; i < _ranges.length; i++) {
+      _thresholdControllers[i] = TextEditingController(
+        text:
+            _ranges[i].threshold == double.infinity
+                ? ''
+                : _ranges[i].threshold.toStringAsFixed(0),
+      );
+      _emojiControllers[i] = TextEditingController(text: _ranges[i].emoji);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _thresholdControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _emojiControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _saveRanges() async {
+    // Validate ranges
+    final validRanges = <SavingEmojiRange>[];
+    for (int i = 0; i < _ranges.length; i++) {
+      final thresholdText = _thresholdControllers[i]?.text ?? '';
+      final emojiText = _emojiControllers[i]?.text ?? '';
+
+      if (emojiText.isEmpty) {
+        // Show error
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.l10n.setting_page_emoji_required} (${_ranges[i].label})',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      double threshold;
+      if (thresholdText.isEmpty) {
+        // Last range can be infinity
+        threshold = double.infinity;
+      } else {
+        final parsed = double.tryParse(thresholdText);
+        if (parsed == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${widget.l10n.setting_page_invalid_threshold} (${_ranges[i].label})',
+                ),
+              ),
+            );
+          }
+          return;
+        }
+        threshold = parsed;
+      }
+
+      validRanges.add(
+        SavingEmojiRange(
+          label: _ranges[i].label,
+          threshold: threshold,
+          emoji: emojiText,
+        ),
+      );
+    }
+
+    // Save to settings
+    final rangesData = validRanges.map((r) => r.toMap()).toList();
+    await AppSettingService.saveSavingEmojiRanges(rangesData);
+
+    // Refresh home bloc to update emoji
+    if (mounted) {
+      context.read<HomeBloc>().add(const RefreshHome());
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _resetToDefaults() {
+    setState(() {
+      _ranges = SavingEmojiRange.getDefaultRanges();
+      // Update controllers
+      for (int i = 0; i < _ranges.length; i++) {
+        _thresholdControllers[i]?.text =
+            _ranges[i].threshold == double.infinity
+                ? ''
+                : _ranges[i].threshold.toStringAsFixed(0);
+        _emojiControllers[i]?.text = _ranges[i].emoji;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final maxHeight = screenHeight * 0.85;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: keyboardHeight),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              decoration: BoxDecoration(
+                color: widget.theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 80,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: widget.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.l10n.setting_page_emoji_ranges,
+                              style: widget.theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.l10n.setting_page_emoji_ranges_hint,
+                              style: widget.theme.textTheme.bodySmall?.copyWith(
+                                color: widget.colorScheme.onSurface.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ...List.generate(_ranges.length, (index) {
+                              final range = _ranges[index];
+                              final isLast = index == _ranges.length - 1;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: index == _ranges.length - 1 ? 0 : 12,
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Label column
+                                    SizedBox(
+                                      width: 100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 18),
+                                        child: Text(
+                                          range.label,
+                                          style: widget
+                                              .theme
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: widget
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.7),
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    // Inputs column
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: TextField(
+                                              controller:
+                                                  _thresholdControllers[index],
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                    widget
+                                                        .l10n
+                                                        .setting_page_threshold,
+                                                hintText:
+                                                    isLast
+                                                        ? widget
+                                                            .l10n
+                                                            .setting_page_threshold_infinity
+                                                        : '0',
+                                                isDense: true,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 16,
+                                                    ),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide(
+                                                    color: widget
+                                                        .colorScheme
+                                                        .outline
+                                                        .withValues(alpha: 0.2),
+                                                  ),
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: widget
+                                                            .colorScheme
+                                                            .outline
+                                                            .withValues(
+                                                              alpha: 0.2,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color:
+                                                            widget
+                                                                .colorScheme
+                                                                .primary,
+                                                        width: 2,
+                                                      ),
+                                                    ),
+                                                filled: true,
+                                                fillColor:
+                                                    widget.colorScheme.surface,
+                                              ),
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              enabled: !isLast,
+                                              textAlignVertical:
+                                                  TextAlignVertical.center,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            flex: 1,
+                                            child: TextField(
+                                              controller:
+                                                  _emojiControllers[index],
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                    widget
+                                                        .l10n
+                                                        .setting_page_emoji,
+                                                isDense: true,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 16,
+                                                    ),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide(
+                                                    color: widget
+                                                        .colorScheme
+                                                        .outline
+                                                        .withValues(alpha: 0.2),
+                                                  ),
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: widget
+                                                            .colorScheme
+                                                            .outline
+                                                            .withValues(
+                                                              alpha: 0.2,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color:
+                                                            widget
+                                                                .colorScheme
+                                                                .primary,
+                                                        width: 2,
+                                                      ),
+                                                    ),
+                                                filled: true,
+                                                fillColor:
+                                                    widget.colorScheme.surface,
+                                                counterText: '',
+                                              ),
+                                              maxLength: 2,
+                                              textAlign: TextAlign.center,
+                                              textAlignVertical:
+                                                  TextAlignVertical.center,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: _resetToDefaults,
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      widget.l10n.setting_page_reset_defaults,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: _saveRanges,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: Text(widget.l10n.action_save),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 24 + keyboardHeight),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Stateful widget for start date selector bottom sheet content
@@ -1083,8 +1559,7 @@ class _StartDateSelectorContent extends StatefulWidget {
       _StartDateSelectorContentState();
 }
 
-class _StartDateSelectorContentState
-    extends State<_StartDateSelectorContent> {
+class _StartDateSelectorContentState extends State<_StartDateSelectorContent> {
   late final TextEditingController _textController;
   late final FocusNode _focusNode;
   late int _selectedDay;
@@ -1093,9 +1568,7 @@ class _StartDateSelectorContentState
   void initState() {
     super.initState();
     _selectedDay = widget.initialDay;
-    _textController = TextEditingController(
-      text: widget.initialDay.toString(),
-    );
+    _textController = TextEditingController(text: widget.initialDay.toString());
     _focusNode = FocusNode();
   }
 
@@ -1134,11 +1607,11 @@ class _StartDateSelectorContentState
     final now = DateTime.now();
     final timeZoneName = now.timeZoneName;
     final timeZoneOffset = now.timeZoneOffset;
-    
+
     // Try to get a readable timezone name
     // Default to HKT if we can't determine, or use device timezone
     String displayName = 'HKT'; // Default
-    
+
     // Check if we can get a better timezone name from the device
     if (timeZoneName.isNotEmpty) {
       // Common timezone mappings
@@ -1152,7 +1625,7 @@ class _StartDateSelectorContentState
         'GMT': 'GMT (Greenwich Mean Time)',
         'UTC': 'UTC (Coordinated Universal Time)',
       };
-      
+
       // Try to match the timezone name
       final upperName = timeZoneName.toUpperCase();
       if (timezoneMap.containsKey(upperName)) {
@@ -1161,7 +1634,8 @@ class _StartDateSelectorContentState
         // Format offset as +/-HH:MM
         final hours = timeZoneOffset.inHours;
         final minutes = (timeZoneOffset.inMinutes % 60).abs();
-        final offsetStr = '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        final offsetStr =
+            '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
         displayName = '$timeZoneName (UTC$offsetStr)';
       }
     } else {
@@ -1171,11 +1645,12 @@ class _StartDateSelectorContentState
         displayName = 'HKT (Hong Kong Time)';
       } else {
         final minutes = (timeZoneOffset.inMinutes % 60).abs();
-        final offsetStr = '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        final offsetStr =
+            '${hours >= 0 ? '+' : ''}${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
         displayName = 'UTC$offsetStr';
       }
     }
-    
+
     return displayName;
   }
 
@@ -1223,8 +1698,9 @@ class _StartDateSelectorContentState
                         width: 80,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: widget.colorScheme.onSurface
-                              .withValues(alpha: 0.3),
+                          color: widget.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -1235,237 +1711,271 @@ class _StartDateSelectorContentState
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                    child: Text(
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                            child: Text(
                               widget.l10n.setting_page_select_start_date,
-                      style: widget.theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        // Display selected day with suffix
-                        Text(
-                          widget.l10n.setting_page_start_date_format(
-                            '${_selectedDay}${_getDaySuffix(_selectedDay)}',
-                          ),
-                          style: widget.theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: widget.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        // Number input with plus/minus buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Minus button
-                            IconButton(
-                              onPressed: () {
-                                _updateDay(_selectedDay - 1);
-                                _focusNode.unfocus();
-                              },
-                              icon: const Icon(Icons.remove_circle_outline),
-                              iconSize: 32,
-                              color: widget.colorScheme.primary,
+                              style: widget.theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(width: 24),
-                            // Number input field
-                            SizedBox(
-                              width: 80,
-                              child: TextField(
-                                controller: _textController,
-                                focusNode: _focusNode,
-                                autofocus: true,
-                                textAlign: TextAlign.center,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  _DayOfMonthInputFormatter(),
-                                ],
-                                style: widget.theme.textTheme.headlineMedium
-                                    ?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              children: [
+                                // Display selected day with suffix
+                                Text(
+                                  widget.l10n.setting_page_start_date_format(
+                                    '${_selectedDay}${_getDaySuffix(_selectedDay)}',
+                                  ),
+                                  style: widget.theme.textTheme.titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: widget.colorScheme.primary,
+                                      ),
                                 ),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: widget.colorScheme.surface,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: widget.colorScheme.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: widget.colorScheme.outline
-                                          .withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: widget.colorScheme.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 8,
-                                  ),
-                                ),
-                                onTap: () {
-                                  // Select all text when tapped
-                                  _textController.selection = TextSelection(
-                                    baseOffset: 0,
-                                    extentOffset:
-                                        _textController.text.length,
-                                  );
-                                },
-                                onChanged: (value) {
-                                  // Allow empty input while typing
-                                  if (value.isEmpty) {
-                                    setState(() {
-                                      _selectedDay = 1;
-                                    });
-                                    return;
-                                  }
-                                  final day = int.tryParse(value);
-                                  if (day != null && day >= 1 && day <= 31) {
-                                    setState(() {
-                                      _selectedDay = day;
-                                    });
-                                  }
-                                },
-                                onSubmitted: (value) {
-                                  final day = int.tryParse(value);
-                                  if (day != null) {
-                                    _updateDay(day);
-                                  } else {
-                                    // If invalid, reset to current
-                                    _textController.text =
-                                        _selectedDay.toString();
-                                  }
-                                  _focusNode.unfocus();
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            // Plus button
-                            IconButton(
-                              onPressed: () {
-                                _updateDay(_selectedDay + 1);
-                                _focusNode.unfocus();
-                              },
-                              icon: const Icon(Icons.add_circle_outline),
-                              iconSize: 32,
-                              color: widget.colorScheme.primary,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Helper text
-                        Text(
-                          widget.l10n.setting_page_start_date_hint,
-                          style: widget.theme.textTheme.bodySmall?.copyWith(
-                            color: widget.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Timezone section
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: widget.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: widget.colorScheme.outline.withValues(
-                                alpha: 0.1,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                size: 20,
-                                color: widget.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                const SizedBox(height: 32),
+                                // Number input with plus/minus buttons
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      widget.l10n.setting_page_timezone,
-                                      style: widget.theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        color: widget.colorScheme.onSurface
-                                            .withValues(alpha: 0.6),
-                                        fontSize: 11,
+                                    // Minus button
+                                    IconButton(
+                                      onPressed: () {
+                                        _updateDay(_selectedDay - 1);
+                                        _focusNode.unfocus();
+                                      },
+                                      icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                      ),
+                                      iconSize: 32,
+                                      color: widget.colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 24),
+                                    // Number input field
+                                    SizedBox(
+                                      width: 80,
+                                      child: TextField(
+                                        controller: _textController,
+                                        focusNode: _focusNode,
+                                        autofocus: true,
+                                        textAlign: TextAlign.center,
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                          _DayOfMonthInputFormatter(),
+                                        ],
+                                        style: widget
+                                            .theme
+                                            .textTheme
+                                            .headlineMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: widget.colorScheme.surface,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.primary,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.outline
+                                                  .withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.primary,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                vertical: 16,
+                                                horizontal: 8,
+                                              ),
+                                        ),
+                                        onTap: () {
+                                          // Select all text when tapped
+                                          _textController
+                                              .selection = TextSelection(
+                                            baseOffset: 0,
+                                            extentOffset:
+                                                _textController.text.length,
+                                          );
+                                        },
+                                        onChanged: (value) {
+                                          // Allow empty input while typing
+                                          if (value.isEmpty) {
+                                            setState(() {
+                                              _selectedDay = 1;
+                                            });
+                                            return;
+                                          }
+                                          final day = int.tryParse(value);
+                                          if (day != null &&
+                                              day >= 1 &&
+                                              day <= 31) {
+                                            setState(() {
+                                              _selectedDay = day;
+                                            });
+                                          }
+                                        },
+                                        onSubmitted: (value) {
+                                          final day = int.tryParse(value);
+                                          if (day != null) {
+                                            _updateDay(day);
+                                          } else {
+                                            // If invalid, reset to current
+                                            _textController.text =
+                                                _selectedDay.toString();
+                                          }
+                                          _focusNode.unfocus();
+                                        },
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _getTimezoneDisplay(),
-                                      style: widget.theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.w600,
+                                    const SizedBox(width: 24),
+                                    // Plus button
+                                    IconButton(
+                                      onPressed: () {
+                                        _updateDay(_selectedDay + 1);
+                                        _focusNode.unfocus();
+                                      },
+                                      icon: const Icon(
+                                        Icons.add_circle_outline,
+                                      ),
+                                      iconSize: 32,
+                                      color: widget.colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                // Helper text
+                                Text(
+                                  widget.l10n.setting_page_start_date_hint,
+                                  style: widget.theme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: widget.colorScheme.onSurface
+                                            .withValues(alpha: 0.6),
+                                      ),
+                                ),
+                                const SizedBox(height: 24),
+                                // Timezone section
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: widget.colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: widget.colorScheme.outline
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time,
+                                        size: 20,
+                                        color: widget.colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              widget.l10n.setting_page_timezone,
+                                              style: widget
+                                                  .theme
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color: widget
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withValues(alpha: 0.6),
+                                                    fontSize: 11,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              _getTimezoneDisplay(),
+                                              style: widget
+                                                  .theme
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                // Action buttons
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed:
+                                            () => Navigator.of(context).pop(),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(context.l10n.action_cancel),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            () => Navigator.of(
+                                              context,
+                                            ).pop(_selectedDay),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(widget.l10n.action_save),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: 24 + keyboardHeight),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 32),
-                        // Action buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: Text(context.l10n.action_cancel),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(_selectedDay),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: Text(widget.l10n.action_save),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 24 + keyboardHeight),
-                      ],
-                    ),
-                  ),
                         ],
                       ),
                     ),

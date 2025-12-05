@@ -717,6 +717,60 @@ abstract class AppLocalizations {
   /// **'Enter a number between 1 and 31'**
   String get setting_page_start_date_hint;
 
+  /// No description provided for @setting_page_emoji_ranges.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving Emoji Ranges'**
+  String get setting_page_emoji_ranges;
+
+  /// No description provided for @setting_page_emoji_ranges_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize emoji thresholds for savings'**
+  String get setting_page_emoji_ranges_subtitle;
+
+  /// No description provided for @setting_page_emoji_ranges_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the amount thresholds and emojis for different savings levels'**
+  String get setting_page_emoji_ranges_hint;
+
+  /// No description provided for @setting_page_threshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get setting_page_threshold;
+
+  /// No description provided for @setting_page_threshold_infinity.
+  ///
+  /// In en, this message translates to:
+  /// **'∞ (Infinity)'**
+  String get setting_page_threshold_infinity;
+
+  /// No description provided for @setting_page_emoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get setting_page_emoji;
+
+  /// No description provided for @setting_page_emoji_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji is required'**
+  String get setting_page_emoji_required;
+
+  /// No description provided for @setting_page_invalid_threshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid threshold'**
+  String get setting_page_invalid_threshold;
+
+  /// No description provided for @setting_page_reset_defaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Defaults'**
+  String get setting_page_reset_defaults;
+
   /// No description provided for @setting_page_timezone.
   ///
   /// In en, this message translates to:

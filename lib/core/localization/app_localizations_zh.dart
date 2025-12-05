@@ -339,6 +339,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setting_page_start_date_hint => '请输入1到31之间的数字';
 
   @override
+  String get setting_page_emoji_ranges => '储蓄表情范围';
+
+  @override
+  String get setting_page_emoji_ranges_subtitle => '自定义储蓄表情阈值';
+
+  @override
+  String get setting_page_emoji_ranges_hint => '为不同的储蓄水平设置金额阈值和表情';
+
+  @override
+  String get setting_page_threshold => '阈值';
+
+  @override
+  String get setting_page_threshold_infinity => '∞ (无限)';
+
+  @override
+  String get setting_page_emoji => '表情';
+
+  @override
+  String get setting_page_emoji_required => '表情是必需的';
+
+  @override
+  String get setting_page_invalid_threshold => '无效的阈值';
+
+  @override
+  String get setting_page_reset_defaults => '重置为默认值';
+
+  @override
   String get setting_page_timezone => '时区';
 
   @override
@@ -702,6 +729,33 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get setting_page_start_date_hint => '請輸入1到31之間的數字';
+
+  @override
+  String get setting_page_emoji_ranges => '儲蓄表情範圍';
+
+  @override
+  String get setting_page_emoji_ranges_subtitle => '自訂儲蓄表情閾值';
+
+  @override
+  String get setting_page_emoji_ranges_hint => '為不同的儲蓄水平設置金額閾值和表情';
+
+  @override
+  String get setting_page_threshold => '閾值';
+
+  @override
+  String get setting_page_threshold_infinity => '∞ (無限)';
+
+  @override
+  String get setting_page_emoji => '表情';
+
+  @override
+  String get setting_page_emoji_required => '表情是必需的';
+
+  @override
+  String get setting_page_invalid_threshold => '無效的閾值';
+
+  @override
+  String get setting_page_reset_defaults => '重置為預設值';
 
   @override
   String get setting_page_timezone => '時區';
