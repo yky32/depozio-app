@@ -251,6 +251,17 @@ class SettingPage extends StatelessWidget {
           theme: theme,
           colorScheme: colorScheme,
         ),
+        _buildSettingsTile(
+          icon: Icons.currency_exchange,
+          title: 'Test Exchange Rate API',
+          subtitle: 'Test ExConvert API and view responses',
+          onTap: () {
+            context.push('/test/exchange-rate');
+          },
+          theme: theme,
+          colorScheme: colorScheme,
+          showChevron: true,
+        ),
       ],
       theme,
       colorScheme,

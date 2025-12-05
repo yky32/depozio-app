@@ -195,6 +195,49 @@ fi
 selected_lane="${lane_commands[$choice]}"
 selected_desc="${lane_descriptions[$choice]}"
 
+# Special handling for option 5 (upload_testflight) - ask for environment
+if [ "$choice" -eq 5 ]; then
+    echo ""
+    echo -e "${BOLD}${CYAN}Select Environment:${NC}"
+    echo -e "${YELLOW}────────────────────────────────────────────────────────────${NC}"
+    echo ""
+    echo -e "  ${GREEN}[1]${NC} ${BOLD}dev${NC}     - Development environment (env/.env.dev)"
+    echo -e "  ${GREEN}[2]${NC} ${BOLD}stag${NC}   - Staging environment (env/.env.stag)"
+    echo -e "  ${GREEN}[3]${NC} ${BOLD}prod${NC}   - Production environment (env/.env.prod) ${BOLD}[Default for TestFlight]${NC}"
+    echo ""
+    echo -e "${BOLD}${CYAN}Enter environment choice [1-3] (default: 3 for prod):${NC} "
+    read -r env_choice
+    
+    # Default to prod if empty or invalid
+    if [ -z "$env_choice" ] || ! [[ "$env_choice" =~ ^[1-3]$ ]]; then
+        env_choice=3
+        echo -e "${YELLOW}Using default: prod${NC}"
+    fi
+    
+    case $env_choice in
+        1)
+            env_value="dev"
+            ;;
+        2)
+            env_value="stag"
+            ;;
+        3)
+            env_value="prod"
+            ;;
+        *)
+            env_value="prod"
+            ;;
+    esac
+    
+    echo ""
+    echo -e "${BOLD}${GREEN}Environment selected:${NC} ${BOLD}$env_value${NC}"
+    echo -e "${CYAN}Will use:${NC} env/.env.$env_value"
+    echo ""
+    
+    # Add env parameter to the lane command
+    selected_lane="$selected_lane env:$env_value"
+fi
+
 echo ""
 echo -e "${BOLD}${GREEN}Selected:${NC} ${BOLD}$selected_lane${NC}"
 echo -e "${CYAN}Description:${NC} $selected_desc"
@@ -209,6 +252,7 @@ exit_code=$?
 
 # Check if the command failed and if it's option 5 (upload_testflight)
 # Automatically fix CocoaPods and retry for option 5
+# Note: env parameter is already included in selected_lane if option 5 was chosen
 if [ $exit_code -ne 0 ] && [ "$choice" -eq 5 ]; then
     echo ""
     echo -e "${YELLOW}⚠️  Build failed. Attempting to fix CocoaPods issue...${NC}"

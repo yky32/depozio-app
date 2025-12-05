@@ -66,3 +66,8 @@ ios/fastlane/test_output
 **/*.mobileprovision
 **/*.cer
 **/*.certSigningRequest
+
+# Environment files (contain sensitive API keys)
+env/.env.dev
+env/.env.stag
+env/.env.prod

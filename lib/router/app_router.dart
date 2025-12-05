@@ -8,6 +8,7 @@ import 'package:depozio/router/app_page.dart';
 import 'package:depozio/widgets/global/scaffold_with_nav_bar.dart';
 import 'package:depozio/widgets/global/splash_screen.dart';
 import 'package:depozio/widgets/test/font_test_page.dart';
+import 'package:depozio/core/services/exchange_rate_test_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,6 +28,15 @@ class AppRouter {
     AppPage.login: () => const LoginPage(),
     AppPage.fontTest: () => const FontTestPage(),
   };
+
+  // Additional test routes (not in AppPage enum)
+  static final List<GoRoute> _testRoutes = [
+    GoRoute(
+      name: 'exchangeRateTest',
+      path: '/test/exchange-rate',
+      builder: (context, state) => const ExchangeRateTestPage(),
+    ),
+  ];
 
   // Generate navigation branches dynamically
   static List<StatefulShellBranch> get _navigationBranches {
@@ -89,6 +99,9 @@ class AppRouter {
       ),
       // Standalone routes (non-navigation pages)
       ..._standaloneRoutes,
+
+      // Test routes
+      ..._testRoutes,
 
       // Transactions list route (with category ID parameter)
       GoRoute(

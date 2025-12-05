@@ -226,8 +226,11 @@ platform :ios do
 
   desc "Build iOS app and create IPA (requires code signing)"
   desc "Options: export_method - 'development', 'ad-hoc', 'app-store', or 'enterprise' (default: 'development')"
+  desc "         env - environment to use: 'dev', 'stag', or 'prod' (default: 'prod' for app-store, 'dev' for others)"
   lane :build_ipa do |options|
     export_method = options[:export_method] || "development"
+    # Use provided env or determine from export_method
+    env_value = options[:env] || (export_method == "app-store" ? "prod" : "dev")
     
     # Get dependencies
     sh("cd #{PROJECT_ROOT} && flutter pub get")
@@ -238,7 +241,9 @@ platform :ios do
     
     # Build iOS app in release mode
     # Using clean environment to avoid Bundler conflicts with CocoaPods
-    sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release")
+    # Use the provided env_value (already set from options or default)
+    UI.message("🔧 Building with ENV=#{env_value} (using env/.env.#{env_value})")
+    sh("cd #{PROJECT_ROOT} && env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH -u BUNDLE_PATH flutter build ios --release --dart-define=ENV=#{env_value}")
     
     # Build IPA using xcodebuild
     # Configure export to use automatic signing (matching the archive)
@@ -269,8 +274,10 @@ platform :ios do
 
   desc "Build IPA and upload to TestFlight"
   desc "Options: skip_build - set to true to skip building and use existing IPA (default: false)"
+  desc "         env - environment to use: 'dev', 'stag', or 'prod' (default: 'prod')"
   lane :upload_testflight do |options|
     skip_build = options[:skip_build] || false
+    env_value = options[:env] || "prod"  # Default to prod for TestFlight
     
     unless skip_build
       # Automatically increment build number before building
@@ -291,7 +298,8 @@ platform :ios do
       
       begin
         # Build IPA with app-store export method for TestFlight
-        build_ipa(export_method: "app-store")
+        # Pass the environment to build_ipa
+        build_ipa(export_method: "app-store", env: env_value)
         build_success = true
       rescue => ex
         error_msg = ex.message
@@ -317,7 +325,7 @@ platform :ios do
             UI.important("")
             
             # Retry the build
-            build_ipa(export_method: "app-store")
+            build_ipa(export_method: "app-store", env: env_value)
             build_success = true
           rescue => setup_ex
             UI.error("")
