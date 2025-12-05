@@ -71,12 +71,10 @@ class RecentActivitySection extends StatelessWidget {
                       ),
                     ),
                   )
-                  : ListView.separated(
+                  : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: recentTransactions.length,
-                    separatorBuilder:
-                        (context, index) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final transaction = recentTransactions[index];
                       return TransactionItem(

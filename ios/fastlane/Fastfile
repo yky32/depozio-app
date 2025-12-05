@@ -90,6 +90,45 @@ def increment_build_number_in_pubspec
   return new_build
 end
 
+# Helper function to generate release notes from git commit
+def generate_release_notes
+  begin
+    # Check if we're in a git repository
+    unless system("cd #{PROJECT_ROOT} && git rev-parse --git-dir > /dev/null 2>&1")
+      UI.important("⚠️  Not a git repository, using default release notes")
+      return "[Feature: Manual build]\n[Build time: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}]"
+    end
+    
+    # Get the latest commit message (excluding merge commits and build number commits)
+    latest_commit = `cd #{PROJECT_ROOT} && git log -1 --pretty=%B --no-merges`.strip
+    
+    # Filter out build number auto-commit messages
+    if latest_commit.include?("Auto-increment build number") || latest_commit.include?("chore: Auto-increment")
+      # Get the commit before the build number commit
+      latest_commit = `cd #{PROJECT_ROOT} && git log -2 --pretty=%B --no-merges | head -n 1`.strip
+    end
+    
+    # Clean up the commit message (remove newlines, limit length)
+    cleaned_message = latest_commit.split("\n").first.strip
+    cleaned_message = cleaned_message[0..200] if cleaned_message.length > 200
+    
+    # Get current datetime
+    build_time = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Format as requested
+    release_notes = "[Feature: #{cleaned_message}]\n[Build time: #{build_time}]"
+    
+    UI.message("📝 Generated release notes:")
+    UI.message(release_notes)
+    
+    return release_notes
+  rescue => ex
+    UI.important("⚠️  Failed to generate release notes from git: #{ex.message}")
+    build_time = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+    return "[Feature: Manual build]\n[Build time: #{build_time}]"
+  end
+end
+
 # Helper function to commit and push build number change
 def commit_and_push_build_number(new_build_number)
   UI.message("📝 Committing build number change...")
@@ -306,14 +345,19 @@ platform :ios do
     
     UI.message("🚀 Uploading to TestFlight...")
     
+    # Generate release notes from git commit
+    release_notes = generate_release_notes
+    UI.message("")
+    
     begin
-      # Upload to TestFlight
+      # Upload to TestFlight with release notes
       upload_to_testflight(
         ipa: ipa_path,
         skip_waiting_for_build_processing: false,  # Wait for processing to complete
         skip_submission: true,  # Don't automatically submit for review
         distribute_external: false,  # Internal testing only (set to true for external)
-        notify_external_testers: false  # Don't notify testers automatically
+        notify_external_testers: false,  # Don't notify testers automatically
+        changelog: release_notes  # Add release notes from git commit
       )
       
       UI.success("✅ Successfully uploaded to TestFlight!")
@@ -334,13 +378,14 @@ platform :ios do
           UI.important("🔄 Retrying upload to TestFlight...")
           UI.important("")
           
-          # Retry the upload
+          # Retry the upload with release notes
           upload_to_testflight(
             ipa: ipa_path,
             skip_waiting_for_build_processing: false,
             skip_submission: true,
             distribute_external: false,
-            notify_external_testers: false
+            notify_external_testers: false,
+            changelog: release_notes  # Add release notes from git commit
           )
           
           UI.success("✅ Successfully uploaded to TestFlight!")

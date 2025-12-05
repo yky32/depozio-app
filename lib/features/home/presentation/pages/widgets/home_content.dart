@@ -32,7 +32,8 @@ class HomeContent extends StatelessWidget {
     final totalExpenses =
         state is HomeLoaded ? (state as HomeLoaded).totalExpenses : 0.0;
 
-    // Calculate total savings (deposits - expenses)
+    // Calculate total savings: Total Deposits minus Total Expenses
+    // This represents the net savings (what's left after expenses are deducted from deposits)
     final totalSavings = totalDeposits - totalExpenses;
 
     return BlocBuilder<AppCoreBloc, AppCoreState>(
