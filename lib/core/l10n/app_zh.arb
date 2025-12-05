@@ -17,6 +17,7 @@
   "home_page_deposits": "存款",
   "home_page_expenses": "支出",
   "home_page_total_savings": "總儲蓄",
+  "home_page_total_savings_currency_reminder": "匯率可能影響計算結果",
   "home_page_savings_goal": "儲蓄目標",
   "home_page_monthly_savings": "每月儲蓄",
   "home_page_recent_activity": "最近活動",

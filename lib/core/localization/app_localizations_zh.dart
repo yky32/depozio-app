@@ -44,6 +44,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_page_total_savings => '總儲蓄';
 
   @override
+  String get home_page_total_savings_currency_reminder => '匯率可能影響計算結果';
+
+  @override
   String get home_page_savings_goal => '儲蓄目標';
 
   @override
@@ -434,6 +437,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get home_page_total_savings => '總儲蓄';
+
+  @override
+  String get home_page_total_savings_currency_reminder => '匯率可能影響計算結果';
 
   @override
   String get home_page_savings_goal => '儲蓄目標';

@@ -165,6 +165,12 @@ abstract class AppLocalizations {
   /// **'Total Savings'**
   String get home_page_total_savings;
 
+  /// No description provided for @home_page_total_savings_currency_reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency exchange rates may affect the calculation'**
+  String get home_page_total_savings_currency_reminder;
+
   /// No description provided for @home_page_savings_goal.
   ///
   /// In en, this message translates to:

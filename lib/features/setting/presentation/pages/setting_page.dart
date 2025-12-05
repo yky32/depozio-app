@@ -607,13 +607,8 @@ class SettingPage extends StatelessWidget {
   }
 
   String _getLanguageDisplayName(Locale locale) {
-    if (locale.countryCode == 'TW') {
-      return 'Chinese (Traditional)';
-    } else if (locale.languageCode == 'zh') {
-      return 'Chinese (Simplified)';
-    } else {
-      return 'English';
-    }
+    // Return the language name in its own language
+    return AppSettingService.getLocaleDisplayName(locale);
   }
 
   Widget _buildCurrencyTile(

@@ -90,12 +90,12 @@ class AppSettingService {
     _localeListeners.remove(listener);
   }
 
-  /// Get locale display name
+  /// Get locale display name in its own language
   static String getLocaleDisplayName(Locale locale) {
     if (locale.countryCode == 'TW') {
-      return 'Chinese (Traditional)';
+      return '繁體中文';
     } else if (locale.languageCode == 'zh') {
-      return 'Chinese (Simplified)';
+      return '中文';
     } else {
       return 'English';
     }

@@ -7,6 +7,7 @@ import 'package:depozio/features/deposit/presentation/pages/transaction/data/ser
 import 'package:depozio/features/deposit/data/services/category_service.dart';
 import 'package:depozio/core/enum/category_type.dart';
 import 'package:depozio/core/services/app_setting_service.dart';
+import 'package:depozio/core/services/exchange_rate_service.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -57,9 +58,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Load recent transactions (top 10, latest first)
       final recentTransactions = _loadRecentTransactions();
 
-      // Calculate total deposits and expenses
-      final totalDeposits = _calculateTotalDeposits();
-      final totalExpenses = _calculateTotalExpenses();
+      // Calculate total deposits and expenses (with currency conversion)
+      final totalDeposits = await _calculateTotalDeposits();
+      final totalExpenses = await _calculateTotalExpenses();
 
       // Calculate total savings: totalDeposits - totalExpenses
       final totalSavings = totalDeposits - totalExpenses;
@@ -201,17 +202,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     return isInPeriod;
   }
 
-  double _calculateTotalDeposits() {
+  Future<double> _calculateTotalDeposits() async {
     try {
       // Ensure AppSettingService is initialized before reading startDate
       AppSettingService.init();
 
       final transactionService = TransactionService();
       final categoryService = CategoryService();
+      final exchangeRateService = ExchangeRateService();
 
-      // Get startDay from settings (ensure we get the latest value)
+      // Get startDay and selected currency from settings
       final startDay = AppSettingService.getStartDate();
-      LoggerUtil.d('💰 Calculating deposits with startDay: $startDay');
+      final selectedCurrency = AppSettingService.getDefaultCurrency();
+      LoggerUtil.d(
+        '💰 Calculating deposits with startDay: $startDay, selected currency: $selectedCurrency',
+      );
 
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
@@ -229,16 +234,39 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           transaction.categoryId,
         );
         if (category?.categoryType == CategoryType.deposits) {
-          total += transaction.amount;
+          // Convert amount to selected currency if needed
+          double amountToAdd = transaction.amount;
+          if (transaction.currencyCode.toUpperCase() !=
+              selectedCurrency.toUpperCase()) {
+            try {
+              final converted = await exchangeRateService.convert(
+                from: transaction.currencyCode,
+                to: selectedCurrency,
+                amount: transaction.amount,
+                useCache: true,
+              );
+              amountToAdd = converted.converted;
+              LoggerUtil.d(
+                '💰 Converted deposit: ${transaction.amount} ${transaction.currencyCode} -> $amountToAdd $selectedCurrency',
+              );
+            } catch (e) {
+              LoggerUtil.w(
+                '⚠️ Failed to convert deposit amount, using original: $e',
+              );
+              // On conversion error, use original amount
+              amountToAdd = transaction.amount;
+            }
+          }
+          total += amountToAdd;
           includedCount++;
           LoggerUtil.d(
-            '💰 Including deposit: ${transaction.amount} on ${transaction.createdAt}',
+            '💰 Including deposit: $amountToAdd $selectedCurrency (original: ${transaction.amount} ${transaction.currencyCode}) on ${transaction.createdAt}',
           );
         }
       }
 
       LoggerUtil.d(
-        '💰 Total deposits: $total (from $includedCount transactions)',
+        '💰 Total deposits: $total $selectedCurrency (from $includedCount transactions)',
       );
       return total;
     } catch (e) {
@@ -247,17 +275,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  double _calculateTotalExpenses() {
+  Future<double> _calculateTotalExpenses() async {
     try {
       // Ensure AppSettingService is initialized before reading startDate
       AppSettingService.init();
 
       final transactionService = TransactionService();
       final categoryService = CategoryService();
+      final exchangeRateService = ExchangeRateService();
 
-      // Get startDay from settings (ensure we get the latest value)
+      // Get startDay and selected currency from settings
       final startDay = AppSettingService.getStartDate();
-      LoggerUtil.d('💸 Calculating expenses with startDay: $startDay');
+      final selectedCurrency = AppSettingService.getDefaultCurrency();
+      LoggerUtil.d(
+        '💸 Calculating expenses with startDay: $startDay, selected currency: $selectedCurrency',
+      );
 
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
@@ -275,16 +307,39 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           transaction.categoryId,
         );
         if (category?.categoryType == CategoryType.expenses) {
-          total += transaction.amount;
+          // Convert amount to selected currency if needed
+          double amountToAdd = transaction.amount;
+          if (transaction.currencyCode.toUpperCase() !=
+              selectedCurrency.toUpperCase()) {
+            try {
+              final converted = await exchangeRateService.convert(
+                from: transaction.currencyCode,
+                to: selectedCurrency,
+                amount: transaction.amount,
+                useCache: true,
+              );
+              amountToAdd = converted.converted;
+              LoggerUtil.d(
+                '💸 Converted expense: ${transaction.amount} ${transaction.currencyCode} -> $amountToAdd $selectedCurrency',
+              );
+            } catch (e) {
+              LoggerUtil.w(
+                '⚠️ Failed to convert expense amount, using original: $e',
+              );
+              // On conversion error, use original amount
+              amountToAdd = transaction.amount;
+            }
+          }
+          total += amountToAdd;
           includedCount++;
           LoggerUtil.d(
-            '💸 Including expense: ${transaction.amount} on ${transaction.createdAt}',
+            '💸 Including expense: $amountToAdd $selectedCurrency (original: ${transaction.amount} ${transaction.currencyCode}) on ${transaction.createdAt}',
           );
         }
       }
 
       LoggerUtil.d(
-        '💸 Total expenses: $total (from $includedCount transactions)',
+        '💸 Total expenses: $total $selectedCurrency (from $includedCount transactions)',
       );
       return total;
     } catch (e) {
@@ -318,9 +373,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
-        // Calculate total deposits and expenses
-        final totalDeposits = _calculateTotalDeposits();
-        final totalExpenses = _calculateTotalExpenses();
+        // Calculate total deposits and expenses (with currency conversion)
+        final totalDeposits = await _calculateTotalDeposits();
+        final totalExpenses = await _calculateTotalExpenses();
 
         // Calculate total savings: totalDeposits - totalExpenses
         final totalSavings = totalDeposits - totalExpenses;
@@ -356,9 +411,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Reload recent transactions
         final recentTransactions = _loadRecentTransactions();
 
-        // Calculate total deposits and expenses
-        final totalDeposits = _calculateTotalDeposits();
-        final totalExpenses = _calculateTotalExpenses();
+        // Calculate total deposits and expenses (with currency conversion)
+        final totalDeposits = await _calculateTotalDeposits();
+        final totalExpenses = await _calculateTotalExpenses();
 
         // Calculate total savings: totalDeposits - totalExpenses
         final totalSavings = totalDeposits - totalExpenses;

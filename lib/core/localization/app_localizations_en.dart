@@ -44,6 +44,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_page_total_savings => 'Total Savings';
 
   @override
+  String get home_page_total_savings_currency_reminder =>
+      'Currency exchange rates may affect the calculation';
+
+  @override
   String get home_page_savings_goal => 'Savings Goal';
 
   @override

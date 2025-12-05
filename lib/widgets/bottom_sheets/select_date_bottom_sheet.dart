@@ -157,7 +157,7 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
     final minHeight = screenHeight * 0.6; // 60% minimum
     final maxHeight = screenHeight * 0.7; // 70% maximum
     final availableHeight = screenHeight - keyboardHeight;
-
+    
     // Use 65% as default, but ensure it fits within 60-70% range
     final targetHeight = screenHeight * 0.65;
     final dynamicHeight = targetHeight.clamp(
@@ -228,37 +228,37 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
                               horizontal: 12,
                               vertical: 0,
                             ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: colorScheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.primary,
+                          width: 2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  color: colorScheme.primary,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: colorScheme.primary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
                                   DateFormat(
                                     'MMM d, yyyy',
                                   ).format(_selectedDate),
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                              ],
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.primary,
                             ),
                           ),
+                        ],
+                      ),
+                    ),
                         ),
                         const SizedBox(width: 12),
                         // Time input fields (HH : mm)
@@ -315,7 +315,7 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
                                   },
                                   onTapOutside:
                                       (event) => _hoursFocusNode.unfocus(),
-                                ),
+                          ),
                               ),
                               // Colon separator
                               Container(
@@ -367,7 +367,7 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
                                   },
                                   onTapOutside:
                                       (event) => _minutesFocusNode.unfocus(),
-                                ),
+                        ),
                               ),
                             ],
                           ),
@@ -378,13 +378,13 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
                     // Custom calendar with Sundays in red
                     _CustomCalendarDatePicker(
                       selectedDate: _selectedDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                      currentDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                        currentDate: DateTime.now(),
                       theme: theme,
                       colorScheme: colorScheme,
-                      onDateChanged: (date) {
-                        setState(() {
+                        onDateChanged: (date) {
+                          setState(() {
                           // Preserve time when date changes
                           _selectedDate = DateTime(
                             date.year,
@@ -393,8 +393,8 @@ class _SelectDateBottomSheetState extends State<SelectDateBottomSheet> {
                             _selectedDate.hour,
                             _selectedDate.minute,
                           );
-                        });
-                      },
+                          });
+                        },
                     ),
                   ],
                 ),

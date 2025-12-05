@@ -196,20 +196,26 @@ class _HomePageContent extends StatelessWidget {
                     BlocListener<AppCoreBloc, AppCoreState>(
                       listenWhen: (previous, current) {
                         // Listen when currency changes in AppCoreSettingsLoaded state
-                        // This ensures transaction items refresh to show converted amounts
+                        // This ensures HomeBloc recalculates totals with new currency
                         if (previous is AppCoreSettingsLoaded &&
                             current is AppCoreSettingsLoaded) {
                           return previous.currencyCode != current.currencyCode;
                         }
                         return false;
                       },
-                      listener: (context, state) {
-                        // Currency changed - transaction items will automatically rebuild
-                        // via BlocBuilder in TransactionItem widget
+                      listener: (context, state) async {
+                        // Currency changed - refresh home data to recalculate totals
+                        // with converted amounts
                         if (state is AppCoreSettingsLoaded) {
                           LoggerUtil.d(
-                            '💱 Currency changed to ${state.currencyCode}, transaction items will refresh',
+                            '💱 Currency changed to ${state.currencyCode}, refreshing home data to recalculate totals',
                           );
+                          // Ensure AppSettingService is initialized and wait a bit for Hive write to complete
+                          await AppSettingService.init();
+                          await Future.delayed(
+                            const Duration(milliseconds: 100),
+                          );
+                          context.read<HomeBloc>().add(const RefreshHome());
                         }
                       },
                     ),
