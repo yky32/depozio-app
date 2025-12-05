@@ -42,13 +42,13 @@ class AppSettingService {
     final localeString = _box!.get(_localeKey) as String?;
     if (localeString == null) return null;
 
-    // Parse locale string (e.g., "en", "zh", "zh_TW")
+    // Parse locale string (e.g., "en", "zh_CN", "zh_TW")
     if (localeString == 'zh_TW' || localeString == 'zh-TW') {
       return const Locale('zh', 'TW');
     } else if (localeString == 'zh' ||
         localeString == 'zh_CN' ||
         localeString == 'zh-CN') {
-      return const Locale('zh');
+      return const Locale('zh', 'CN');
     } else {
       return const Locale('en');
     }
@@ -63,7 +63,7 @@ class AppSettingService {
     if (locale.countryCode == 'TW') {
       localeString = 'zh_TW';
     } else if (locale.languageCode == 'zh') {
-      localeString = 'zh';
+      localeString = locale.countryCode == 'CN' ? 'zh_CN' : 'zh_CN';
     } else {
       localeString = 'en';
     }
@@ -94,8 +94,10 @@ class AppSettingService {
   static String getLocaleDisplayName(Locale locale) {
     if (locale.countryCode == 'TW') {
       return '繁體中文';
+    } else if (locale.languageCode == 'zh' && locale.countryCode == 'CN') {
+      return '简体中文';
     } else if (locale.languageCode == 'zh') {
-      return '中文';
+      return '简体中文'; // Default to Simplified for zh without country code
     } else {
       return 'English';
     }
@@ -103,7 +105,7 @@ class AppSettingService {
 
   /// Get all supported locales
   static List<Locale> getSupportedLocales() {
-    return [const Locale('en'), const Locale('zh'), const Locale('zh', 'TW')];
+    return [const Locale('en'), const Locale('zh', 'CN'), const Locale('zh', 'TW')];
   }
 
   // ==================== Currency Methods ====================

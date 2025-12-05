@@ -1,0 +1,199 @@
+{
+  "@@locale": "zh_CN",
+  "action_cancel": "取消",
+  "action_confirm": "确认",
+  "action_save": "保存",
+  "login_page_email": "电子邮件",
+  "login_page_password": "密码",
+  "login_page_submit": "登录",
+  "home_page_title": "首页",
+  "home_page_greeting": "你好，{username}",
+  "@home_page_greeting": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "home_page_deposits": "存款",
+  "home_page_expenses": "支出",
+  "home_page_total_savings": "总储蓄",
+  "home_page_total_savings_currency_reminder": "汇率可能影响计算结果",
+  "home_page_savings_goal": "储蓄目标",
+  "home_page_monthly_savings": "每月储蓄",
+  "home_page_recent_activity": "最近活动",
+  "home_page_no_activity": "无最近活动",
+  "deposit_page_title": "存款",
+  "deposit_page_add_category": "新增类别",
+  "add_category_bottom_sheet_title": "新增类别",
+  "add_category_name": "名称",
+  "add_category_name_hint": "输入类别名称",
+  "add_category_icon": "图标",
+  "add_category_type": "类型",
+  "add_category_type_deposits": "存款",
+  "add_category_type_expenses": "支出",
+  "transaction_record_title": "记录交易",
+  "transaction_amount": "金额",
+  "transaction_category": "类别",
+  "transaction_description": "描述",
+  "transaction_description_placeholder": "添加备注（选填）",
+  "transaction_select_currency": "选择货币",
+  "transaction_select_category": "选择类别",
+  "transaction_select_category_placeholder": "选择一个类别",
+  "transaction_please_select_category": "请选择一个类别",
+  "transaction_please_enter_amount": "请输入金额",
+  "transaction_please_enter_valid_amount": "请输入有效的金额",
+  "transaction_recorded": "交易已记录：{amount} - {category}",
+  "@transaction_recorded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_no_categories_available": "没有可用的类别。请先创建一个类别。",
+  "currency_usd": "美元",
+  "currency_eur": "欧元",
+  "currency_gbp": "英镑",
+  "currency_jpy": "日元",
+  "currency_cny": "人民币",
+  "currency_hkd": "港币",
+  "currency_sgd": "新加坡元",
+  "currency_thb": "泰铢",
+  "currency_krw": "韩元",
+  "currency_aud": "澳元",
+  "currency_cad": "加元",
+  "deposit_page_error_loading": "加载类别时出错",
+  "deposit_page_error_message": "错误：{error}",
+  "@deposit_page_error_message": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deposit_page_retry": "重试",
+  "deposit_page_no_categories": "还没有类别",
+  "deposit_page_add_category_hint": "点击 + 按钮添加类别",
+  "add_category_please_select_type": "请选择类型",
+  "add_category_please_select_icon": "请选择图标",
+  "add_category_please_enter_name": "请输入类别名称",
+  "add_category_please_select_icon_and_type": "请选择图标和类型",
+  "add_category_error": "错误：{error}",
+  "@add_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_dialog_title": "删除类别",
+  "delete_category_dialog_message": "您确定要删除 \"{name}\" 吗？",
+  "@delete_category_dialog_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_action": "删除",
+  "delete_category_snackbar": "类别 \"{name}\" 已删除",
+  "@delete_category_snackbar": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete_category_undo": "撤销",
+  "delete_category_error": "删除类别时出错：{error}",
+  "@delete_category_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_edit_coming_soon": "编辑 \"{name}\" - 即将推出",
+  "@slidable_category_edit_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_archive_coming_soon": "归档 \"{name}\" - 即将推出",
+  "@slidable_category_archive_coming_soon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "slidable_category_type_deposit": "存款",
+  "slidable_category_type_expense": "支出",
+  "analytics_page_coming_soon": "即将推出",
+  "setting_page_title": "设置",
+  "setting_page_coming_soon": "即将推出",
+  "setting_page_testing": "测试",
+  "setting_page_font_test": "字体测试",
+  "setting_page_font_test_subtitle": "验证 Satoshi 字体是否正确应用",
+  "setting_page_app_information": "应用信息",
+  "setting_page_language": "语言",
+  "setting_page_select_language": "选择语言",
+  "setting_page_default_currency": "默认货币",
+  "setting_page_select_default_currency": "选择默认货币",
+  "setting_page_app_version": "应用版本",
+  "setting_page_app_name": "应用名称",
+  "setting_page_data_management": "数据管理",
+  "setting_page_clear_all_data": "清除所有数据",
+  "setting_page_clear_all_data_subtitle": "删除所有类别和交易记录（应用设置将保留）",
+  "setting_page_clear_data_dialog_title": "清除所有数据",
+  "setting_page_clear_data_dialog_message": "这将永久删除所有类别和交易记录。应用设置（语言、货币）将保留。此操作无法撤销。",
+  "setting_page_clear_data_confirm": "清除",
+  "setting_page_clear_data_success": "所有数据已成功清除",
+  "setting_page_clear_data_error": "清除数据时发生错误",
+  "setting_page_cleanup_data": "清理数据",
+  "setting_page_cleanup_data_subtitle": "选择要清理的内容",
+  "setting_page_cleanup_dialog_title": "清理数据",
+  "setting_page_cleanup_categories": "类别",
+  "setting_page_cleanup_transactions": "交易记录",
+  "setting_page_cleanup_dialog_message": "选择要清理的数据。应用设置将保留。",
+  "setting_page_cleanup_success": "数据清理成功",
+  "setting_page_cleanup_error": "清理数据时发生错误",
+  "setting_page_set_username": "设置用户名",
+  "setting_page_enter_username_hint": "请输入您的用户名",
+  "setting_page_start_date": "开始日期",
+  "setting_page_start_date_format": "每月{day}",
+  "@setting_page_start_date_format": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "setting_page_select_start_date": "选择开始日期",
+  "setting_page_start_date_hint": "请输入1到31之间的数字",
+  "setting_page_emoji_ranges": "储蓄表情范围",
+  "setting_page_emoji_ranges_subtitle": "自定义储蓄表情阈值",
+  "setting_page_emoji_ranges_hint": "为不同的储蓄水平设置金额阈值和表情",
+  "setting_page_threshold": "阈值",
+  "setting_page_threshold_infinity": "∞ (无限)",
+  "setting_page_emoji": "表情",
+  "setting_page_emoji_required": "表情是必需的",
+  "setting_page_invalid_threshold": "无效的阈值",
+  "setting_page_reset_defaults": "重置为默认值",
+  "setting_page_timezone": "时区",
+  "setting_page_tap_to_set_username": "点击设置用户名",
+  "action_retry": "重试",
+  "transactions_page_title": "交易记录",
+  "select_datetime_title": "选择日期和时间",
+  "transaction_date": "交易日期",
+  "transaction_select_date": "选择日期",
+  "transaction_is_today": "今天",
+  "login_page_error": "电子邮件或密码不正确。",
+  "login_page_email_hint": "example@example.com"
+}

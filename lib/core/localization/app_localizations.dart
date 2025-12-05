@@ -96,6 +96,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('zh'),
+    Locale('zh', 'CN'),
     Locale('zh', 'TW'),
   ];
 
@@ -861,6 +862,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     case 'zh':
       {
         switch (locale.countryCode) {
+          case 'CN':
+            return AppLocalizationsZhCn();
           case 'TW':
             return AppLocalizationsZhTw();
         }
