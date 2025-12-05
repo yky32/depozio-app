@@ -68,6 +68,8 @@ Build iOS app and create IPA (requires code signing)
 
 Options: export_method - 'development', 'ad-hoc', 'app-store', or 'enterprise' (default: 'development')
 
+         env - environment to use: 'dev', 'stag', or 'prod' (default: 'prod' for app-store, 'dev' for others)
+
 ### ios upload_testflight
 
 ```sh
@@ -77,6 +79,8 @@ Options: export_method - 'development', 'ad-hoc', 'app-store', or 'enterprise' (
 Build IPA and upload to TestFlight
 
 Options: skip_build - set to true to skip building and use existing IPA (default: false)
+
+         env - environment to use: 'dev', 'stag', or 'prod' (default: 'prod')
 
 ### ios create_app
 

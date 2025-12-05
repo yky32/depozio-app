@@ -193,6 +193,26 @@ class _HomePageContent extends StatelessWidget {
                         }
                       },
                     ),
+                    BlocListener<AppCoreBloc, AppCoreState>(
+                      listenWhen: (previous, current) {
+                        // Listen when currency changes in AppCoreSettingsLoaded state
+                        // This ensures transaction items refresh to show converted amounts
+                        if (previous is AppCoreSettingsLoaded &&
+                            current is AppCoreSettingsLoaded) {
+                          return previous.currencyCode != current.currencyCode;
+                        }
+                        return false;
+                      },
+                      listener: (context, state) {
+                        // Currency changed - transaction items will automatically rebuild
+                        // via BlocBuilder in TransactionItem widget
+                        if (state is AppCoreSettingsLoaded) {
+                          LoggerUtil.d(
+                            '💱 Currency changed to ${state.currencyCode}, transaction items will refresh',
+                          );
+                        }
+                      },
+                    ),
                   ],
                   child: NotificationListener<ScrollUpdateNotification>(
                     onNotification: (notification) {
