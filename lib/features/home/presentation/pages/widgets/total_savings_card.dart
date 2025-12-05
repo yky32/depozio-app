@@ -166,13 +166,8 @@ class TotalSavingsCard extends StatelessWidget {
                 decimalDigits: 2,
               ).format(amount);
 
-              // Color based on amount: green for positive, red for negative
-              final amountColor =
-                  amount >= 0
-                      ? Colors
-                          .green
-                          .shade400 // Green for positive amounts
-                      : Colors.red.shade400; // Red for negative amounts
+              // Keep amount color white for carousel
+              const amountColor = Colors.white;
 
               return Text(
                 formattedSavings,
@@ -181,7 +176,7 @@ class TotalSavingsCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   shadows: [
                     Shadow(
-                      color: amountColor.withValues(alpha: 0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

@@ -1,65 +1,60 @@
 import 'package:flutter/material.dart';
 
-/// Consistent color palette for the ParkParkPark app
+/// Consistent color palette for the Depozio app
 class AppColors {
   AppColors._(); // Private constructor to prevent instantiation
 
+  // Color Palette
+  static const Color midnightGraphite = Color(0xFF0C0F16); // Dark background
+  static const Color softGold = Color(0xFFD7B56D); // Primary/Accent
+  static const Color neoMint = Color(0xFFB5FFDA); // Secondary/Success
+  static const Color mistSilver = Color(0xFFC9CCD5); // Neutral/Surface
+  static const Color pearWhite = Color(0xFFFAFAFA); // Light background
+
   // Primary Colors
-  static const Color primary = Color(0xFF2563EB); // Professional Blue
-  static const Color primaryLight = Color(0xFF3B82F6); // Lighter Blue
-  static const Color primaryDark = Color(0xFF1E40AF); // Darker Blue
+  static const Color primary = softGold; // Soft Gold
+  static const Color primaryLight = Color(0xFFE5C98A); // Lighter Gold
+  static const Color primaryDark = Color(0xFFB8964F); // Darker Gold
 
   // Secondary Colors
-  static const Color secondary = Color(0xFF059669); // Parking Green
-  static const Color secondaryLight = Color(0xFF10B981); // Success Green
-  static const Color secondaryDark = Color(0xFF047857); // Dark Green
+  static const Color secondary = neoMint; // Neo Mint
+  static const Color secondaryLight = Color(0xFFC9FFE5); // Lighter Mint
+  static const Color secondaryDark = Color(0xFF9FE6C4); // Darker Mint
 
   // Accent Colors
-  static const Color accent = Color(0xFF7C3AED); // Premium Purple
-  static const Color accentLight = Color(0xFF8B5CF6); // Light Purple
-  static const Color accentDark = Color(0xFF6D28D9); // Dark Purple
+  static const Color accent = softGold; // Soft Gold as accent
+  static const Color accentLight = Color(0xFFE5C98A); // Light Gold
+  static const Color accentDark = Color(0xFFB8964F); // Dark Gold
 
   // Status Colors
-  static const Color success = Color(0xFF10B981); // Available/Success
-  static const Color warning = Color(0xFFF59E0B); // Caution/Moderate
-  static const Color error = Color(0xFFDC2626); // Full/Error
-  static const Color info = Color(0xFF0EA5E9); // Information
+  static const Color success = neoMint; // Neo Mint for success
+  static const Color warning = Color(0xFFF59E0B); // Orange for warning
+  static const Color error = Color(0xFFDC2626); // Red for error
+  static const Color info = Color(0xFF0EA5E9); // Blue for information
 
   // Neutral Colors
-  static const Color background = Color(0xFFF8FAFC); // Light Gray Background
-  static const Color surface = Color(0xFFFFFFFF); // White Surface
-  static const Color onSurface = Color(0xFF1F2937); // Dark Text
-  static const Color onSurfaceVariant = Color(0xFF6B7280); // Muted Text
-  static const Color divider = Color(0xFFE5E7EB); // Light Divider
+  static const Color background = pearWhite; // Pear White background
+  static const Color backgroundDark =
+      midnightGraphite; // Midnight Graphite for dark
+  static const Color surface = pearWhite; // Pear White surface
+  static const Color surfaceDark = Color(0xFF1A1F24); // Dark surface
+  static const Color onSurface = midnightGraphite; // Dark text on light
+  static const Color onSurfaceDark = pearWhite; // Light text on dark
+  static const Color onSurfaceVariant = mistSilver; // Muted text
+  static const Color divider = mistSilver; // Mist Silver divider
 
   // Gradients
   static const List<Color> primaryGradient = [primary, primaryLight];
   static const List<Color> secondaryGradient = [secondary, secondaryLight];
   static const List<Color> accentGradient = [accent, accentLight];
-  static const List<Color> weatherGradient = [
-    Color(0xFFFFB347),
-    Color(0xFFFF8C69)
-  ]; // Orange to Coral
-  static const List<Color> transportationGradient = [
-    Color(0xFFFF6B6B),
-    Color(0xFFFFE66D)
-  ]; // Red to Yellow
-  static const List<Color> parkingGradient = [
-    secondary,
-    Color(0xFF34D399)
-  ]; // Green gradient
-
-  // Traffic Status Colors
-  static const Color trafficHeavy = Color(0xFFDC2626); // Red
-  static const Color trafficModerate = Color(0xFFF59E0B); // Orange
-  static const Color trafficLight = Color(0xFF10B981); // Green
-
-  // Car Park Category Colors
-  static const Color mallParking = primary; // Blue for malls
-  static const Color airportParking = accent; // Purple for airports
-  static const Color shoppingParking = secondary; // Green for shopping
-  static const Color residentialParking =
-      Color(0xFFF59E0B); // Orange for residential
+  static const List<Color> goldGradient = [
+    softGold,
+    Color(0xFFE5C98A),
+  ]; // Gold gradient
+  static const List<Color> mintGradient = [
+    neoMint,
+    Color(0xFFC9FFE5),
+  ]; // Mint gradient
 
   // Semantic Colors with Alpha
   static Color primaryWithAlpha(double alpha) =>

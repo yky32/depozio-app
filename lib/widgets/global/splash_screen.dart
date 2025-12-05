@@ -2,12 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:depozio/core/theme/app_colors.dart';
 
 class _WaveText extends StatelessWidget {
-  const _WaveText({
-    required this.text,
-    this.style,
-  });
+  const _WaveText({required this.text, this.style});
 
   final String text;
   final TextStyle? style;
@@ -16,49 +14,55 @@ class _WaveText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: text.split('').asMap().entries.map((entry) {
-        final index = entry.key;
-        final char = entry.value;
-        final delay = index * 100; // 100ms delay between each letter
+      children:
+          text.split('').asMap().entries.map((entry) {
+            final index = entry.key;
+            final char = entry.value;
+            final delay = index * 100; // 100ms delay between each letter
 
-        return TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 1200),
-          curve: Curves.easeOut,
-          builder: (context, value, child) {
-            // Calculate animation progress with delay
-            final progress = ((value * 1200) - delay) / 600;
-            final clampedProgress = progress.clamp(0.0, 1.0);
+            return TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                // Calculate animation progress with delay
+                final progress = ((value * 1200) - delay) / 600;
+                final clampedProgress = progress.clamp(0.0, 1.0);
 
-            // Jump effect: letter moves up then down
-            final jumpOffset = clampedProgress < 0.5
-                ? -30.0 * (clampedProgress * 2) // Jump up
-                : -30.0 * (2 - clampedProgress * 2); // Come down
+                // Jump effect: letter moves up then down
+                final jumpOffset =
+                    clampedProgress < 0.5
+                        ? -30.0 *
+                            (clampedProgress * 2) // Jump up
+                        : -30.0 * (2 - clampedProgress * 2); // Come down
 
-            // Fade in effect
-            final opacity = clampedProgress;
+                // Fade in effect
+                final opacity = clampedProgress;
 
-            // Scale effect for bounce
-            final scale = clampedProgress < 0.5
-                ? 1.0 + (0.3 * (clampedProgress * 2)) // Scale up
-                : 1.3 - (0.3 * ((clampedProgress - 0.5) * 2)); // Scale down
+                // Scale effect for bounce
+                final scale =
+                    clampedProgress < 0.5
+                        ? 1.0 +
+                            (0.3 * (clampedProgress * 2)) // Scale up
+                        : 1.3 -
+                            (0.3 * ((clampedProgress - 0.5) * 2)); // Scale down
 
-            return Opacity(
-              opacity: opacity,
-              child: Transform.scale(
-                scale: scale,
-                child: Transform.translate(
-                  offset: Offset(0, jumpOffset),
-                  child: Text(
-                    char == ' ' ? '\u00A0' : char, // Non-breaking space
-                    style: style,
+                return Opacity(
+                  opacity: opacity,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: Transform.translate(
+                      offset: Offset(0, jumpOffset),
+                      child: Text(
+                        char == ' ' ? '\u00A0' : char, // Non-breaking space
+                        style: style,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             );
-          },
-        );
-      }).toList(),
+          }).toList(),
     );
   }
 }
@@ -124,8 +128,9 @@ class SplashScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: colorScheme.primary
-                                            .withValues(alpha: 0.3),
+                                        color: colorScheme.primary.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 20,
                                         spreadRadius: 5,
                                       ),
@@ -146,7 +151,7 @@ class SplashScreen extends StatelessWidget {
                             text: 'Depozio',
                             style: theme.textTheme.displayMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
+                              color: AppColors.softGold,
                             ),
                           ),
                         ],

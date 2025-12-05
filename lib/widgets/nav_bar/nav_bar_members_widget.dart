@@ -15,22 +15,23 @@ class NavBarMembersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 20), // No top margin
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 14.25,
+      ), // Reduced by 5%
       decoration: BoxDecoration(
-        color: Colors.white70,
+        color: colorScheme.surface.withValues(
+          alpha: 0.9,
+        ), // Match home page card background
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -38,15 +39,19 @@ class NavBarMembersWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // Left side navigation items (first 2)
-          ..._getSortedNavigationPages().take(2).map((page) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: __buildNavBarMember(
-                    icon: page.icon,
-                    index: page.navBarMemberIndex,
+          ..._getSortedNavigationPages()
+              .take(2)
+              .map(
+                (page) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: __buildNavBarMember(
+                      icon: page.icon,
+                      index: page.navBarMemberIndex,
+                    ),
                   ),
                 ),
-              )),
+              ),
           // Center action button
           NavBarActionButton(
             onPressed: () {
@@ -56,22 +61,26 @@ class NavBarMembersWidget extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 isDismissible: true,
                 enableDrag: true,
-                builder: (context) => const ActionBottomSheet(
-                  maxHeightPercentage: 0.9,
-                ),
+                builder:
+                    (context) =>
+                        const ActionBottomSheet(maxHeightPercentage: 0.9),
               );
             },
           ),
           // Right side navigation items (last 2)
-          ..._getSortedNavigationPages().skip(2).map((page) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: __buildNavBarMember(
-                    icon: page.icon,
-                    index: page.navBarMemberIndex,
+          ..._getSortedNavigationPages()
+              .skip(2)
+              .map(
+                (page) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: __buildNavBarMember(
+                      icon: page.icon,
+                      index: page.navBarMemberIndex,
+                    ),
                   ),
                 ),
-              )),
+              ),
         ],
       ),
     );
@@ -81,16 +90,15 @@ class NavBarMembersWidget extends StatelessWidget {
   List<AppPage> _getSortedNavigationPages() {
     return AppPage.values
         .where(
-            (page) => page.navBarMemberIndex != 99) // Filter out non-nav pages
+          (page) => page.navBarMemberIndex != 99,
+        ) // Filter out non-nav pages
         .toList()
-      ..sort((a, b) => a.navBarMemberIndex
-          .compareTo(b.navBarMemberIndex)); // Sort by navBarMemberIndex ASC;
+      ..sort(
+        (a, b) => a.navBarMemberIndex.compareTo(b.navBarMemberIndex),
+      ); // Sort by navBarMemberIndex ASC;
   }
 
-  Widget __buildNavBarMember({
-    required IconData icon,
-    required int index,
-  }) {
+  Widget __buildNavBarMember({required IconData icon, required int index}) {
     final bool isSelected = selectedIndex == index;
 
     return GestureDetector(

@@ -151,57 +151,88 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   /// Check if a transaction is within the current period based on startDay
-  bool _isTransactionInCurrentPeriod(
-    DateTime transactionDate,
-    int startDay,
-  ) {
+  bool _isTransactionInCurrentPeriod(DateTime transactionDate, int startDay) {
     final now = DateTime.now();
     final periodStart = _getCurrentPeriodStart(now, startDay);
     final nextPeriodStart = _getNextPeriodStart(now, startDay);
-    
-    // Use the earlier of now or nextPeriodStart as the end date
-    final periodEnd = now.isBefore(nextPeriodStart) ? now : nextPeriodStart;
-    
-    // Filter: periodStart <= transaction.createdAt < periodEnd
-    // Normalize periodStart to start of day (00:00:00) for inclusive comparison
-    final periodStartNormalized = DateTime(
+
+    // Normalize all dates to day boundaries for comparison (ignore time components)
+    final periodStartDay = DateTime(
       periodStart.year,
       periodStart.month,
       periodStart.day,
     );
-    
-    // Transaction date must be >= periodStart (start of day) and < periodEnd
-    return !transactionDate.isBefore(periodStartNormalized) &&
-           transactionDate.isBefore(periodEnd);
+
+    // periodEndDay: current day if today is before nextPeriodStart,
+    // otherwise the day before nextPeriodStart (exclusive)
+    final periodEndDay =
+        now.isBefore(nextPeriodStart)
+            ? DateTime(now.year, now.month, now.day)
+            : DateTime(
+              nextPeriodStart.year,
+              nextPeriodStart.month,
+              nextPeriodStart.day,
+            );
+
+    // Normalize transaction date to start of day for comparison
+    final transactionDay = DateTime(
+      transactionDate.year,
+      transactionDate.month,
+      transactionDate.day,
+    );
+
+    // Filter: periodStartDay <= transactionDay <= periodEndDay (inclusive of end day)
+    final isInPeriod =
+        !transactionDay.isBefore(periodStartDay) &&
+        !transactionDay.isAfter(periodEndDay);
+
+    LoggerUtil.d(
+      '📅 Transaction date check: ${transactionDay.toString().substring(0, 10)} '
+      '(startDay: $startDay, period: ${periodStartDay.toString().substring(0, 10)} to ${periodEndDay.toString().substring(0, 10)}, included: $isInPeriod)',
+    );
+
+    return isInPeriod;
   }
 
   double _calculateTotalDeposits() {
     try {
+      // Ensure AppSettingService is initialized before reading startDate
+      AppSettingService.init();
+
       final transactionService = TransactionService();
       final categoryService = CategoryService();
 
-      // Get startDay from settings
+      // Get startDay from settings (ensure we get the latest value)
       final startDay = AppSettingService.getStartDate();
+      LoggerUtil.d('💰 Calculating deposits with startDay: $startDay');
 
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
 
       // Calculate sum of deposit transactions within the current period
       double total = 0.0;
+      int includedCount = 0;
       for (final transaction in allTransactions) {
         // Filter by date range: startDay <= transaction.createdAt < Next StartDay (or Now)
         if (!_isTransactionInCurrentPeriod(transaction.createdAt, startDay)) {
           continue;
         }
-        
+
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
         if (category?.categoryType == CategoryType.deposits) {
           total += transaction.amount;
+          includedCount++;
+          LoggerUtil.d(
+            '💰 Including deposit: ${transaction.amount} on ${transaction.createdAt}',
+          );
         }
       }
 
+      LoggerUtil.d(
+        '💰 Total deposits: $total (from $includedCount transactions)',
+      );
       return total;
     } catch (e) {
       LoggerUtil.e('❌ Error calculating total deposits', error: e);
@@ -211,31 +242,43 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   double _calculateTotalExpenses() {
     try {
+      // Ensure AppSettingService is initialized before reading startDate
+      AppSettingService.init();
+
       final transactionService = TransactionService();
       final categoryService = CategoryService();
 
-      // Get startDay from settings
+      // Get startDay from settings (ensure we get the latest value)
       final startDay = AppSettingService.getStartDate();
+      LoggerUtil.d('💸 Calculating expenses with startDay: $startDay');
 
       // Get all transactions
       final allTransactions = transactionService.getAllTransactions();
 
       // Calculate sum of expense transactions within the current period
       double total = 0.0;
+      int includedCount = 0;
       for (final transaction in allTransactions) {
         // Filter by date range: startDay <= transaction.createdAt < Next StartDay (or Now)
         if (!_isTransactionInCurrentPeriod(transaction.createdAt, startDay)) {
           continue;
         }
-        
+
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
         if (category?.categoryType == CategoryType.expenses) {
           total += transaction.amount;
+          includedCount++;
+          LoggerUtil.d(
+            '💸 Including expense: ${transaction.amount} on ${transaction.createdAt}',
+          );
         }
       }
 
+      LoggerUtil.d(
+        '💸 Total expenses: $total (from $includedCount transactions)',
+      );
       return total;
     } catch (e) {
       LoggerUtil.e('❌ Error calculating total expenses', error: e);
