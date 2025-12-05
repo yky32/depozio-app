@@ -90,7 +90,7 @@ def increment_build_number_in_pubspec
   return new_build
 end
 
-# Helper function to generate release notes from git commit
+# Helper function to generate release notes from git commits
 def generate_release_notes
   begin
     # Check if we're in a git repository
@@ -99,26 +99,52 @@ def generate_release_notes
       return "[Feature: Manual build]\n[Build time: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}]"
     end
     
-    # Get the latest commit message (excluding merge commits and build number commits)
-    latest_commit = `cd #{PROJECT_ROOT} && git log -1 --pretty=%B --no-merges`.strip
+    # Get the last 3 commit messages (excluding merge commits)
+    # Use a separator to split commits, then get subject line for each
+    commit_output = `cd #{PROJECT_ROOT} && git log -10 --pretty=format:"%H|%s" --no-merges`.strip
     
-    # Filter out build number auto-commit messages
-    if latest_commit.include?("Auto-increment build number") || latest_commit.include?("chore: Auto-increment")
-      # Get the commit before the build number commit
-      latest_commit = `cd #{PROJECT_ROOT} && git log -2 --pretty=%B --no-merges | head -n 1`.strip
+    # Filter out build number auto-commit messages and collect valid commits
+    valid_commits = []
+    commit_output.split("\n").each do |line|
+      next if line.empty?
+      
+      # Extract commit message (after the | separator)
+      parts = line.split("|", 2)
+      next if parts.length < 2
+      
+      commit_msg = parts[1].strip
+      
+      # Skip if it's a build number commit
+      next if commit_msg.include?("Auto-increment build number") || commit_msg.include?("chore: Auto-increment")
+      
+      # Clean up the commit message (limit length)
+      cleaned = commit_msg[0..150] if commit_msg.length > 150
+      cleaned ||= commit_msg
+      
+      valid_commits << cleaned unless cleaned.empty?
+      
+      # Stop when we have 3 valid commits
+      break if valid_commits.length >= 3
     end
     
-    # Clean up the commit message (remove newlines, limit length)
-    cleaned_message = latest_commit.split("\n").first.strip
-    cleaned_message = cleaned_message[0..200] if cleaned_message.length > 200
+    # Fallback if still no valid commits
+    if valid_commits.empty?
+      valid_commits = ["Manual build"]
+    end
     
     # Get current datetime
     build_time = Time.now.strftime('%Y-%m-%d %H:%M:%S')
     
-    # Format as requested
-    release_notes = "[Feature: #{cleaned_message}]\n[Build time: #{build_time}]"
+    # Format release notes with last 3 commits
+    release_notes_parts = []
+    valid_commits.each_with_index do |commit_msg, index|
+      release_notes_parts << "[Feature #{index + 1}: #{commit_msg}]"
+    end
+    release_notes_parts << "[Build time: #{build_time}]"
     
-    UI.message("📝 Generated release notes:")
+    release_notes = release_notes_parts.join("\n")
+    
+    UI.message("📝 Generated release notes from last #{valid_commits.length} commit(s):")
     UI.message(release_notes)
     
     return release_notes
