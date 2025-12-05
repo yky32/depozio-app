@@ -12,22 +12,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get action_cancel => '取消';
 
   @override
-  String get action_confirm => '確認';
+  String get action_confirm => '确认';
 
   @override
-  String get action_save => 'Save';
+  String get action_save => '保存';
 
   @override
-  String get login_page_email => '電子郵件';
+  String get login_page_email => '电子邮件';
 
   @override
-  String get login_page_password => '密碼';
+  String get login_page_password => '密码';
 
   @override
-  String get login_page_submit => '登入';
+  String get login_page_submit => '登录';
 
   @override
-  String get home_page_title => '首頁';
+  String get home_page_title => '首页';
 
   @override
   String home_page_greeting(String username) {
@@ -41,43 +41,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home_page_expenses => '支出';
 
   @override
-  String get home_page_total_savings => '總儲蓄';
+  String get home_page_total_savings => '总储蓄';
 
   @override
-  String get home_page_total_savings_currency_reminder => '匯率可能影響計算結果';
+  String get home_page_total_savings_currency_reminder => '汇率可能影响计算结果';
 
   @override
-  String get home_page_savings_goal => '儲蓄目標';
+  String get home_page_savings_goal => '储蓄目标';
 
   @override
-  String get home_page_monthly_savings => '每月儲蓄';
+  String get home_page_monthly_savings => '每月储蓄';
 
   @override
-  String get home_page_recent_activity => '最近活動';
+  String get home_page_recent_activity => '最近活动';
 
   @override
-  String get home_page_no_activity => '無最近活動';
+  String get home_page_no_activity => '无最近活动';
 
   @override
   String get deposit_page_title => '存款';
 
   @override
-  String get deposit_page_add_category => '新增類別';
+  String get deposit_page_add_category => '新增类别';
 
   @override
-  String get add_category_bottom_sheet_title => '新增類別';
+  String get add_category_bottom_sheet_title => '新增类别';
 
   @override
-  String get add_category_name => '名稱';
+  String get add_category_name => '名称';
 
   @override
-  String get add_category_name_hint => '輸入類別名稱';
+  String get add_category_name_hint => '输入类别名称';
 
   @override
-  String get add_category_icon => '圖標';
+  String get add_category_icon => '图标';
 
   @override
-  String get add_category_type => '類型';
+  String get add_category_type => '类型';
 
   @override
   String get add_category_type_deposits => '存款';
@@ -86,72 +86,72 @@ class AppLocalizationsZh extends AppLocalizations {
   String get add_category_type_expenses => '支出';
 
   @override
-  String get transaction_record_title => '記錄交易';
+  String get transaction_record_title => '记录交易';
 
   @override
-  String get transaction_amount => '金額';
+  String get transaction_amount => '金额';
 
   @override
-  String get transaction_category => '類別';
+  String get transaction_category => '类别';
 
   @override
   String get transaction_description => '描述';
 
   @override
-  String get transaction_description_placeholder => '新增備註（選填）';
+  String get transaction_description_placeholder => '添加备注（选填）';
 
   @override
-  String get transaction_select_currency => '選擇貨幣';
+  String get transaction_select_currency => '选择货币';
 
   @override
-  String get transaction_select_category => '選擇類別';
+  String get transaction_select_category => '选择类别';
 
   @override
-  String get transaction_select_category_placeholder => '選擇一個類別';
+  String get transaction_select_category_placeholder => '选择一个类别';
 
   @override
-  String get transaction_please_select_category => '請選擇一個類別';
+  String get transaction_please_select_category => '请选择一个类别';
 
   @override
-  String get transaction_please_enter_amount => '請輸入金額';
+  String get transaction_please_enter_amount => '请输入金额';
 
   @override
-  String get transaction_please_enter_valid_amount => '請輸入有效的金額';
+  String get transaction_please_enter_valid_amount => '请输入有效的金额';
 
   @override
   String transaction_recorded(String amount, String category) {
-    return '交易已記錄：$amount - $category';
+    return '交易已记录：$amount - $category';
   }
 
   @override
-  String get transaction_no_categories_available => '沒有可用的類別。請先創建一個類別。';
+  String get transaction_no_categories_available => '没有可用的类别。请先创建一个类别。';
 
   @override
   String get currency_usd => '美元';
 
   @override
-  String get currency_eur => '歐元';
+  String get currency_eur => '欧元';
 
   @override
-  String get currency_gbp => '英鎊';
+  String get currency_gbp => '英镑';
 
   @override
   String get currency_jpy => '日元';
 
   @override
-  String get currency_cny => '人民幣';
+  String get currency_cny => '人民币';
 
   @override
-  String get currency_hkd => '港幣';
+  String get currency_hkd => '港币';
 
   @override
   String get currency_sgd => '新加坡元';
 
   @override
-  String get currency_thb => '泰銖';
+  String get currency_thb => '泰铢';
 
   @override
-  String get currency_krw => '韓元';
+  String get currency_krw => '韩元';
 
   @override
   String get currency_aud => '澳元';
