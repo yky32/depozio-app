@@ -345,19 +345,27 @@ platform :ios do
     
     UI.message("🚀 Uploading to TestFlight...")
     
-    # Generate release notes from git commit
+    # Generate release notes from git commit for TestFlight "What to Test" content
     release_notes = generate_release_notes
+    UI.message("📝 TestFlight release notes:")
+    UI.message(release_notes)
     UI.message("")
     
     begin
-      # Upload to TestFlight with release notes
+      # Upload to TestFlight with "What to Test" notes
+      # Using localized_build_info to set TestFlight app test content
       upload_to_testflight(
         ipa: ipa_path,
         skip_waiting_for_build_processing: false,  # Wait for processing to complete
         skip_submission: true,  # Don't automatically submit for review
         distribute_external: false,  # Internal testing only (set to true for external)
         notify_external_testers: false,  # Don't notify testers automatically
-        changelog: release_notes  # Add release notes from git commit
+        changelog: release_notes,  # Release notes for App Store Connect
+        localized_build_info: {
+          'en-US' => {
+            whats_new: release_notes  # "What to Test" content shown in TestFlight app
+          }
+        }
       )
       
       UI.success("✅ Successfully uploaded to TestFlight!")
@@ -385,7 +393,12 @@ platform :ios do
             skip_submission: true,
             distribute_external: false,
             notify_external_testers: false,
-            changelog: release_notes  # Add release notes from git commit
+            changelog: release_notes,  # Release notes for App Store Connect
+            localized_build_info: {
+              'en-US' => {
+                whats_new: release_notes  # "What to Test" content shown in TestFlight app
+              }
+            }
           )
           
           UI.success("✅ Successfully uploaded to TestFlight!")

@@ -26,15 +26,16 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get total deposits and expenses from state
+    // Get total savings from bloc state (calculated as: totalDeposits - totalExpenses)
+    // The calculation is done in HomeBloc to ensure consistency
+    final totalSavings =
+        state is HomeLoaded ? (state as HomeLoaded).totalSavings : 0.0;
+
+    // Get total deposits and expenses for display in statistics cards
     final totalDeposits =
         state is HomeLoaded ? (state as HomeLoaded).totalDeposits : 0.0;
     final totalExpenses =
         state is HomeLoaded ? (state as HomeLoaded).totalExpenses : 0.0;
-
-    // Calculate total savings: Total Deposits minus Total Expenses
-    // This represents the net savings (what's left after expenses are deducted from deposits)
-    final totalSavings = totalDeposits - totalExpenses;
 
     return BlocBuilder<AppCoreBloc, AppCoreState>(
       buildWhen: (previous, current) {

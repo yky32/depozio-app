@@ -61,6 +61,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final totalDeposits = _calculateTotalDeposits();
       final totalExpenses = _calculateTotalExpenses();
 
+      // Calculate total savings: totalDeposits - totalExpenses
+      final totalSavings = totalDeposits - totalExpenses;
+      LoggerUtil.d(
+        '💰 Total savings calculated: $totalSavings (deposits: $totalDeposits - expenses: $totalExpenses)',
+      );
+
       // Preserve scroll offset from previous state
       final previousScrollOffset =
           (state is HomeLoaded) ? (state as HomeLoaded).scrollOffset : 0.0;
@@ -72,6 +78,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           scrollOffset: previousScrollOffset,
           totalDeposits: totalDeposits,
           totalExpenses: totalExpenses,
+          totalSavings: totalSavings,
         ),
       );
       LoggerUtil.d(
@@ -315,6 +322,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final totalDeposits = _calculateTotalDeposits();
         final totalExpenses = _calculateTotalExpenses();
 
+        // Calculate total savings: totalDeposits - totalExpenses
+        final totalSavings = totalDeposits - totalExpenses;
+
         // Preserve scroll offset from before refresh
         emit(
           HomeLoaded(
@@ -323,6 +333,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             scrollOffset: preservedScrollOffset,
             totalDeposits: totalDeposits,
             totalExpenses: totalExpenses,
+            totalSavings: totalSavings,
           ),
         );
         LoggerUtil.d(
@@ -349,6 +360,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final totalDeposits = _calculateTotalDeposits();
         final totalExpenses = _calculateTotalExpenses();
 
+        // Calculate total savings: totalDeposits - totalExpenses
+        final totalSavings = totalDeposits - totalExpenses;
+
         // Use 0.0 as default - scroll offset should be updated via UpdateScrollOffset
         emit(
           HomeLoaded(
@@ -357,6 +371,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             scrollOffset: 0.0,
             totalDeposits: totalDeposits,
             totalExpenses: totalExpenses,
+            totalSavings: totalSavings,
           ),
         );
         LoggerUtil.d(

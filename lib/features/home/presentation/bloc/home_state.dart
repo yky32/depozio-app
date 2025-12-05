@@ -25,6 +25,7 @@ class HomeLoaded extends HomeState {
   final double scrollOffset;
   final double totalDeposits;
   final double totalExpenses;
+  final double totalSavings; // Calculated as: totalDeposits - totalExpenses
 
   HomeLoaded({
     DateTime? refreshTimestamp,
@@ -32,8 +33,11 @@ class HomeLoaded extends HomeState {
     this.scrollOffset = 0.0,
     this.totalDeposits = 0.0,
     this.totalExpenses = 0.0,
+    double? totalSavings,
   }) : refreshTimestamp = refreshTimestamp ?? DateTime.now(),
-       recentTransactions = recentTransactions ?? const [];
+       recentTransactions = recentTransactions ?? const [],
+       // Calculate totalSavings: totalDeposits - totalExpenses
+       totalSavings = totalSavings ?? (totalDeposits - totalExpenses);
 
   @override
   List<Object?> get props => [
@@ -42,6 +46,7 @@ class HomeLoaded extends HomeState {
     scrollOffset,
     totalDeposits,
     totalExpenses,
+    totalSavings,
   ];
 
   HomeLoaded copyWith({
@@ -50,13 +55,21 @@ class HomeLoaded extends HomeState {
     double? scrollOffset,
     double? totalDeposits,
     double? totalExpenses,
+    double? totalSavings,
   }) {
+    // Calculate totalSavings if deposits or expenses changed
+    final newTotalDeposits = totalDeposits ?? this.totalDeposits;
+    final newTotalExpenses = totalExpenses ?? this.totalExpenses;
+    final calculatedTotalSavings =
+        totalSavings ?? (newTotalDeposits - newTotalExpenses);
+
     return HomeLoaded(
       refreshTimestamp: refreshTimestamp ?? this.refreshTimestamp,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       scrollOffset: scrollOffset ?? this.scrollOffset,
-      totalDeposits: totalDeposits ?? this.totalDeposits,
-      totalExpenses: totalExpenses ?? this.totalExpenses,
+      totalDeposits: newTotalDeposits,
+      totalExpenses: newTotalExpenses,
+      totalSavings: calculatedTotalSavings,
     );
   }
 }
