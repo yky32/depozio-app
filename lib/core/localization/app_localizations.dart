@@ -256,6 +256,12 @@ abstract class AppLocalizations {
   /// **'Record Transaction'**
   String get transaction_record_title;
 
+  /// No description provided for @transaction_ocr_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR is coming soon'**
+  String get transaction_ocr_coming_soon;
+
   /// No description provided for @transaction_amount.
   ///
   /// In en, this message translates to:

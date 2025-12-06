@@ -90,6 +90,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_record_title => 'Record Transaction';
 
   @override
+  String get transaction_ocr_coming_soon => 'OCR is coming soon';
+
+  @override
   String get transaction_amount => 'Amount';
 
   @override

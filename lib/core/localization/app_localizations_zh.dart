@@ -90,6 +90,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transaction_record_title => 'Record Transaction';
 
   @override
+  String get transaction_ocr_coming_soon => 'OCR is coming soon';
+
+  @override
   String get transaction_amount => 'Amount';
 
   @override
@@ -508,6 +511,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get transaction_record_title => '记录交易';
 
   @override
+  String get transaction_ocr_coming_soon => 'OCR功能即将推出';
+
+  @override
   String get transaction_amount => '金额';
 
   @override
@@ -913,6 +919,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get transaction_record_title => '記錄交易';
+
+  @override
+  String get transaction_ocr_coming_soon => 'OCR功能即將推出';
 
   @override
   String get transaction_amount => '金額';

@@ -33,6 +33,7 @@
   "add_category_type_deposits": "Deposits",
   "add_category_type_expenses": "Expenses",
   "transaction_record_title": "Record Transaction",
+  "transaction_ocr_coming_soon": "OCR is coming soon",
   "transaction_amount": "Amount",
   "transaction_category": "Category",
   "transaction_description": "Description",

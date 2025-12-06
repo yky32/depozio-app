@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,11 +83,26 @@ class ActionBottomSheet extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: Text(
-                context.l10n.transaction_record_title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Centered title
+                  Text(
+                    context.l10n.transaction_record_title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // Scan receipt button (placeholder) - positioned at top right
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _ScanReceiptButton(
+                      theme: theme,
+                      colorScheme: colorScheme,
+                      l10n: context.l10n,
+                    ),
+                  ),
+                ],
               ),
             ),
             Flexible(
@@ -998,6 +1014,103 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Scan receipt button with tooltip overlay
+class _ScanReceiptButton extends StatefulWidget {
+  const _ScanReceiptButton({
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+  });
+
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final dynamic l10n;
+
+  @override
+  State<_ScanReceiptButton> createState() => _ScanReceiptButtonState();
+}
+
+class _ScanReceiptButtonState extends State<_ScanReceiptButton> {
+  OverlayEntry? _overlayEntry;
+  Timer? _hideTimer;
+
+  void _showTooltip() {
+    if (_overlayEntry != null) {
+      _hideTooltip();
+      return;
+    }
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    final size = renderBox?.size ?? Size.zero;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          right: MediaQuery.of(context).size.width - offset.dx - size.width,
+          top: offset.dy + size.height + 8,
+          child: Material(
+            color: Colors.transparent,
+            child: GestureDetector(
+              onTap: _hideTooltip,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: Text(
+                  widget.l10n.transaction_ocr_coming_soon,
+                  style: widget.theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+
+    _hideTimer = Timer(const Duration(seconds: 3), _hideTooltip);
+  }
+
+  void _hideTooltip() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _hideTooltip();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _showTooltip,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(
+          Icons.document_scanner,
+          color: widget.colorScheme.primary,
+          size: 24,
+        ),
+      ),
     );
   }
 }
