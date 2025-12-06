@@ -18,17 +18,17 @@ class CurrencyHelper {
   };
 
   static const Map<String, String> currencySymbols = {
-    'USD': '\$',
+    'USD': r'$',
     'EUR': '€',
     'GBP': '£',
     'JPY': '¥',
     'CNY': '¥',
-    'HKD': 'HK\$',
-    'SGD': 'S\$',
+    'HKD': r'$',
+    'SGD': r'S$',
     'THB': '฿',
     'KRW': '₩',
-    'AUD': 'A\$',
-    'CAD': 'C\$',
+    'AUD': r'A$',
+    'CAD': r'C$',
   };
 
   static const Map<String, String> currencyNameKeys = {
@@ -87,4 +87,3 @@ class CurrencyHelper {
     }
   }
 }
-
