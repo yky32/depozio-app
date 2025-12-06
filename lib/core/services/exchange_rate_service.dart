@@ -96,7 +96,7 @@ class ExchangeRateService {
     }
 
     // Check cache first
-    final cacheKey = '${fromUpper}_${toUpper}';
+    final cacheKey = '${fromUpper}_$toUpper';
     if (useCache && _rateCache.containsKey(cacheKey)) {
       final cached = _rateCache[cacheKey]!;
       if (DateTime.now().difference(cached.timestamp) < _cacheExpiry) {

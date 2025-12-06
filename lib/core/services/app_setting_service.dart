@@ -105,7 +105,11 @@ class AppSettingService {
 
   /// Get all supported locales
   static List<Locale> getSupportedLocales() {
-    return [const Locale('en'), const Locale('zh', 'CN'), const Locale('zh', 'TW')];
+    return [
+      const Locale('en'),
+      const Locale('zh', 'CN'),
+      const Locale('zh', 'TW'),
+    ];
   }
 
   // ==================== Currency Methods ====================

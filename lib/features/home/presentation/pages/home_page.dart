@@ -341,7 +341,7 @@ class _HomePageContent extends StatelessWidget {
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
-                                                '${startDate}${_getDaySuffix(startDate)}',
+                                                '$startDate${_getDaySuffix(startDate)}',
                                                 style: theme.textTheme.bodySmall
                                                     ?.copyWith(
                                                       fontWeight:

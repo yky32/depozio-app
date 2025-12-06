@@ -966,7 +966,7 @@ class SettingPage extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           l10n.setting_page_start_date_format(
-                            '${currentStartDate}${_getDaySuffix(currentStartDate)}',
+                            '$currentStartDate${_getDaySuffix(currentStartDate)}',
                           ),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
@@ -1732,7 +1732,7 @@ class _StartDateSelectorContentState extends State<_StartDateSelectorContent> {
                                 // Display selected day with suffix
                                 Text(
                                   widget.l10n.setting_page_start_date_format(
-                                    '${_selectedDay}${_getDaySuffix(_selectedDay)}',
+                                    '$_selectedDay${_getDaySuffix(_selectedDay)}',
                                   ),
                                   style: widget.theme.textTheme.titleLarge
                                       ?.copyWith(

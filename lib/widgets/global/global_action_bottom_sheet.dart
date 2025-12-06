@@ -670,7 +670,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             );
                           }
                         },
-                        activeColor: widget.colorScheme.primary,
+                        activeThumbColor: widget.colorScheme.primary,
                       ),
                     ],
                   ),
