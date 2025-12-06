@@ -26,7 +26,8 @@ class TransactionService {
     if (_box == null) {
       return [];
     }
-    return _box!.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return _box!.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   /// Get transactions by category ID
@@ -48,6 +49,16 @@ class TransactionService {
     return _box!.values
         .where((transaction) => transaction.categoryId == categoryId)
         .length;
+  }
+
+  /// Get total amount sum by category ID
+  double getTotalAmountByCategoryId(String categoryId) {
+    if (_box == null) {
+      return 0.0;
+    }
+    return _box!.values
+        .where((transaction) => transaction.categoryId == categoryId)
+        .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
   /// Add a new transaction
@@ -99,11 +110,14 @@ class TransactionService {
   }
 
   /// Get a stream of transactions by category (reactive)
-  Stream<List<TransactionEntity>> watchTransactionsByCategoryId(String categoryId) {
+  Stream<List<TransactionEntity>> watchTransactionsByCategoryId(
+    String categoryId,
+  ) {
     if (_box == null) {
       return Stream.value([]);
     }
-    return _box!.watch().map((event) => getTransactionsByCategoryId(categoryId));
+    return _box!.watch().map(
+      (event) => getTransactionsByCategoryId(categoryId),
+    );
   }
 }
-

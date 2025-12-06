@@ -6,6 +6,8 @@ import 'package:depozio/features/deposit/presentation/widgets/delete_category_di
 import 'package:depozio/features/deposit/presentation/bloc/deposit_bloc.dart';
 import 'package:depozio/core/network/logger.dart';
 import 'package:depozio/core/enum/category_type.dart';
+import 'package:depozio/features/deposit/presentation/pages/transaction/data/currency_helper.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 /// A professional slidable card widget for category items
@@ -20,6 +22,7 @@ class SlidableCategoryCard extends StatelessWidget {
     required this.colorScheme,
     required this.l10n,
     this.transactionCount = 0,
+    this.totalAmount = 0.0,
   });
 
   final CategoryEntity category;
@@ -27,6 +30,7 @@ class SlidableCategoryCard extends StatelessWidget {
   final ColorScheme colorScheme;
   final dynamic l10n; // AppLocalizations
   final int transactionCount;
+  final double totalAmount;
 
   Future<void> _handleDelete(BuildContext context) async {
     LoggerUtil.d(
@@ -183,14 +187,16 @@ class SlidableCategoryCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                subtitle: Text(
-                  category.categoryType == CategoryType.deposits
-                      ? l10n.add_category_type_deposits
-                      : l10n.add_category_type_expenses,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
+                subtitle:
+                    totalAmount > 0
+                        ? Text(
+                          _formatAmount(totalAmount),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                            fontSize: 12,
+                          ),
+                        )
+                        : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -247,5 +253,16 @@ class SlidableCategoryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatAmount(double amount) {
+    // Use USD as default currency symbol for formatting
+    // Since we're summing amounts that might have different currencies,
+    // we'll use a generic dollar sign
+    final currencySymbol = CurrencyHelper.getSymbol('USD');
+    return NumberFormat.currency(
+      symbol: currencySymbol,
+      decimalDigits: 2,
+    ).format(amount);
   }
 }

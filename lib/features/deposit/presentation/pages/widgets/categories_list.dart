@@ -44,12 +44,16 @@ class CategoriesList extends StatelessWidget {
           final category = categories[index];
           final transactionCount = transactionService
               .getTransactionCountByCategoryId(category.id);
+          final totalAmount = transactionService.getTotalAmountByCategoryId(
+            category.id,
+          );
           return SlidableCategoryCard(
             category: category,
             theme: theme,
             colorScheme: colorScheme,
             l10n: l10n,
             transactionCount: transactionCount,
+            totalAmount: totalAmount,
           );
         },
       ),
