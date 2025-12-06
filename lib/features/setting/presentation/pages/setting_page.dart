@@ -188,6 +188,7 @@ class SettingPage extends StatelessWidget {
     String currentUsername,
   ) async {
     final textController = TextEditingController(text: currentUsername);
+    final focusNode = FocusNode();
     final l10n = context.l10n;
 
     final result = await showDialog<String>(
@@ -197,6 +198,7 @@ class SettingPage extends StatelessWidget {
             title: Text(l10n.setting_page_set_username),
             content: TextField(
               controller: textController,
+              focusNode: focusNode,
               decoration: InputDecoration(
                 hintText: l10n.setting_page_enter_username_hint,
                 border: OutlineInputBorder(
@@ -204,6 +206,7 @@ class SettingPage extends StatelessWidget {
                 ),
               ),
               autofocus: true,
+              onTapOutside: (event) => focusNode.unfocus(),
             ),
             actions: [
               TextButton(
@@ -223,6 +226,7 @@ class SettingPage extends StatelessWidget {
           ),
     );
 
+    focusNode.dispose();
     if (result != null && result.isNotEmpty && context.mounted) {
       await AppSettingService.saveUsername(result);
       // Refresh the home page if it's available
@@ -1271,6 +1275,8 @@ class _EmojiRangesSelectorContentState
   late List<SavingEmojiRange> _ranges;
   final Map<int, TextEditingController> _thresholdControllers = {};
   final Map<int, TextEditingController> _emojiControllers = {};
+  final Map<int, FocusNode> _thresholdFocusNodes = {};
+  final Map<int, FocusNode> _emojiFocusNodes = {};
 
   @override
   void initState() {
@@ -1285,6 +1291,8 @@ class _EmojiRangesSelectorContentState
                 : _ranges[i].threshold.toStringAsFixed(0),
       );
       _emojiControllers[i] = TextEditingController(text: _ranges[i].emoji);
+      _thresholdFocusNodes[i] = FocusNode();
+      _emojiFocusNodes[i] = FocusNode();
     }
   }
 
@@ -1295,6 +1303,12 @@ class _EmojiRangesSelectorContentState
     }
     for (final controller in _emojiControllers.values) {
       controller.dispose();
+    }
+    for (final focusNode in _thresholdFocusNodes.values) {
+      focusNode.dispose();
+    }
+    for (final focusNode in _emojiFocusNodes.values) {
+      focusNode.dispose();
     }
     super.dispose();
   }
@@ -1489,6 +1503,12 @@ class _EmojiRangesSelectorContentState
                                             child: TextField(
                                               controller:
                                                   _thresholdControllers[index],
+                                              focusNode:
+                                                  _thresholdFocusNodes[index],
+                                              onTapOutside:
+                                                  (event) =>
+                                                      _thresholdFocusNodes[index]
+                                                          ?.unfocus(),
                                               decoration: InputDecoration(
                                                 labelText:
                                                     widget
@@ -1562,6 +1582,12 @@ class _EmojiRangesSelectorContentState
                                             child: TextField(
                                               controller:
                                                   _emojiControllers[index],
+                                              focusNode:
+                                                  _emojiFocusNodes[index],
+                                              onTapOutside:
+                                                  (event) =>
+                                                      _emojiFocusNodes[index]
+                                                          ?.unfocus(),
                                               decoration: InputDecoration(
                                                 labelText:
                                                     widget
@@ -1909,6 +1935,8 @@ class _StartDateSelectorContentState extends State<_StartDateSelectorContent> {
                                               .digitsOnly,
                                           _DayOfMonthInputFormatter(),
                                         ],
+                                        onTapOutside:
+                                            (event) => _focusNode.unfocus(),
                                         style: widget
                                             .theme
                                             .textTheme
@@ -2284,6 +2312,8 @@ class _RecentActivitiesCountSelectorContentState
                                           FilteringTextInputFormatter
                                               .digitsOnly,
                                         ],
+                                        onTapOutside:
+                                            (event) => _focusNode.unfocus(),
                                         style: widget
                                             .theme
                                             .textTheme
