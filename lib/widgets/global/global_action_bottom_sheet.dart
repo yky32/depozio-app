@@ -447,23 +447,10 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                             horizontal: 20,
                             vertical: 20,
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(16),
-                              bottomRight: Radius.circular(16),
-                            ),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(16),
-                              bottomRight: Radius.circular(16),
-                            ),
-                            borderSide: BorderSide(
-                              color: widget.colorScheme.primary,
-                              width: 2,
-                            ),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
                         ),
                       ),
                     ),
@@ -478,60 +465,60 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   runSpacing: 8,
                   children:
                       _lastAmounts.map((amountPair) {
-                    final amount = amountPair['amount'] ?? '';
-                    final currencyCode = amountPair['currencyCode'] ?? '';
+                        final amount = amountPair['amount'] ?? '';
+                        final currencyCode = amountPair['currencyCode'] ?? '';
                         final currencySymbol = CurrencyHelper.getSymbol(
                           currencyCode,
                         );
-                    final flag = CurrencyHelper.getFlag(currencyCode);
-                    
-                    return GestureDetector(
-                      onTap: () {
-                        _amountController.text = amount;
-                        context.read<TransactionBloc>().add(
-                          UpdateAmount(amount: amount),
-                        );
-                        context.read<TransactionBloc>().add(
-                          SelectCurrency(currencyCode: currencyCode),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: widget.colorScheme.outline.withValues(
-                              alpha: 0.1,
+                        final flag = CurrencyHelper.getFlag(currencyCode);
+
+                        return GestureDetector(
+                          onTap: () {
+                            _amountController.text = amount;
+                            context.read<TransactionBloc>().add(
+                              UpdateAmount(amount: amount),
+                            );
+                            context.read<TransactionBloc>().add(
+                              SelectCurrency(currencyCode: currencyCode),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              flag,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$currencySymbol $amount',
-                                  style: widget.theme.textTheme.bodySmall
-                                      ?.copyWith(
-                                fontSize: 12,
-                                        color: widget.colorScheme.onSurface
-                                            .withValues(alpha: 0.8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: widget.colorScheme.outline.withValues(
+                                  alpha: 0.1,
+                                ),
+                                width: 1,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  flag,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$currencySymbol $amount',
+                                  style: widget.theme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        fontSize: 12,
+                                        color: widget.colorScheme.onSurface
+                                            .withValues(alpha: 0.8),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                 ),
               ],
               const SizedBox(height: 32),
@@ -565,17 +552,10 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                       horizontal: 20,
                       vertical: 20,
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: widget.colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
                   ),
                 ),
               ),
@@ -587,40 +567,40 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   runSpacing: 8,
                   children:
                       _lastDescriptions.map((description) {
-                    return GestureDetector(
-                      onTap: () {
-                        _descriptionController.text = description;
-                        context.read<TransactionBloc>().add(
-                          UpdateDescription(description: description),
+                        return GestureDetector(
+                          onTap: () {
+                            _descriptionController.text = description;
+                            context.read<TransactionBloc>().add(
+                              UpdateDescription(description: description),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: widget.colorScheme.outline.withValues(
+                                  alpha: 0.1,
+                                ),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              description,
+                              style: widget.theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 12,
+                                color: widget.colorScheme.onSurface.withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                            ),
+                          ),
                         );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: widget.colorScheme.outline.withValues(
-                              alpha: 0.1,
-                            ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          description,
-                          style: widget.theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: widget.colorScheme.onSurface.withValues(
-                              alpha: 0.8,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                      }).toList(),
                 ),
               ],
               const SizedBox(height: 32),
@@ -629,11 +609,11 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-              Text(
+                  Text(
                     l10n.transaction_date,
-                style: widget.theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                    style: widget.theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -701,15 +681,6 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   decoration: BoxDecoration(
                     color: widget.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                          transactionDt != null
-                          ? widget.colorScheme.primary
-                          : widget.colorScheme.outline.withValues(
-                            alpha: 0.3,
-                          ),
-                      width: transactionDt != null ? 2 : 1,
-                    ),
                   ),
                   child: Row(
                     children: [
@@ -737,14 +708,14 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           style: widget.theme.textTheme.bodyMedium?.copyWith(
                             fontWeight:
                                 transactionDt != null
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                             color:
                                 transactionDt != null
-                                ? widget.colorScheme.onSurface
-                                : widget.colorScheme.onSurface.withValues(
-                                  alpha: 0.5,
-                                ),
+                                    ? widget.colorScheme.onSurface
+                                    : widget.colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
                           ),
                         ),
                       ),
@@ -779,15 +750,6 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   decoration: BoxDecoration(
                     color: widget.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                          selectedCategory != null
-                              ? widget.colorScheme.primary
-                              : widget.colorScheme.outline.withValues(
-                                alpha: 0.3,
-                              ),
-                      width: selectedCategory != null ? 2 : 1,
-                    ),
                   ),
                   child: Row(
                     children: [
@@ -829,7 +791,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                     decoration: BoxDecoration(
                                       color:
                                           selectedCategory.categoryType ==
-                                              CategoryType.deposits
+                                                  CategoryType.deposits
                                               ? Colors.green.withValues(
                                                 alpha: 0.1,
                                               )
@@ -846,9 +808,9 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                       size: 12,
                                       color:
                                           selectedCategory.categoryType ==
-                                              CategoryType.deposits
-                                          ? Colors.green.shade700
-                                          : Colors.red.shade700,
+                                                  CategoryType.deposits
+                                              ? Colors.green.shade700
+                                              : Colors.red.shade700,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
@@ -860,13 +822,13 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                                         : l10n.add_category_type_expenses,
                                     style: widget.theme.textTheme.bodySmall
                                         ?.copyWith(
-                                      fontSize: 11,
+                                          fontSize: 11,
                                           color:
                                               selectedCategory.categoryType ==
-                                              CategoryType.deposits
-                                          ? Colors.green.shade700
-                                          : Colors.red.shade700,
-                                    ),
+                                                      CategoryType.deposits
+                                                  ? Colors.green.shade700
+                                                  : Colors.red.shade700,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -957,14 +919,14 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                           final descriptionText =
                               currentState.description.trim();
                           final amountText = currentState.amount.trim();
-                          
+
                           // Save description to last descriptions if not empty
                           if (descriptionText.isNotEmpty) {
                             await AppSettingService.saveLastDescription(
                               descriptionText,
                             );
                           }
-                          
+
                           // Save amount-currency pair to last amounts if not empty
                           if (amountText.isNotEmpty) {
                             await AppSettingService.saveLastAmount(
@@ -972,7 +934,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                               currentState.currencyCode,
                             );
                           }
-                          
+
                           // Refresh last data lists
                           if (mounted) {
                             setState(() {
@@ -981,7 +943,7 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                               _lastAmounts = AppSettingService.getLastAmounts();
                             });
                           }
-                          
+
                           // Ensure transactionDt is set (should always be set from date picker)
                           // Use current time only if transactionDt is somehow null
                           // This ensures the date and time from the picker are always used
