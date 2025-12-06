@@ -103,11 +103,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Get all transactions (already sorted by createdAt descending)
       final allTransactions = transactionService.getAllTransactions();
 
-      // Take top 10
-      final top10Transactions = allTransactions.take(10).toList();
+      // Get the count limit from settings (default: 20)
+      final countLimit = AppSettingService.getRecentActivitiesCount();
+      final recentTransactions = allTransactions.take(countLimit).toList();
 
       // Map to TransactionWithCategory
-      return top10Transactions.map((transaction) {
+      return recentTransactions.map((transaction) {
         final category = categoryService.getCategoryById(
           transaction.categoryId,
         );
@@ -149,9 +150,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   /// Get the next period start date based on startDay
   DateTime _getNextPeriodStart(DateTime now, int startDay) {
-    // Next period starts on startDay of next month
-    final nextMonth = now.month == 12 ? 1 : now.month + 1;
-    final nextYear = now.month == 12 ? now.year + 1 : now.year;
+    // Get the current period start date first
+    final currentPeriodStart = _getCurrentPeriodStart(now, startDay);
+    // Next period starts on startDay of the month after the current period's month
+    final nextMonth =
+        currentPeriodStart.month == 12 ? 1 : currentPeriodStart.month + 1;
+    final nextYear =
+        currentPeriodStart.month == 12
+            ? currentPeriodStart.year + 1
+            : currentPeriodStart.year;
     // Handle months with fewer days
     final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
     final adjustedDay = startDay > daysInMonth ? daysInMonth : startDay;

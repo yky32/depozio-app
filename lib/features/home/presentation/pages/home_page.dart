@@ -312,6 +312,7 @@ class _HomePageContent extends StatelessWidget {
                                           ),
                                         ),
                                         Container(
+                                          alignment: Alignment.center,
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 12,
                                             vertical: 6,
@@ -333,6 +334,8 @@ class _HomePageContent extends StatelessWidget {
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Icon(
                                                 Icons.calendar_today,

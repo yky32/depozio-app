@@ -423,6 +423,7 @@ class SettingPage extends StatelessWidget {
             _buildLanguageTile(context, theme, colorScheme),
             _buildCurrencyTile(context, theme, colorScheme),
             _buildStartDateTile(context, theme, colorScheme),
+            _buildRecentActivitiesCountTile(context, theme, colorScheme),
             _buildSettingsTile(
               icon: Icons.mood,
               title: l10n.setting_page_emoji_ranges,
@@ -1031,6 +1032,109 @@ class SettingPage extends StatelessWidget {
     if (result != null && result != currentStartDate) {
       // Dispatch ChangeStartDate event to AppCoreBloc
       bloc.add(ChangeStartDate(dayOfMonth: result));
+    }
+  }
+
+  Widget _buildRecentActivitiesCountTile(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    final l10n = context.l10n;
+    final currentCount = AppSettingService.getRecentActivitiesCount();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showRecentActivitiesCountSelector(context, currentCount),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.history,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.setting_page_recent_activities_count,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$currentCount',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showRecentActivitiesCountSelector(
+    BuildContext context,
+    int currentCount,
+  ) async {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final result = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      useRootNavigator: true,
+      useSafeArea: false,
+      builder: (bottomSheetContext) {
+        return _RecentActivitiesCountSelectorContent(
+          initialCount: currentCount,
+          theme: theme,
+          colorScheme: colorScheme,
+          l10n: l10n,
+        );
+      },
+    );
+
+    if (result != null && result != currentCount) {
+      await AppSettingService.saveRecentActivitiesCount(result);
+      // Trigger home page refresh to update recent activities count
+      if (context.mounted) {
+        // Ensure AppSettingService is initialized and wait a bit for Hive write to complete
+        await AppSettingService.init();
+        await Future.delayed(const Duration(milliseconds: 100));
+        // Try to trigger home page refresh if HomeBloc is available
+        try {
+          final homeBloc = context.read<HomeBloc>();
+          homeBloc.add(const RefreshHome());
+        } catch (e) {
+          // HomeBloc not available in this context, will refresh when user navigates to home
+          // The home bloc reads the count from AppSettingService on each load/refresh
+        }
+      }
     }
   }
 
@@ -1963,6 +2067,393 @@ class _StartDateSelectorContentState extends State<_StartDateSelectorContent> {
                                             () => Navigator.of(
                                               context,
                                             ).pop(_selectedDay),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(widget.l10n.action_save),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 24 + keyboardHeight),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Stateful widget for recent activities count selector bottom sheet content
+class _RecentActivitiesCountSelectorContent extends StatefulWidget {
+  const _RecentActivitiesCountSelectorContent({
+    required this.initialCount,
+    required this.theme,
+    required this.colorScheme,
+    required this.l10n,
+  });
+
+  final int initialCount;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
+
+  @override
+  State<_RecentActivitiesCountSelectorContent> createState() =>
+      _RecentActivitiesCountSelectorContentState();
+}
+
+class _RecentActivitiesCountSelectorContentState
+    extends State<_RecentActivitiesCountSelectorContent> {
+  late final TextEditingController _textController;
+  late final FocusNode _focusNode;
+  late int _selectedCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCount = widget.initialCount;
+    _textController = TextEditingController(
+      text: widget.initialCount.toString(),
+    );
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _updateCount(int newCount) {
+    final clampedCount = newCount.clamp(1, 100);
+    setState(() {
+      _selectedCount = clampedCount;
+      _textController.text = clampedCount.toString();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final maxHeight = screenHeight * 0.5;
+
+    return Stack(
+      children: [
+        // Backdrop to cover navigation bar - tappable to dismiss
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
+          ),
+        ),
+        // Bottom sheet content
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: keyboardHeight),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              decoration: BoxDecoration(
+                color: widget.theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 80,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: widget.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                            child: Text(
+                              widget
+                                  .l10n
+                                  .setting_page_select_recent_activities_count,
+                              style: widget.theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              children: [
+                                // Number input with plus/minus buttons
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Minus button
+                                    IconButton(
+                                      onPressed: () {
+                                        _updateCount(_selectedCount - 1);
+                                        _focusNode.unfocus();
+                                      },
+                                      icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                      ),
+                                      iconSize: 32,
+                                      color: widget.colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 24),
+                                    // Number input field
+                                    SizedBox(
+                                      width: 100,
+                                      child: TextField(
+                                        controller: _textController,
+                                        focusNode: _focusNode,
+                                        autofocus: true,
+                                        textAlign: TextAlign.center,
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        style: widget
+                                            .theme
+                                            .textTheme
+                                            .headlineMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: widget.colorScheme.surface,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.primary,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.outline
+                                                  .withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: widget.colorScheme.primary,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                vertical: 16,
+                                                horizontal: 8,
+                                              ),
+                                        ),
+                                        onTap: () {
+                                          // Select all text when tapped
+                                          _textController
+                                              .selection = TextSelection(
+                                            baseOffset: 0,
+                                            extentOffset:
+                                                _textController.text.length,
+                                          );
+                                        },
+                                        onChanged: (value) {
+                                          // Allow empty input while typing
+                                          if (value.isEmpty) {
+                                            setState(() {
+                                              _selectedCount = 1;
+                                            });
+                                            return;
+                                          }
+                                          final count = int.tryParse(value);
+                                          if (count != null &&
+                                              count >= 1 &&
+                                              count <= 100) {
+                                            setState(() {
+                                              _selectedCount = count;
+                                            });
+                                          }
+                                        },
+                                        onSubmitted: (value) {
+                                          final count = int.tryParse(value);
+                                          if (count != null) {
+                                            _updateCount(count);
+                                          } else {
+                                            // If invalid, reset to current
+                                            _textController.text =
+                                                _selectedCount.toString();
+                                          }
+                                          _focusNode.unfocus();
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    // Plus button
+                                    IconButton(
+                                      onPressed: () {
+                                        _updateCount(_selectedCount + 1);
+                                        _focusNode.unfocus();
+                                      },
+                                      icon: const Icon(
+                                        Icons.add_circle_outline,
+                                      ),
+                                      iconSize: 32,
+                                      color: widget.colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                // Helper text
+                                Text(
+                                  widget
+                                      .l10n
+                                      .setting_page_recent_activities_count_hint,
+                                  style: widget.theme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: widget.colorScheme.onSurface
+                                            .withValues(alpha: 0.6),
+                                      ),
+                                ),
+                                const SizedBox(height: 24),
+                                // Quick select badges
+                                Wrap(
+                                  spacing: 12,
+                                  runSpacing: 12,
+                                  alignment: WrapAlignment.center,
+                                  children:
+                                      [25, 50, 75, 100].map((count) {
+                                        final isSelected =
+                                            _selectedCount == count;
+                                        return GestureDetector(
+                                          onTap: () {
+                                            _updateCount(count);
+                                            _focusNode.unfocus();
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  isSelected
+                                                      ? widget
+                                                          .colorScheme
+                                                          .primary
+                                                      : widget
+                                                          .colorScheme
+                                                          .surface,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color:
+                                                    isSelected
+                                                        ? widget
+                                                            .colorScheme
+                                                            .primary
+                                                        : widget
+                                                            .colorScheme
+                                                            .outline
+                                                            .withValues(
+                                                              alpha: 0.3,
+                                                            ),
+                                                width: isSelected ? 2 : 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '$count',
+                                              style: widget
+                                                  .theme
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        isSelected
+                                                            ? Colors.white
+                                                            : widget
+                                                                .colorScheme
+                                                                .onSurface,
+                                                  ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                ),
+                                const SizedBox(height: 32),
+                                // Action buttons
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed:
+                                            () => Navigator.of(context).pop(),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(context.l10n.action_cancel),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            () => Navigator.of(
+                                              context,
+                                            ).pop(_selectedCount),
                                         style: ElevatedButton.styleFrom(
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 16,

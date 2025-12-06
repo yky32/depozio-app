@@ -350,6 +350,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setting_page_start_date_hint => 'Enter a number between 1 and 31';
 
   @override
+  String get setting_page_recent_activities_count => 'Recent Activities Count';
+
+  @override
+  String get setting_page_recent_activities_count_subtitle =>
+      'Number of activities to show';
+
+  @override
+  String get setting_page_select_recent_activities_count => 'Select Count';
+
+  @override
+  String get setting_page_recent_activities_count_hint =>
+      'Enter a number between 1 and 100';
+
+  @override
   String get setting_page_emoji_ranges => 'Saving Emoji Ranges';
 
   @override
@@ -747,6 +761,18 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get setting_page_start_date_hint => '请输入1到31之间的数字';
 
   @override
+  String get setting_page_recent_activities_count => '最近活动数量';
+
+  @override
+  String get setting_page_recent_activities_count_subtitle => '显示的活动数量';
+
+  @override
+  String get setting_page_select_recent_activities_count => '选择数量';
+
+  @override
+  String get setting_page_recent_activities_count_hint => '请输入1到100之间的数字';
+
+  @override
   String get setting_page_emoji_ranges => '储蓄表情范围';
 
   @override
@@ -1140,6 +1166,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get setting_page_start_date_hint => '請輸入1到31之間的數字';
+
+  @override
+  String get setting_page_recent_activities_count => '最近活動數量';
+
+  @override
+  String get setting_page_recent_activities_count_subtitle => '顯示的活動數量';
+
+  @override
+  String get setting_page_select_recent_activities_count => '選擇數量';
+
+  @override
+  String get setting_page_recent_activities_count_hint => '請輸入1到100之間的數字';
 
   @override
   String get setting_page_emoji_ranges => '儲蓄表情範圍';

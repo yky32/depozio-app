@@ -10,12 +10,14 @@ class AppSettingService {
   static const String _currencyOrderKey = 'currency_order';
   static const String _usernameKey = 'username';
   static const String _startDateKey = 'start_date';
+  static const String _recentActivitiesCountKey = 'recent_activities_count';
   static const String _lastDescriptionsKey = 'last_descriptions';
   static const String _lastAmountsKey = 'last_amounts';
   static const String _savingEmojiRangesKey = 'saving_emoji_ranges';
   static const String _defaultCurrency =
       'HKD'; // Default fallback (Hong Kong Dollar)
   static const int _defaultStartDate = 1; // Default to 1st of the month
+  static const int _defaultRecentActivitiesCount = 20; // Default to 20 items
   static const int _maxLastDescriptions =
       5; // Maximum number of last descriptions to store
   static const int _maxLastAmounts =
@@ -181,6 +183,25 @@ class AppSettingService {
     // Validate day is between 1 and 31
     final validDay = dayOfMonth.clamp(1, 31);
     await _box!.put(_startDateKey, validDay);
+  }
+
+  // ==================== Recent Activities Count Methods ====================
+
+  /// Get recent activities count (default: 20)
+  static int getRecentActivitiesCount() {
+    if (_box == null) return _defaultRecentActivitiesCount;
+    final count = _box!.get(_recentActivitiesCountKey) as int?;
+    return count ?? _defaultRecentActivitiesCount;
+  }
+
+  /// Save recent activities count preference (1-100)
+  static Future<void> saveRecentActivitiesCount(int count) async {
+    if (_box == null) {
+      await init();
+    }
+    // Validate count is between 1 and 100
+    final validCount = count.clamp(1, 100);
+    await _box!.put(_recentActivitiesCountKey, validCount);
   }
 
   // ==================== Last Descriptions Methods ====================

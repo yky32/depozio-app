@@ -350,6 +350,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setting_page_start_date_hint => 'Enter a number between 1 and 31';
 
   @override
+  String get setting_page_recent_activities_count => 'Recent Activities Count';
+
+  @override
+  String get setting_page_recent_activities_count_subtitle =>
+      'Number of activities to show';
+
+  @override
+  String get setting_page_select_recent_activities_count => 'Select Count';
+
+  @override
+  String get setting_page_recent_activities_count_hint =>
+      'Enter a number between 1 and 100';
+
+  @override
   String get setting_page_emoji_ranges => 'Saving Emoji Ranges';
 
   @override

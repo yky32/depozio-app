@@ -205,9 +205,15 @@ class _DateRangeIndicator extends StatelessWidget {
   }
 
   DateTime _getNextPeriodStart(DateTime now) {
-    // Next period starts on startDay of next month
-    final nextMonth = now.month == 12 ? 1 : now.month + 1;
-    final nextYear = now.month == 12 ? now.year + 1 : now.year;
+    // Get the current period start date first
+    final currentPeriodStart = _getCurrentPeriodStart(now);
+    // Next period starts on startDay of the month after the current period's month
+    final nextMonth =
+        currentPeriodStart.month == 12 ? 1 : currentPeriodStart.month + 1;
+    final nextYear =
+        currentPeriodStart.month == 12
+            ? currentPeriodStart.year + 1
+            : currentPeriodStart.year;
     // Handle months with fewer days
     final daysInMonth = DateTime(nextYear, nextMonth + 1, 0).day;
     final adjustedDay = startDay > daysInMonth ? daysInMonth : startDay;
@@ -222,15 +228,20 @@ class _DateRangeIndicator extends StatelessWidget {
     // Check if we haven't reached the next period start date yet
     final hasNotReachedNextPeriod = now.isBefore(nextPeriodStart);
 
-    // Format start date as ddMMMyyyy
+    // Format start date as dd MMM (short format for display with space)
     final formattedStartDate = DateFormat(
-      'ddMMMyyyy',
+      'dd MMM',
       'en_US',
     ).format(periodStart);
 
-    // Format next period start date as ddMMMyyyy
-    final nextPeriodText = DateFormat(
-      'ddMMMyyyy',
+    // Full date format for tooltips (dd-MMM-yyyy)
+    final fullStartDate = DateFormat(
+      'dd-MMM-yyyy',
+      'en_US',
+    ).format(periodStart);
+
+    final fullNextPeriodDate = DateFormat(
+      'dd-MMM-yyyy',
       'en_US',
     ).format(nextPeriodStart);
 
@@ -250,39 +261,130 @@ class _DateRangeIndicator extends StatelessWidget {
       child: Row(
         children: [
           // Start date with icon
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.calendar_today, size: 16, color: colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                formattedStartDate,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
-                  letterSpacing: 0.5,
+          GestureDetector(
+            onTap: () {
+              // Show tooltip with full date
+              final overlay = Overlay.of(context);
+              final RenderBox? renderBox =
+                  context.findRenderObject() as RenderBox?;
+              final offset =
+                  renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+              final size = renderBox?.size ?? Size.zero;
+
+              final overlayEntry = OverlayEntry(
+                builder:
+                    (context) => Positioned(
+                      left: offset.dx,
+                      top: offset.dy + size.height + 8,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            fullStartDate,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+              );
+              overlay.insert(overlayEntry);
+              Future.delayed(const Duration(seconds: 3), () {
+                overlayEntry.remove();
+              });
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Tooltip(
+                  message: fullStartDate,
+                  child: Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Tooltip(
+                  message: fullStartDate,
+                  child: Text(
+                    formattedStartDate,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          // Separator with dots
+          // MTR-style separator with line and 2 stations (start and end)
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: List.generate(
-                  20,
-                  (index) => Expanded(
+                children: [
+                  // Start station
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Continuous horizontal line
+                  Expanded(
                     child: Container(
                       height: 2,
-                      margin: EdgeInsets.only(right: index < 19 ? 2 : 0),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
-                        color: colorScheme.outline.withValues(alpha: 0.2),
+                        color: colorScheme.primary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(1),
                       ),
                     ),
                   ),
-                ),
+                  // End station
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -338,7 +440,7 @@ class _DateRangeIndicator extends StatelessWidget {
                                   ],
                                 ),
                                 child: Text(
-                                  'Next period: $nextPeriodText',
+                                  'Next period: $fullNextPeriodDate',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurface,
                                   ),
@@ -353,7 +455,7 @@ class _DateRangeIndicator extends StatelessWidget {
                     });
                   },
                   child: Tooltip(
-                    message: 'Next period: $nextPeriodText',
+                    message: 'Next period: $fullNextPeriodDate',
                     child: Padding(
                       padding: const EdgeInsets.all(4),
                       child: Icon(

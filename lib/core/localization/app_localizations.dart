@@ -724,6 +724,30 @@ abstract class AppLocalizations {
   /// **'Enter a number between 1 and 31'**
   String get setting_page_start_date_hint;
 
+  /// No description provided for @setting_page_recent_activities_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activities Count'**
+  String get setting_page_recent_activities_count;
+
+  /// No description provided for @setting_page_recent_activities_count_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of activities to show'**
+  String get setting_page_recent_activities_count_subtitle;
+
+  /// No description provided for @setting_page_select_recent_activities_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Count'**
+  String get setting_page_select_recent_activities_count;
+
+  /// No description provided for @setting_page_recent_activities_count_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between 1 and 100'**
+  String get setting_page_recent_activities_count_hint;
+
   /// No description provided for @setting_page_emoji_ranges.
   ///
   /// In en, this message translates to:
