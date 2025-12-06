@@ -418,55 +418,67 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                   // Amount input (80%)
                   Expanded(
                     flex: 8,
-                    child: SizedBox(
-                      height: 60,
-                      child: TextField(
-                        controller: _amountController,
-                        focusNode: _amountFocusNode,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                          signed: false,
-                        ),
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          // Allow only numbers and decimal point
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                          // Ensure only one decimal point
-                          TextInputFormatter.withFunction((oldValue, newValue) {
-                            final text = newValue.text;
-                            // Count decimal points
-                            final decimalCount = '.'.allMatches(text).length;
-                            // If more than one decimal point, reject
-                            if (decimalCount > 1) {
-                              return oldValue;
-                            }
-                            // If decimal point is at the start, reject
-                            if (text.startsWith('.')) {
-                              return oldValue;
-                            }
-                            return newValue;
-                          }),
-                        ],
-                        onTapOutside: (event) => _amountFocusNode.unfocus(),
-                        onChanged: (value) {
-                          context.read<TransactionBloc>().add(
-                            UpdateAmount(amount: value),
-                          );
-                        },
-                        style: widget.theme.textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          hintText: '0.00',
-                          prefixText: '$currencySymbol ',
-                          filled: true,
-                          fillColor: widget.colorScheme.surface,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 20,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                      child: Container(
+                        height: 60,
+                        color: widget.colorScheme.surface,
+                        child: TextField(
+                          controller: _amountController,
+                          focusNode: _amountFocusNode,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: false,
                           ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
+                          textInputAction: TextInputAction.next,
+                          inputFormatters: [
+                            // Allow only numbers and decimal point
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.]'),
+                            ),
+                            // Ensure only one decimal point
+                            TextInputFormatter.withFunction((
+                              oldValue,
+                              newValue,
+                            ) {
+                              final text = newValue.text;
+                              // Count decimal points
+                              final decimalCount = '.'.allMatches(text).length;
+                              // If more than one decimal point, reject
+                              if (decimalCount > 1) {
+                                return oldValue;
+                              }
+                              // If decimal point is at the start, reject
+                              if (text.startsWith('.')) {
+                                return oldValue;
+                              }
+                              return newValue;
+                            }),
+                          ],
+                          onTapOutside: (event) => _amountFocusNode.unfocus(),
+                          onChanged: (value) {
+                            context.read<TransactionBloc>().add(
+                              UpdateAmount(amount: value),
+                            );
+                          },
+                          style: widget.theme.textTheme.bodyLarge,
+                          decoration: InputDecoration(
+                            hintText: '0.00',
+                            prefixText: '$currencySymbol ',
+                            filled: true,
+                            fillColor: widget.colorScheme.surface,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 20,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                          ),
                         ),
                       ),
                     ),
@@ -546,32 +558,36 @@ class _TransactionFormContentState extends State<_TransactionFormContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 60,
-                child: TextField(
-                  controller: _descriptionController,
-                  focusNode: _descriptionFocusNode,
-                  textInputAction: TextInputAction.next,
-                  maxLines: 1,
-                  onTapOutside: (event) => _descriptionFocusNode.unfocus(),
-                  onChanged: (value) {
-                    context.read<TransactionBloc>().add(
-                      UpdateDescription(description: value),
-                    );
-                  },
-                  style: widget.theme.textTheme.bodyLarge,
-                  decoration: InputDecoration(
-                    hintText: l10n.transaction_description_placeholder,
-                    filled: true,
-                    fillColor: widget.colorScheme.surface,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 20,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 60,
+                  color: widget.colorScheme.surface,
+                  child: TextField(
+                    controller: _descriptionController,
+                    focusNode: _descriptionFocusNode,
+                    textInputAction: TextInputAction.next,
+                    maxLines: 1,
+                    onTapOutside: (event) => _descriptionFocusNode.unfocus(),
+                    onChanged: (value) {
+                      context.read<TransactionBloc>().add(
+                        UpdateDescription(description: value),
+                      );
+                    },
+                    style: widget.theme.textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: l10n.transaction_description_placeholder,
+                      filled: true,
+                      fillColor: widget.colorScheme.surface,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
                     ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
                   ),
                 ),
               ),
