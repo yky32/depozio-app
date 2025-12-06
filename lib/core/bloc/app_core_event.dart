@@ -56,6 +56,22 @@ class ChangeStartDate extends AppCoreEvent {
   List<Object?> get props => [dayOfMonth];
 }
 
+// ==================== Recent Activities Count Events ====================
+
+/// Load the saved recent activities count from storage
+class LoadRecentActivitiesCount extends AppCoreEvent {
+  const LoadRecentActivitiesCount();
+}
+
+/// Change the recent activities count (1-100)
+class ChangeRecentActivitiesCount extends AppCoreEvent {
+  final int count;
+  const ChangeRecentActivitiesCount({required this.count});
+
+  @override
+  List<Object?> get props => [count];
+}
+
 // ==================== Future Events (Examples) ====================
 // Uncomment and implement as needed:
 //

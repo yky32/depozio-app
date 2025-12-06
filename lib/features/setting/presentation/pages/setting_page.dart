@@ -1041,55 +1041,84 @@ class SettingPage extends StatelessWidget {
     ColorScheme colorScheme,
   ) {
     final l10n = context.l10n;
-    final currentCount = AppSettingService.getRecentActivitiesCount();
+    return BlocBuilder<AppCoreBloc, AppCoreState>(
+      buildWhen: (previous, current) {
+        // Rebuild when recent activities count changes in settings state
+        if (previous is AppCoreSettingsLoaded &&
+            current is AppCoreSettingsLoaded) {
+          return previous.recentActivitiesCount !=
+              current.recentActivitiesCount;
+        }
+        // Rebuild when transitioning to settings loaded state
+        return current is AppCoreSettingsLoaded;
+      },
+      builder: (context, state) {
+        // Load recent activities count if not already loaded
+        if (state is! AppCoreSettingsLoaded) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AppCoreBloc>().add(const LoadRecentActivitiesCount());
+          });
+        }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showRecentActivitiesCountSelector(context, currentCount),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.history,
-                  color: colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.setting_page_recent_activities_count,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+        // Get current count from state or fallback to service
+        int currentCount;
+        if (state is AppCoreSettingsLoaded) {
+          currentCount = state.recentActivitiesCount;
+        } else {
+          AppSettingService.init();
+          currentCount = AppSettingService.getRecentActivitiesCount();
+        }
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap:
+                () => _showRecentActivitiesCountSelector(context, currentCount),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$currentCount',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
+                    child: Icon(
+                      Icons.history,
+                      color: colorScheme.primary,
+                      size: 20,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.setting_page_recent_activities_count,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$currentCount',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -1119,14 +1148,18 @@ class SettingPage extends StatelessWidget {
       },
     );
 
-    if (result != null && result != currentCount) {
-      await AppSettingService.saveRecentActivitiesCount(result);
+    if (result != null && result != currentCount && context.mounted) {
+      // Dispatch ChangeRecentActivitiesCount event to AppCoreBloc
+      final bloc = context.read<AppCoreBloc>();
+      bloc.add(ChangeRecentActivitiesCount(count: result));
+
       // Trigger home page refresh to update recent activities count
+      // Ensure AppSettingService is initialized and wait a bit for Hive write to complete
+      await AppSettingService.init();
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Try to trigger home page refresh if HomeBloc is available
       if (context.mounted) {
-        // Ensure AppSettingService is initialized and wait a bit for Hive write to complete
-        await AppSettingService.init();
-        await Future.delayed(const Duration(milliseconds: 100));
-        // Try to trigger home page refresh if HomeBloc is available
         try {
           final homeBloc = context.read<HomeBloc>();
           homeBloc.add(const RefreshHome());

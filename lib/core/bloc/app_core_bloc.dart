@@ -23,14 +23,18 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     // Locale events
     on<LoadLocale>(_handleLoadLocale);
     on<ChangeLocale>(_handleChangeLocale);
-    
+
     // Currency events
     on<LoadCurrency>(_handleLoadCurrency);
     on<ChangeCurrency>(_handleChangeCurrency);
-    
+
     // Start date events
     on<LoadStartDate>(_handleLoadStartDate);
     on<ChangeStartDate>(_handleChangeStartDate);
+
+    // Recent activities count events
+    on<LoadRecentActivitiesCount>(_handleLoadRecentActivitiesCount);
+    on<ChangeRecentActivitiesCount>(_handleChangeRecentActivitiesCount);
   }
 
   // ==================== Locale Handlers ====================
@@ -43,11 +47,16 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
       final locale = AppSettingService.getSavedLocale();
       final currencyCode = AppSettingService.getDefaultCurrency();
       final startDate = AppSettingService.getStartDate();
-      emit(AppCoreSettingsLoaded(
-        locale: locale,
-        currencyCode: currencyCode,
-        startDate: startDate,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
     }
@@ -60,14 +69,19 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       emit(const AppCoreLocaleLoading());
       await AppSettingService.saveLocale(event.locale);
-      // Preserve currency and start date when changing locale
+      // Preserve currency, start date, and recent activities count when changing locale
       final currencyCode = AppSettingService.getDefaultCurrency();
       final startDate = AppSettingService.getStartDate();
-      emit(AppCoreSettingsLoaded(
-        locale: event.locale,
-        currencyCode: currencyCode,
-        startDate: startDate,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: event.locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
       LoggerUtil.d('🌍 Locale changed to: ${event.locale}');
     } catch (e) {
       emit(AppCoreLocaleError(error: e.toString()));
@@ -83,14 +97,19 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       final currencyCode = AppSettingService.getDefaultCurrency();
-      // Preserve locale and start date when loading currency
+      // Preserve locale, start date, and recent activities count when loading currency
       final locale = AppSettingService.getSavedLocale();
       final startDate = AppSettingService.getStartDate();
-      emit(AppCoreSettingsLoaded(
-        locale: locale,
-        currencyCode: currencyCode,
-        startDate: startDate,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
       LoggerUtil.d('💰 Currency loaded: $currencyCode');
     } catch (e) {
       emit(AppCoreCurrencyError(error: e.toString()));
@@ -105,14 +124,19 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
     try {
       emit(const AppCoreCurrencyLoading());
       await AppSettingService.saveDefaultCurrency(event.currencyCode);
-      // Preserve locale and start date when changing currency
+      // Preserve locale, start date, and recent activities count when changing currency
       final locale = AppSettingService.getSavedLocale();
       final startDate = AppSettingService.getStartDate();
-      emit(AppCoreSettingsLoaded(
-        locale: locale,
-        currencyCode: event.currencyCode,
-        startDate: startDate,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: event.currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
       LoggerUtil.d('💰 Currency changed to: ${event.currencyCode}');
     } catch (e) {
       emit(AppCoreCurrencyError(error: e.toString()));
@@ -128,14 +152,19 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       final startDate = AppSettingService.getStartDate();
-      // Preserve locale and currency when loading start date
+      // Preserve locale, currency, and recent activities count when loading start date
       final locale = AppSettingService.getSavedLocale();
       final currencyCode = AppSettingService.getDefaultCurrency();
-      emit(AppCoreSettingsLoaded(
-        locale: locale,
-        currencyCode: currencyCode,
-        startDate: startDate,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
       LoggerUtil.d('📅 Start date loaded: $startDate');
     } catch (e) {
       LoggerUtil.e('❌ Error loading start date: $e');
@@ -148,17 +177,73 @@ class AppCoreBloc extends Bloc<AppCoreEvent, AppCoreState> {
   ) async {
     try {
       await AppSettingService.saveStartDate(event.dayOfMonth);
-      // Preserve locale and currency when changing start date
+      // Preserve locale, currency, and recent activities count when changing start date
       final locale = AppSettingService.getSavedLocale();
       final currencyCode = AppSettingService.getDefaultCurrency();
-      emit(AppCoreSettingsLoaded(
-        locale: locale,
-        currencyCode: currencyCode,
-        startDate: event.dayOfMonth,
-      ));
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: event.dayOfMonth,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
       LoggerUtil.d('📅 Start date changed to: ${event.dayOfMonth}');
     } catch (e) {
       LoggerUtil.e('❌ Error changing start date: $e');
+    }
+  }
+
+  // ==================== Recent Activities Count Handlers ====================
+
+  Future<void> _handleLoadRecentActivitiesCount(
+    LoadRecentActivitiesCount event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      final recentActivitiesCount =
+          AppSettingService.getRecentActivitiesCount();
+      // Preserve locale, currency, and start date when loading recent activities count
+      final locale = AppSettingService.getSavedLocale();
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      final startDate = AppSettingService.getStartDate();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: recentActivitiesCount,
+        ),
+      );
+      LoggerUtil.d('📊 Recent activities count loaded: $recentActivitiesCount');
+    } catch (e) {
+      LoggerUtil.e('❌ Error loading recent activities count: $e');
+    }
+  }
+
+  Future<void> _handleChangeRecentActivitiesCount(
+    ChangeRecentActivitiesCount event,
+    Emitter<AppCoreState> emit,
+  ) async {
+    try {
+      await AppSettingService.saveRecentActivitiesCount(event.count);
+      // Preserve locale, currency, and start date when changing recent activities count
+      final locale = AppSettingService.getSavedLocale();
+      final currencyCode = AppSettingService.getDefaultCurrency();
+      final startDate = AppSettingService.getStartDate();
+      emit(
+        AppCoreSettingsLoaded(
+          locale: locale,
+          currencyCode: currencyCode,
+          startDate: startDate,
+          recentActivitiesCount: event.count,
+        ),
+      );
+      LoggerUtil.d('📊 Recent activities count changed to: ${event.count}');
+    } catch (e) {
+      LoggerUtil.e('❌ Error changing recent activities count: $e');
     }
   }
 }

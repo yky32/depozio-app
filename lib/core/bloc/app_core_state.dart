@@ -66,14 +66,21 @@ class AppCoreSettingsLoaded extends AppCoreState {
   final Locale? locale;
   final String currencyCode;
   final int startDate;
+  final int recentActivitiesCount;
   const AppCoreSettingsLoaded({
     required this.locale,
     required this.currencyCode,
     required this.startDate,
+    required this.recentActivitiesCount,
   });
 
   @override
-  List<Object?> get props => [locale, currencyCode, startDate];
+  List<Object?> get props => [
+    locale,
+    currencyCode,
+    startDate,
+    recentActivitiesCount,
+  ];
 }
 
 // ==================== Future States (Examples) ====================
